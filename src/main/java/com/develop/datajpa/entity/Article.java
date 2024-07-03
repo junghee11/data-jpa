@@ -10,14 +10,17 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.DynamicInsert;
 
 import java.time.LocalDateTime;
 
 @Getter
+@Setter
 @Entity
 @ToString(of = {"idx", "title", "content", "user"})
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -28,7 +31,7 @@ public class Article {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "article_idx")
-    private Integer idx;
+    private long idx;
 
     private String category;
 
@@ -36,18 +39,26 @@ public class Article {
 
     private String content;
 
-    private Integer state;
+    private int state;
 
-    private Integer view_count;
+    @Column(name = "view_count")
+    private int viewCount;
 
-    private Integer comment_count;
+    @Column(name = "comment_count")
+    private int commentCount;
 
-    private LocalDateTime created_at;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    public void addViewCount() {
+        this.viewCount++;
+    }
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private User user;
 
+    @Builder
     public Article(String category, String title, String content, User user) {
         this.category = category;
         this.title = title;

@@ -48,7 +48,7 @@ public class User {
     private LocalDateTime created_at;
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
-    private List<Article> article = new ArrayList<>();
+    private final List<Article> article = new ArrayList<>();
 
     public void setPw(String pw) {
         this.pw = pw;

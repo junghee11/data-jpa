@@ -39,7 +39,6 @@ public class UserService {
         Optional<User> user = userRepository.findOptionalByUserId(id);
         if (user.isEmpty()) {
             throw new ClientException("가입정보가 확인되지 않습니다.");
-//            throw new HttpClientErrorException(HttpStatus.UNAUTHORIZED, "가입정보가 확인되지 않습니다.");
         }
 
         return user.get();
@@ -76,12 +75,12 @@ public class UserService {
     );
 
     public Map<String, Object> checkMemberId(String memberId) {
-        if(FORBIDDEN_NAME.contains(memberId.toUpperCase())) {
+        if (FORBIDDEN_NAME.contains(memberId.toUpperCase())) {
             throw new ClientException("사용하실 수 없는 아이디입니다.");
         }
 
         UserDto user = userRepository.findByUserId(memberId);
-        if(nonNull(user)) {
+        if (nonNull(user)) {
             throw new ClientException("이미 사용중인 아이디입니다.");
         }
 
@@ -91,12 +90,12 @@ public class UserService {
     }
 
     public Map<String, Object> checkNickname(String nickname) {
-        if(FORBIDDEN_NAME.contains(nickname.toUpperCase())) {
+        if (FORBIDDEN_NAME.contains(nickname.toUpperCase())) {
             throw new ClientException("사용하실 수 없는 닉네임입니다.");
         }
 
         User user = userRepository.findByNickname(nickname);
-        if(nonNull(user)) {
+        if (nonNull(user)) {
             throw new ClientException("이미 사용중인 닉네임입니다.");
         }
 
@@ -105,13 +104,14 @@ public class UserService {
         );
     }
 
-    public Map<String, Object> userPhoneCheck (CheckUserPhoneRequest request) {
+    public Map<String, Object> userPhoneCheck(CheckUserPhoneRequest request) {
         User user = userRepository.findByPhone(request.getPhone());
-        if(nonNull(user)) {
+        if (nonNull(user)) {
             throw new FindException("이미 가입된 정보가 있습니다.");
         }
 
         // TODO : 외부 API로 작업필요
+        // TODO : signup api에서 검증내용 한번 더 확인해주기
         request.getName();
 
         return Map.of(
@@ -119,7 +119,7 @@ public class UserService {
         );
     }
 
-    public Map<String, Object> userSignUp (UserSignUpRequest request) {
+    public Map<String, Object> userSignUp(UserSignUpRequest request) {
         User user = userRepository.findByUserIdOrNicknameOrPhone(request.getUserId(), request.getNickname(), request.getPhone());
         if (nonNull(user)) {
             throw new ClientException("이미 존재하는 회원정보입니다.");
@@ -139,7 +139,7 @@ public class UserService {
         );
     }
 
-    public Map<String, Object> findUserId (FindUserIdRequest request) {
+    public Map<String, Object> findUserId(FindUserIdRequest request) {
         User user = userRepository.findByNameAndPhone(request.getName(), request.getPhone());
         if (isNull(user)) {
             throw new ClientException("가입하신 정보가 확인되지 않습니다.");
@@ -150,7 +150,7 @@ public class UserService {
         );
     }
 
-    public Map<String, Object> findPassword (FindUserPwRequest request) {
+    public Map<String, Object> findPassword(FindUserPwRequest request) {
         User user = userRepository.findByUserIdAndNameAndPhone(request.getUserId(), request.getName(), request.getPhone());
         if (isNull(user)) {
             throw new ClientException("가입하신 정보가 확인되지 않습니다.");
@@ -174,7 +174,7 @@ public class UserService {
         );
     }
 
-    public Map<String, Object> resetUserPassword (ResetUserPwRequest request) {
+    public Map<String, Object> resetUserPassword(ResetUserPwRequest request) {
         User user = userRepository.findByUserIdAndPw(request.getUserId(), request.getTempPw());
         if (isNull(user)) {
             throw new ClientException("잘못된 요청입니다.");

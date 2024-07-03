@@ -1,8 +1,8 @@
 package com.develop.datajpa.controller.user;
 
 import com.develop.datajpa.request.user.CheckNicknameRequest;
-import com.develop.datajpa.request.user.CheckUserPhoneRequest;
 import com.develop.datajpa.request.user.CheckUserIdRequest;
+import com.develop.datajpa.request.user.CheckUserPhoneRequest;
 import com.develop.datajpa.request.user.FindUserIdRequest;
 import com.develop.datajpa.request.user.FindUserPwRequest;
 import com.develop.datajpa.request.user.ResetUserPwRequest;

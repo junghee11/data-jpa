@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -42,7 +41,7 @@ public class ControllerExceptionAdvice {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> MethodArgumentNotValidException(MethodArgumentNotValidException e) {
         String message = e.getBindingResult().getFieldErrors().get(0).getDefaultMessage();
-        for (int i =  0; i < e.getErrorCount(); i++) {
+        for (int i = 0; i < e.getErrorCount(); i++) {
             log.info("errorMessage{} : {}", i + 1, e.getBindingResult().getFieldErrors().get(i).getDefaultMessage());
         }
 
