@@ -2,19 +2,15 @@ package com.develop.datajpa.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import org.hibernate.annotations.DynamicInsert;
 
 import java.time.LocalDateTime;
@@ -22,8 +18,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Entity
-@ToString(of = {"idx", "title", "content", "user"})
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @DynamicInsert
 @Table(name = "article")
 public class Article {
@@ -54,22 +49,14 @@ public class Article {
         this.viewCount++;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id")
-    private User user;
+    @Column(name = "user_id")
+    private String userId;
 
     @Builder
-    public Article(String category, String title, String content, User user) {
+    public Article(String category, String title, String content, String userId) {
         this.category = category;
         this.title = title;
         this.content = content;
-        if (user != null) {
-            changeWriter(user);
-        }
-    }
-
-    public void changeWriter(User user) {
-        this.user = user;
-        user.getArticle().add(this);
+        this.userId = userId;
     }
 }

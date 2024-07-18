@@ -27,34 +27,34 @@ public class ArticleController {
 
     private final ArticleService articleService;
 
-    @GetMapping("/articles")
+    @GetMapping("")
     public Map<String, Object> getArticleList(@RequestHeader(value = "Authorization", required = false) String token,
                                               GetArticleListRequest request) {
         return articleService.getArticleList(request);
     }
 
-    @GetMapping("/articles/{id}")
+    @GetMapping("/{id}")
     public Map<String, Object> getArticle(@RequestHeader(value = "Authorization", required = false) String token,
-                                          @PathVariable long id) {
+                                          @PathVariable(value = "id") long id) {
         return articleService.getArticle(id);
     }
 
 
-    @PostMapping("/article")
+    @PostMapping("")
     public Map<String, Object> createArticle(@RequestHeader(value = "Authorization") String token,
                                              @RequestBody CreateArticleRequest request) {
         return articleService.createArticle(resolveToken(token), request);
     }
 
-    @PatchMapping("/article")
+    @PatchMapping("")
     public Map<String, Object> modifyArticle(@RequestHeader(value = "Authorization") String token,
                                              @RequestBody ModifyArticleRequest request) {
         return articleService.modifyArticle(resolveToken(token), request);
     }
 
-    @DeleteMapping("/article/{id}")
+    @DeleteMapping("/{id}")
     public Map<String, Object> deleteArticle(@RequestHeader(value = "Authorization") String token,
-                                             @PathVariable long id) {
+                                             @PathVariable(value = "id") long id) {
         return articleService.deleteArticle(resolveToken(token), id);
     }
 

@@ -95,4 +95,16 @@ public class JwtProvider {
             throw new HttpClientErrorException(HttpStatus.PROXY_AUTHENTICATION_REQUIRED);
         }
     }
+
+    // test용
+    public String generateToken(String tempId) {
+        log.info("salt = {}", salt);  // 이거 어디씀??
+
+        return Jwts.builder()
+//            .setIssuedAt(new Date(System.currentTimeMillis()))
+            .claim("userId", tempId)
+            .setExpiration(new Date(System.currentTimeMillis() + exp))
+            .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+            .compact();
+    }
 }

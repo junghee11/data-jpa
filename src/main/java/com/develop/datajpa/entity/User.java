@@ -2,26 +2,20 @@ package com.develop.datajpa.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @Entity
-@ToString(of = {"id", "name", "nickname"})
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@NoArgsConstructor
 @DynamicInsert
 @DynamicUpdate
 @Table(name = "users")
@@ -46,9 +40,6 @@ public class User {
     private String ip;
 
     private LocalDateTime created_at;
-
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
-    private final List<Article> article = new ArrayList<>();
 
     public void setPw(String pw) {
         this.pw = pw;
