@@ -5,6 +5,7 @@ import com.develop.datajpa.request.article.CreateArticleRequest;
 import com.develop.datajpa.request.article.GetArticleListRequest;
 import com.develop.datajpa.request.article.ModifyArticleRequest;
 import com.develop.datajpa.service.article.ArticleService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,7 +30,7 @@ public class ArticleController {
 
     @GetMapping("")
     public Map<String, Object> getArticleList(@RequestHeader(value = "Authorization", required = false) String token,
-                                              GetArticleListRequest request) {
+                                              @Valid GetArticleListRequest request) {
         return articleService.getArticleList(request);
     }
 
@@ -42,13 +43,13 @@ public class ArticleController {
 
     @PostMapping("")
     public Map<String, Object> createArticle(@RequestHeader(value = "Authorization") String token,
-                                             @RequestBody CreateArticleRequest request) {
+                                             @Valid @RequestBody CreateArticleRequest request) {
         return articleService.createArticle(resolveToken(token), request);
     }
 
     @PatchMapping("")
     public Map<String, Object> modifyArticle(@RequestHeader(value = "Authorization") String token,
-                                             @RequestBody ModifyArticleRequest request) {
+                                             @Valid @RequestBody ModifyArticleRequest request) {
         return articleService.modifyArticle(resolveToken(token), request);
     }
 

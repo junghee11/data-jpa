@@ -27,7 +27,7 @@ public class ArticleService {
 
     public Map<String, Object> getArticleList(GetArticleListRequest request) {
         Page<Article> articles = articleRepository.findByCategoryAndStateOrderByCreatedAtDesc
-            (request.getCategory().name(), State.ACTIVE.ordinal(), PageRequest.of(request.getPage(), 10));
+            (request.getCategory().name(), State.ACTIVE.ordinal(), PageRequest.of(request.getPage() - 1, 10));
 
         return Map.of(
             "pageCount", articles.getTotalPages(),
