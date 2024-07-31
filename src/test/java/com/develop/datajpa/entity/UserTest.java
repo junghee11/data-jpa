@@ -4,7 +4,6 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.Rollback;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -40,8 +39,8 @@ public class UserTest {
 
         List<Article> articles = em.createQuery("select a from Article a", Article.class).getResultList();
 
-        for(Article article : articles) {
-            System.out.println("article = "+ article.getTitle());
+        for (Article article : articles) {
+            System.out.println("article = " + article.getTitle());
 //            System.out.println("article = "+ article);
 //            System.out.println("-> article.writer = "+ article.getUser());
         }

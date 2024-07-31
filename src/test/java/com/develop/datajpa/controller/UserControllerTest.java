@@ -1,19 +1,12 @@
 package com.develop.datajpa.controller;
 
-import com.develop.datajpa.dto.user.LoginInfo;
-import com.develop.datajpa.entity.Article;
-import com.develop.datajpa.entity.ArticleType.Category;
-import com.develop.datajpa.request.article.CreateArticleRequest;
 import com.develop.datajpa.request.user.UserSignUpRequest;
-import com.develop.datajpa.service.article.ArticleService;
 import com.develop.datajpa.service.user.UserService;
 import com.google.gson.Gson;
-import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -22,10 +15,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.Map;
 
 import static org.mockito.BDDMockito.given;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -48,7 +39,7 @@ public class UserControllerTest {
         request.setNickname("테스트계정");
         request.setPhone("01000000000");
         request.setIp("123.4567.4567");
-        
+
         given(userService.userSignUp(request)).willReturn(
             Map.of("message", "회원가입이 완료되었습니다")
         );

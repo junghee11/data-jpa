@@ -41,11 +41,10 @@ public class ArticleService {
             .orElseThrow(() -> new ClientException("삭제되었거나 존재하지 않는 게시글입니다."));
 
         article.addViewCount();
-        Article newArticle = articleRepository.save(article);
-        System.out.println("newArticle" + newArticle);
+        articleRepository.save(article);
 
         return Map.of(
-            "result", newArticle
+            "result", article
         );
     }
 
