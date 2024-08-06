@@ -1,17 +1,22 @@
 package com.develop.datajpa.repository;
 
 import com.develop.datajpa.entity.MatchSchedule;
+import com.develop.datajpa.entity.MatchType.MatchResult;
+import com.develop.datajpa.entity.MatchType.TeamType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MatchScheduleRepository extends JpaRepository<MatchSchedule, Long> {
 
-    List<MatchSchedule> findByMatchDate(Date date);
+    List<MatchSchedule> findByMatchDate(LocalDate date);
 
-    List<MatchSchedule> findByHomeTeamOrAwayTeamOrderByMatchDate(String home, String away);
+    Optional<MatchSchedule> findByIdxAndResult(Long id, MatchResult result);
+
+    List<MatchSchedule> findByHomeTeamOrAwayTeamOrderByMatchDate(TeamType home, TeamType away);
 
 }

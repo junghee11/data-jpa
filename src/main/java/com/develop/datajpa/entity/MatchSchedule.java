@@ -2,6 +2,8 @@ package com.develop.datajpa.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -12,7 +14,8 @@ import lombok.ToString;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 
 @Getter
 @Entity
@@ -25,13 +28,15 @@ public class MatchSchedule {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer idx;
+    private Long idx;
 
     @Column(name = "home_team")
-    private String homeTeam;
+    @Enumerated(EnumType.ORDINAL)
+    private MatchType.TeamType homeTeam;
 
     @Column(name = "away_team")
-    private String awayTeam;
+    @Enumerated(EnumType.ORDINAL)
+    private MatchType.TeamType awayTeam;
 
     @Column(name = "home_score")
     private Integer homeScore;
@@ -42,13 +47,23 @@ public class MatchSchedule {
     private String stadium;
 
     @Column(name = "match_result")
-    private String matchResult;
+    private MatchType.MatchResult matchResult;
 
     @Column(name = "match_date")
-    private LocalDateTime matchDate;
+    private LocalDate matchDate;
 
     @Column(name = "match_time")
-    private LocalDateTime matchTime;
+    private LocalTime matchTime;
 
+    public void setHomeScore(Integer homeScore) {
+        this.homeScore = homeScore;
+    }
 
+    public void setAwayScore(Integer awayScore) {
+        this.awayScore = awayScore;
+    }
+
+    public void setMatchResult(MatchType.MatchResult matchResult) {
+        this.matchResult = matchResult;
+    }
 }
