@@ -15,7 +15,7 @@ public interface MatchScheduleRepository extends JpaRepository<MatchSchedule, Lo
 
     List<MatchSchedule> findByMatchDate(LocalDate date);
 
-    Optional<MatchSchedule> findByIdxAndResult(Long id, MatchResult result);
+    Optional<MatchSchedule> findByIdxAndMatchResult(Long id, MatchResult result);
 
     List<MatchSchedule> findByHomeTeamOrAwayTeamOrderByMatchDate(TeamType home, TeamType away);
 

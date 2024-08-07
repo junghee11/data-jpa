@@ -38,7 +38,7 @@ public class AdminService {
     }
 
     public Map<String, Object> cancelMatch(long id) {
-        MatchSchedule match = matchScheduleRepository.findByIdxAndResult(id, MatchResult.INITIAL)
+        MatchSchedule match = matchScheduleRepository.findByIdxAndMatchResult(id, MatchResult.INITIAL)
             .orElseThrow(() -> new ClientException("이미 처리되었거나 존재하지 않은 경기번호 입니다."));
 
         match.setMatchResult(MatchResult.CANCELED);
