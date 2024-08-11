@@ -8,10 +8,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -31,7 +33,7 @@ public class ArticleRepositoryTest {
         userId = "member1";
     }
 
-    @DisplayName("게시글 생성")
+    @DisplayName("게시글 생성- success")
     @Test
     public void createArticleSuccess() throws Exception {
         Article article = Article.builder()
@@ -52,20 +54,19 @@ public class ArticleRepositoryTest {
         assertThat(findArticle.get()).isEqualTo(newArticle);
     }
 
-    @DisplayName("게시글 생성 - 실패케이스")
+    @DisplayName("게시글 생성 - fail")
     @Test
     public void createArticleFail() throws Exception {
         Article article = Article.builder()
             .category(ArticleType.Category.FOOD.name())
             .userId(userId)
-            .title(title)
+//            .title(title)
             .content(content)
             .build();
 
-        Article newArticle = articleRepository.save(article);
-
-        assertThat(newArticle).isNull();
-        assertThat(newArticle).isNotInstanceOf(Article.class);
+        assertThrows(DataIntegrityViolationException.class, () -> {
+            articleRepository.save(article);
+        }, "중복된 제목으로 삽입 시 DataIntegrityViolationException이 발생해야 합니다.");
     }
 
 }

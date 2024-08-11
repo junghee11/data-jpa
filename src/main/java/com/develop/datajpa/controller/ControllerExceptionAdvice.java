@@ -2,7 +2,9 @@ package com.develop.datajpa.controller;
 
 
 import com.develop.datajpa.response.ClientException;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpClientErrorException;
 
+import java.sql.SQLException;
 import java.util.Map;
 
 import static java.util.Objects.isNull;
@@ -47,6 +50,24 @@ public class ControllerExceptionAdvice {
 
         return new ResponseEntity<>(
             Map.of("message", isNull(message) ? "잘못된 요청값입니다" : message),
+            HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
+        String errorMessage = "필수 입력값이 누락되었습니다.";  // TODO : 배포 후에는 이 메세지로 변경 필요
+        return new ResponseEntity<>(
+            Map.of("message", e.getMessage()),
+            HttpStatus.BAD_REQUEST
+        );
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Map<String, Object>> handleConstraintViolationException(ConstraintViolationException e) {
+        String errorMessage = "필수 입력값이 누락되었습니다.";  // TODO : 배포 후에는 이 메세지로 변경 필요
+        return new ResponseEntity<>(
+            Map.of("message", e.getMessage()),
             HttpStatus.BAD_REQUEST
         );
     }

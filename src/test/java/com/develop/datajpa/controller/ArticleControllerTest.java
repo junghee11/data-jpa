@@ -73,9 +73,11 @@ public class ArticleControllerTest {
         @Test
         @DisplayName("특정 게시글 가져오기 - success")
         public void getArticleSuccess() throws Exception {
+            Article mockArticle = new Article("FOOD", title, content, userId);
+
             given(articleService.getArticle(1)).willReturn(
                 Map.of(
-                    "result", new Article("FOOD", title, content, userId)
+                    "result", mockArticle
                 ));
 
             Long articleIdx = 1L;
@@ -91,14 +93,13 @@ public class ArticleControllerTest {
         public void getArticleFail() throws Exception {
             given(articleService.getArticle(1)).willReturn(
                 Map.of(
-                    "result", new Article("FOOD", title, content, userId)
+                    "result", new Article("FOOD", null, content, userId)
                 ));
 
-            Long articleIdx = 1L;
+            String articleIdx = "idx";
             mockMvc.perform(get("/article/" + articleIdx)
                     .header("Authorization", "Bearer " + jwtToken))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.title").value("실패한 제목입니다"))
+                .andExpect(status().isBadRequest())
                 .andDo(print());
         }
 
@@ -135,7 +136,15 @@ public class ArticleControllerTest {
                     .param("category", Category.FOOD.name())
                     // request 페이지값 누락
                     .header("Authorization", "Bearer " + jwtToken))
-                .andExpect(status().isOk())
+                .andExpect(status().isBadRequest())
+                .andDo(print());
+
+            mockMvc.perform(get("/article")
+                    .param("category", Category.FOOD.name())
+                    .param("page", "0")
+                    .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("페이지값은 1보다 작을 수 없습니다"))
                 .andDo(print());
         }
     }
@@ -189,7 +198,7 @@ public class ArticleControllerTest {
                     .header("Authorization", "Bearer " + null)
                     .content(requestBody)
                     .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
+                .andExpect(status().isUnauthorized())
                 .andDo(print());
         }
     }
@@ -242,7 +251,7 @@ public class ArticleControllerTest {
                     .header("Authorization", "Bearer " + jwtToken)
                     .content(requestBody)
                     .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
+                .andExpect(status().isBadRequest())
                 .andDo(print());
         }
     }
@@ -270,7 +279,7 @@ public class ArticleControllerTest {
         @DisplayName("fail")
         public void deleteArticleFail() throws Exception {
             mockMvc.perform(delete("/article/" + 1))
-                .andExpect(status().isOk())
+                .andExpect(status().isBadRequest())
                 .andDo(print());
         }
     }
