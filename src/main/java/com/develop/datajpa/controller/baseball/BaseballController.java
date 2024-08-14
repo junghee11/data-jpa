@@ -24,12 +24,12 @@ public class BaseballController {
     private final BaseballService baseballService;
 
     @GetMapping("/schedule/{team}")
-    public Map<String, Object> getMatchList(@PathVariable TeamType team) {
+    public Map<String, Object> getMatchList(@PathVariable("team") TeamType team) {
         return baseballService.getMatchList(team);
     }
 
     @GetMapping("/team/{team}")
-    public Map<String, Object> getTeamInfo(@PathVariable TeamType team) {
+    public Map<String, Object> getTeamInfo(@PathVariable("team") TeamType team) {
         return baseballService.getTeamInfo(team);
     }
 
