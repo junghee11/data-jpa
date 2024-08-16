@@ -15,7 +15,7 @@ public class GetStadiumInfoRequest {
 
     private String type;
 
-    @NotBlank(message = "검색어를 선택해주세요")
+    @NotBlank(message = "검색어를 입력해주세요")
     private String keyword;
 
 }

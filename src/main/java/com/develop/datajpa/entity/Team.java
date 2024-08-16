@@ -1,6 +1,9 @@
 package com.develop.datajpa.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -24,6 +27,10 @@ public class Team {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idx;
 
+    @Column(name = "team_code")
+    @Enumerated(EnumType.STRING)
+    private MatchType.TeamCode teamCode;
+
     private String name;
 
     private Integer rank;
@@ -34,7 +41,15 @@ public class Team {
 
     private String draw;
 
-    private String img_url;
+    private String director;
 
+    @Column(name = "img_url")
+    private String imgUrl;
+
+    private String stadium;
+
+    private String homepage;
+
+    private String outline;
 
 }

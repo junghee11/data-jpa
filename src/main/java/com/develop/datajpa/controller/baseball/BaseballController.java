@@ -1,7 +1,7 @@
 package com.develop.datajpa.controller.baseball;
 
 
-import com.develop.datajpa.entity.MatchType.TeamType;
+import com.develop.datajpa.entity.MatchType.TeamCode;
 import com.develop.datajpa.request.baseball.GetPlayerInfoRequest;
 import com.develop.datajpa.request.baseball.GetStadiumInfoRequest;
 import com.develop.datajpa.service.baseball.BaseballService;
@@ -24,12 +24,12 @@ public class BaseballController {
     private final BaseballService baseballService;
 
     @GetMapping("/schedule/{team}")
-    public Map<String, Object> getMatchList(@PathVariable("team") TeamType team) {
+    public Map<String, Object> getMatchList(@PathVariable("team") TeamCode team) {
         return baseballService.getMatchList(team);
     }
 
     @GetMapping("/team/{team}")
-    public Map<String, Object> getTeamInfo(@PathVariable("team") TeamType team) {
+    public Map<String, Object> getTeamInfo(@PathVariable("team") TeamCode team) {
         return baseballService.getTeamInfo(team);
     }
 

@@ -31,12 +31,12 @@ public class MatchSchedule {
     private Long idx;
 
     @Column(name = "home_team")
-    @Enumerated(EnumType.ORDINAL)
-    private MatchType.TeamType homeTeam;
+    @Enumerated(EnumType.STRING)
+    private MatchType.TeamCode homeTeam;
 
     @Column(name = "away_team")
-    @Enumerated(EnumType.ORDINAL)
-    private MatchType.TeamType awayTeam;
+    @Enumerated(EnumType.STRING)
+    private MatchType.TeamCode awayTeam;
 
     @Column(name = "home_score")
     private Integer homeScore;
@@ -47,6 +47,7 @@ public class MatchSchedule {
     private String stadium;
 
     @Column(name = "match_result")
+    @Enumerated(EnumType.STRING)
     private MatchType.MatchResult matchResult;
 
     @Column(name = "match_date")

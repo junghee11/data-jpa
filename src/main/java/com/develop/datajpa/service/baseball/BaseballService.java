@@ -1,7 +1,8 @@
 package com.develop.datajpa.service.baseball;
 
+import com.develop.datajpa.dto.baseball.MatchDto;
 import com.develop.datajpa.entity.MatchSchedule;
-import com.develop.datajpa.entity.MatchType.TeamType;
+import com.develop.datajpa.entity.MatchType.TeamCode;
 import com.develop.datajpa.entity.Player;
 import com.develop.datajpa.entity.Team;
 import com.develop.datajpa.repository.MatchScheduleRepository;
@@ -18,11 +19,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.develop.datajpa.request.valid.InvalidRequest.containsInvalidKeyword;
-import static java.util.Objects.isNull;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,27 +33,42 @@ public class BaseballService {
     private final StadiumRepository stadiumRepository;
     private final PlayerRepository playerRepository;
 
-    public Map<String, Object> getMatchList(TeamType team) {
+    public Map<String, Object> getMatchList(TeamCode team) {
         List<MatchSchedule> matchSchedules;
-        if (TeamType.ALL.equals(team)) {
+        if (TeamCode.ALL.equals(team)) {
             matchSchedules = matchScheduleRepository.findByMatchDate(LocalDate.now());
         } else {
             matchSchedules = matchScheduleRepository.findByHomeTeamOrAwayTeamOrderByMatchDate(team, team);
         }
 
+        Map<String, String> imgList = new HashMap<String, String>();
+        teamRepository.findAll().stream().forEach(teamInfo -> {
+            imgList.put(teamInfo.getTeamCode().get(), teamInfo.getImgUrl());
+        });
+
+        List<MatchDto> result = matchSchedules.stream().map(schedule -> {
+            MatchDto match = new MatchDto(schedule);
+            match.setHomeImgUrl(imgList.get(schedule.getHomeTeam().name()));
+            match.setAwayImgUrl(imgList.get(schedule.getAwayTeam().name()));
+
+            return match;
+        }).toList();
+
         return Map.of(
-            "result", matchSchedules
+            "result", result
         );
     }
 
-    public Map<String, Object> getTeamInfo(TeamType team) {
-        if (TeamType.ALL.equals(team)) {
+    public Map<String, Object> getTeamInfo(TeamCode team) {
+        if (TeamCode.ALL.equals(team)) {
             return Map.of(
                 "result", teamRepository.findAll()
             );
         } else {
+            System.out.println("team = " + team);
+            System.out.println("team = " + team.name());
             return Map.of(
-                "result", teamRepository.findByName(team.name())
+                "result", teamRepository.findByTeamCode(team)
                     .orElseThrow(() -> new ClientException("조회되는 팀이 없습니다."))
             );
         }
