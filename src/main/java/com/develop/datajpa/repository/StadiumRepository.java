@@ -10,10 +10,10 @@ import java.util.Optional;
 @Repository
 public interface StadiumRepository extends JpaRepository<Stadium, Long> {
 
-    Optional<Stadium> findByNameLike(String name);
+    Optional<Stadium> findByNameContaining(String name);
 
-    Optional<Stadium> findByTeamLike(String team);
+    Optional<Stadium> findByTeamContaining(String team);
 
-    Optional<Stadium> findByAddressLike(String address);
+    Optional<Stadium> findByAddressContaining(String address);
 
 }

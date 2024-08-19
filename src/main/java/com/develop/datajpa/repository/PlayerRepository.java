@@ -15,8 +15,8 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
 
     Page<Player> findAll(Pageable pageable);
 
-    Optional<Player> findByNameLike(String name);
+    Optional<Player> findByNameContaining(String name);
 
-    List<Player> findByTeamLike(String team);
+    List<Player> findByTeamContaining(String team);
 
 }

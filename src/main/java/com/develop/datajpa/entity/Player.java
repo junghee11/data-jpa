@@ -1,5 +1,6 @@
 package com.develop.datajpa.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -28,6 +29,10 @@ public class Player {
 
     private String name;
 
+    private String num;
+
+    private String position;
+
     private LocalDateTime birth;
 
     private String body;
@@ -40,5 +45,13 @@ public class Player {
 
     private String img_url;
 
+    private int pay;
+
+    private int hit;
+
+    @Column(name = "home_run")
+    private int homeRun;
+
+    private int run;
 
 }

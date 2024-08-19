@@ -81,17 +81,17 @@ public class BaseballService {
             );
         } else if ("name".equals(request.getType())) {
             return Map.of(
-                "result", stadiumRepository.findByNameLike(request.getKeyword())
+                "result", stadiumRepository.findByNameContaining(request.getKeyword())
                     .orElseThrow(() -> new ClientException("조회되는 경기장이 없습니다."))
             );
         } else if ("team".equals(request.getType())) {
             return Map.of(
-                "result", stadiumRepository.findByTeamLike(request.getKeyword())
+                "result", stadiumRepository.findByTeamContaining(request.getKeyword())
                     .orElseThrow(() -> new ClientException("조회되는 경기장이 없습니다."))
             );
         } else if ("address".equals(request.getType())) {
             return Map.of(
-                "result", stadiumRepository.findByAddressLike(request.getKeyword())
+                "result", stadiumRepository.findByAddressContaining(request.getKeyword())
                     .orElseThrow(() -> new ClientException("조회되는 경기장이 없습니다."))
             );
         } else {
@@ -101,7 +101,7 @@ public class BaseballService {
 
     public Map<String, Object> getPlayerInfo(GetPlayerInfoRequest request) {
         if ("all".equals(request.getKeyword())) {
-            Page<Player> players = playerRepository.findAll(PageRequest.of(request.getPage(), 10,
+            Page<Player> players = playerRepository.findAll(PageRequest.of(request.getPage()-1, 10,
                 Sort.by("name").ascending()));
             return Map.of(
                 "result", players.getContent(),
@@ -109,11 +109,11 @@ public class BaseballService {
             );
         } else if ("name".equals(request.getType())) {
             return Map.of(
-                "result", playerRepository.findByNameLike(request.getKeyword())
+                "result", playerRepository.findByNameContaining(request.getKeyword())
                     .orElseThrow(() -> new ClientException("조회되는 선수가 없습니다."))
             );
         } else if ("team".equals(request.getType())) {
-            List<Player> players = playerRepository.findByTeamLike(request.getKeyword());
+            List<Player> players = playerRepository.findByTeamContaining(request.getKeyword());
             return Map.of(
                 "result", players
             );

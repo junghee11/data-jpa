@@ -5,13 +5,15 @@ public class MatchType {
     public enum TeamCode {
         ALL("ALL"),
         SAMSUNG("삼성 라이온즈"),
-        SSG("신세계 랜더스"),
+        SSG("SSG 랜더스"),
         KT("KT wiz"),
-        LG("LG 트윈즈"),
-        NC("NC 디아노스"),
+        LG("LG 트윈스"),
+        NC("NC 다이노스"),
         DOOSAN("두산 베어스"),
         KIWOOM("키움 히어로즈"),
-        KIA("KIA 타이거즈");
+        KIA("KIA 타이거즈"),
+        HANHWA("한화 이글스"),
+        LOTTE("롯데 자이언츠");
 
         private final String value;
 
