@@ -7,10 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @UtilityClass
 public class InvalidRequest {
-    private static final String[] invalidKeywords = {"/","(", ")", "$", "+", "=", "select", "|", "[", "]", "sleep", "_", ";", "*"};
+    private static final String[] invalidKeywords = {"/", "(", ")", "$", "+", "=", "select", "|", "[", "]", "sleep", "_", ";", "*"};
 
     public static void containsInvalidKeyword(String... args) {
-        String request = String.join( "", args);
+        String request = String.join("", args);
         for (String invalidKeyword : invalidKeywords) {
             if (request.contains(invalidKeyword)) {
                 log.error("sql injection 시도 감지, request = {}", request);

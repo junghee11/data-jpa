@@ -4,7 +4,6 @@ import com.develop.datajpa.dto.baseball.MatchDto;
 import com.develop.datajpa.entity.MatchSchedule;
 import com.develop.datajpa.entity.MatchType.TeamCode;
 import com.develop.datajpa.entity.Player;
-import com.develop.datajpa.entity.Team;
 import com.develop.datajpa.repository.MatchScheduleRepository;
 import com.develop.datajpa.repository.PlayerRepository;
 import com.develop.datajpa.repository.StadiumRepository;
@@ -22,7 +21,6 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -101,7 +99,7 @@ public class BaseballService {
 
     public Map<String, Object> getPlayerInfo(GetPlayerInfoRequest request) {
         if ("all".equals(request.getKeyword())) {
-            Page<Player> players = playerRepository.findAll(PageRequest.of(request.getPage()-1, 10,
+            Page<Player> players = playerRepository.findAll(PageRequest.of(request.getPage() - 1, 10,
                 Sort.by("name").ascending()));
             return Map.of(
                 "result", players.getContent(),
@@ -117,7 +115,7 @@ public class BaseballService {
             return Map.of(
                 "result", players
             );
-        }  else {
+        } else {
             throw new ClientException("검색 조건을 확인해주세요");
         }
     }
