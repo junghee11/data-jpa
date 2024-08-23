@@ -41,7 +41,7 @@ public class BaseballService {
 
         Map<String, String> imgList = new HashMap<String, String>();
         teamRepository.findAll().stream().forEach(teamInfo -> {
-            imgList.put(teamInfo.getTeamCode().get(), teamInfo.getImgUrl());
+            imgList.put(teamInfo.getTeamCode().name(), teamInfo.getImgUrl());
         });
 
         List<MatchDto> result = matchSchedules.stream().map(schedule -> {
@@ -60,7 +60,7 @@ public class BaseballService {
     public Map<String, Object> getTeamInfo(TeamCode team) {
         if (TeamCode.ALL.equals(team)) {
             return Map.of(
-                "result", teamRepository.findAll()
+                "result", teamRepository.findAll(Sort.by("rank").ascending())
             );
         } else {
             System.out.println("team = " + team);
