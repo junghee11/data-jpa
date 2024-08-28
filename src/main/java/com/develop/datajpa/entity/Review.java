@@ -21,8 +21,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-@Table(name = "food")
-public class Food {
+@Table(name = "review")
+public class Review {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,23 +31,27 @@ public class Food {
     @Column(name = "restaurants_id")
     private Integer restaurantsId;
 
-    private String name;
+    private Integer star;
 
-    private String description;
+    private String content;
 
-    private Integer price;
+    @Column(name = "user_id")
+    private String userId;
+
+    private Integer state;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    public void setState(Integer state) {
+        this.state = state;
+    }
 
     @Builder
-    public Food(Integer restaurantsId, String name, String description, Integer price) {
+    public Review(Integer restaurantsId, Integer star, String content, String userId) {
         this.restaurantsId = restaurantsId;
-        this.name = name;
-        this.description = description;
-        this.price = price;
+        this.star = star;
+        this.content = content;
+        this.userId = userId;
     }
 }

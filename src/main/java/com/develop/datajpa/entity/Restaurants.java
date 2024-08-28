@@ -28,11 +28,11 @@ public class Restaurants {
 
     private String name;
 
-    private String stadium;
+    private long stadium;
 
     private boolean inside;
 
-    private Integer star;
+    private Double star;
 
     private String address;
 
@@ -50,5 +50,7 @@ public class Restaurants {
 
     private LocalDateTime updated_at;
 
-
+    public void setStar(Double star) {
+        this.star = star;
+    }
 }
