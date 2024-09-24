@@ -12,6 +12,7 @@ import com.develop.datajpa.entity.QUser;
 import com.develop.datajpa.entity.Restaurants;
 import com.develop.datajpa.entity.Review;
 import com.develop.datajpa.entity.ReviewRepository;
+import com.develop.datajpa.entity.Stadium;
 import com.develop.datajpa.repository.FoodRepository;
 import com.develop.datajpa.repository.MatchScheduleRepository;
 import com.develop.datajpa.repository.PlayerRepository;
@@ -75,6 +76,7 @@ public class BaseballService {
 
             return match;
         }).toList();
+        System.out.println("result = " + result);
 
         return Map.of(
             "result", result
@@ -102,10 +104,13 @@ public class BaseballService {
                 "result", stadiumRepository.findAll()
             );
         } else if ("id".equals(request.getType())) {
+            Stadium stadium = stadiumRepository.findById(Long.parseLong(request.getKeyword()))
+                .orElseThrow(() -> new ClientException("조회되는 경기장이 없습니다."));
+            List<Restaurants> restaurants = restaurantsRepository.findByStadium(stadium.getIdx());
+            System.out.println("restaurants = " + restaurants);
             return Map.of(
-                "result", stadiumRepository.findById(Long.parseLong(request.getKeyword()))
-                    .orElseThrow(() -> new ClientException("조회되는 경기장이 없습니다.")),
-                "restaurants", restaurantsRepository.findByStadium(Integer.parseInt(request.getKeyword()))
+                "result", stadium,
+                "restaurants", restaurantsRepository.findByStadium(stadium.getIdx())
             );
         } else if ("name".equals(request.getType())) {
             return Map.of(
@@ -160,7 +165,7 @@ public class BaseballService {
                 Projections.constructor(ReviewDto.class,
                     r, u))
             .from(r)
-            .join(u)
+            .join(u).on(r.userId.eq(u.userId))
             .where(
                 r.restaurantsId.eq(id)
                     .and(r.state.eq(0))

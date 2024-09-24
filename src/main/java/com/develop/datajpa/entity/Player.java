@@ -43,7 +43,8 @@ public class Player {
 
     private String song;
 
-    private String img_url;
+    @Column(name = "img_url")
+    private String imgUrl;
 
     private int pay;
 

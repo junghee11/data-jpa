@@ -52,8 +52,8 @@ public class BaseballController {
     }
 
     @GetMapping("/restaurant/{id}")
-    public Map<String, Object> getRestaurantInfo(@PathVariable("id") int stadiumId) {
-        return baseballService.getRestaurantInfo(stadiumId);
+    public Map<String, Object> getRestaurantInfo(@PathVariable("id") int restaurantId) {
+        return baseballService.getRestaurantInfo(restaurantId);
     }
 
     @PostMapping("/restaurant/review")

@@ -37,6 +37,9 @@ public class Food {
 
     private Integer price;
 
+    @Column(name = "img_url")
+    private String imgUrl;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 

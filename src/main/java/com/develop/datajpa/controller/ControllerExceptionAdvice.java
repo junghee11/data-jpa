@@ -71,12 +71,12 @@ public class ControllerExceptionAdvice {
         );
     }
 
-    @ResponseStatus(value = HttpStatus.BAD_REQUEST)
+    @ResponseStatus(value = HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(ClientException.class)
     public ResponseEntity<Map<String, Object>> exception(Exception e) {
         return new ResponseEntity<>(
             Map.of("message", e.getMessage()),
-            HttpStatus.BAD_REQUEST
+            HttpStatus.INTERNAL_SERVER_ERROR
         );
     }
 

@@ -1,5 +1,6 @@
 package com.develop.datajpa.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -10,6 +11,8 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+
+import java.time.LocalDate;
 
 @Getter
 @Entity
@@ -32,7 +35,16 @@ public class Stadium {
 
     private String phone;
 
-    private String ticket_link;
+    @Column(name = "ticketLink")
+    private String ticketLink;
 
+    @Column(name = "img_url")
+    private String imgUrl;
+
+    private LocalDate open;
+
+    private Integer sit;
+
+    private String desc;
 
 }

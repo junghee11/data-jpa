@@ -1,5 +1,6 @@
 package com.develop.datajpa.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -42,13 +43,19 @@ public class Restaurants {
 
     private String phone;
 
-    private String opening_hours;
+    @Column(name = "opening_hours")
+    private String openingHours;
 
     private String website;
 
-    private LocalDateTime created_at;
+    @Column(name = "img_url")
+    private String imgUrl;
 
-    private LocalDateTime updated_at;
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
     public void setStar(Double star) {
         this.star = star;
