@@ -1,5 +1,6 @@
-package com.develop.datajpa.entity;
+package com.develop.datajpa.repository;
 
+import com.develop.datajpa.entity.Review;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

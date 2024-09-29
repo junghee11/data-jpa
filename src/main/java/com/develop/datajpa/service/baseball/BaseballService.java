@@ -11,12 +11,12 @@ import com.develop.datajpa.entity.QReview;
 import com.develop.datajpa.entity.QUser;
 import com.develop.datajpa.entity.Restaurants;
 import com.develop.datajpa.entity.Review;
-import com.develop.datajpa.entity.ReviewRepository;
 import com.develop.datajpa.entity.Stadium;
 import com.develop.datajpa.repository.FoodRepository;
 import com.develop.datajpa.repository.MatchScheduleRepository;
 import com.develop.datajpa.repository.PlayerRepository;
 import com.develop.datajpa.repository.RestaurantsRepository;
+import com.develop.datajpa.repository.ReviewRepository;
 import com.develop.datajpa.repository.StadiumRepository;
 import com.develop.datajpa.repository.TeamRepository;
 import com.develop.datajpa.request.baseball.GetPlayerInfoRequest;
@@ -76,7 +76,6 @@ public class BaseballService {
 
             return match;
         }).toList();
-        System.out.println("result = " + result);
 
         return Map.of(
             "result", result
@@ -89,8 +88,6 @@ public class BaseballService {
                 "result", teamRepository.findAll(Sort.by("rank").ascending())
             );
         } else {
-            System.out.println("team = " + team);
-            System.out.println("team = " + team.name());
             return Map.of(
                 "result", teamRepository.findByTeamCode(team)
                     .orElseThrow(() -> new ClientException("조회되는 팀이 없습니다."))
@@ -107,7 +104,6 @@ public class BaseballService {
             Stadium stadium = stadiumRepository.findById(Long.parseLong(request.getKeyword()))
                 .orElseThrow(() -> new ClientException("조회되는 경기장이 없습니다."));
             List<Restaurants> restaurants = restaurantsRepository.findByStadium(stadium.getIdx());
-            System.out.println("restaurants = " + restaurants);
             return Map.of(
                 "result", stadium,
                 "restaurants", restaurantsRepository.findByStadium(stadium.getIdx())
