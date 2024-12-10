@@ -3,6 +3,7 @@ package com.develop.datajpa.controller.article;
 
 import com.develop.datajpa.request.article.CreateArticleRequest;
 import com.develop.datajpa.request.article.GetArticleListRequest;
+import com.develop.datajpa.request.article.GetCommentListRequest;
 import com.develop.datajpa.request.article.ModifyArticleRequest;
 import com.develop.datajpa.service.article.ArticleService;
 import jakarta.validation.Valid;
@@ -57,6 +58,12 @@ public class ArticleController {
     public Map<String, Object> deleteArticle(@RequestHeader(value = "Authorization") String token,
                                              @PathVariable(value = "id") long id) {
         return articleService.deleteArticle(resolveToken(token), id);
+    }
+
+    @GetMapping("/comments")
+    public Map<String, Object> getCommentList(@RequestHeader(value = "Authorization", required = false) String token,
+                                              @Valid GetCommentListRequest request) {
+        return articleService.getCommentList(request);
     }
 
 }

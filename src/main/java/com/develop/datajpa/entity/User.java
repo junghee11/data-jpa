@@ -32,13 +32,20 @@ public class User {
 
     private Integer grade;
 
-    private Integer state;
+    private Integer role;
+
+    @Column(name = "profile_img_url")
+    private String profileImgUrl;
 
     private String pw;
 
     private String ip;
 
     private LocalDateTime created_at;
+
+    public void setProfileImgUrl(String profileImgUrl) {
+        this.profileImgUrl = profileImgUrl;
+    }
 
     public void setPw(String pw) {
         this.pw = pw;
