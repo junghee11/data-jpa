@@ -1,4 +1,4 @@
-package com.develop.datajpa.entity;
+package com.develop.datajpa.entity.shop;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,16 +13,14 @@ import lombok.ToString;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
-import java.time.LocalDateTime;
-
 @Getter
 @Entity
 @ToString
 @NoArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-@Table(name = "cart")
-public class Cart {
+@Table(name = "wish")
+public class Wish {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,19 +32,9 @@ public class Cart {
     @Column(name = "goods_idx")
     private Long goodsIdx;
 
-    private Integer count;
-
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    public void setCount(Integer count) {
-        this.count = count;
-    }
-
     @Builder
-    public Cart(String userId, Long goodsIdx, Integer count) {
+    public Wish(String userId, Long goodsIdx) {
         this.userId = userId;
         this.goodsIdx = goodsIdx;
-        this.count = count;
     }
 }

@@ -1,13 +1,17 @@
 package com.develop.datajpa.controller.baseball;
 
 
-import com.develop.datajpa.entity.MatchType.TeamCode;
-import com.develop.datajpa.request.baseball.AddCartRequest;
+import com.develop.datajpa.request.baseball.GetGoodsListRequest;
+import com.develop.datajpa.request.shop.AddCartRequest;
+import com.develop.datajpa.request.shop.LeaveGoodsReviewRequest;
+import com.develop.datajpa.request.shop.ModifyGoodsReviewRequest;
+import com.develop.datajpa.request.shop.PurchaseGoodsRequest;
 import com.develop.datajpa.service.baseball.ShopService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,12 +30,12 @@ public class ShopController {
 
     private final ShopService shopService;
 
-    @GetMapping("/goods/{team}")
-    public Map<String, Object> getGoodsList(@PathVariable("team") TeamCode team) {
-        return shopService.getGoodsList(team);
+    @GetMapping("/goods")
+    public Map<String, Object> getGoodsList(@Valid GetGoodsListRequest request) {
+        return shopService.getGoodsList(request);
     }
 
-    @GetMapping("/goods/detail/{idx}")
+    @GetMapping("/goods/{idx}")
     public Map<String, Object> getGoodsInfo(@RequestHeader(value = "Authorization", required = false) String token,
                                             @PathVariable("idx") long idx) {
         return shopService.getGoodsInfo(token, idx);
@@ -60,10 +64,34 @@ public class ShopController {
         return shopService.clearCart(resolveToken(token));
     }
 
-//    @PostMapping("/goods/{id}")
-//    public Map<String, Object> purchaseItem(@RequestHeader(value = "Authorization") String token,
-//                                            @RequestBody LeaveReviewRequest request) {
-//        return shopService.leaveReview(resolveToken(token), request);
-//    }
+    @PostMapping("/goods")
+    public Map<String, Object> PurchaseGoods(@RequestHeader(value = "Authorization") String token,
+                                             @RequestBody PurchaseGoodsRequest request) {
+        return shopService.PurchaseGoods(resolveToken(token), request);
+    }
+
+    @PostMapping("/goods/{id}")
+    public Map<String, Object> orderShoppingCart(@RequestHeader(value = "Authorization") String token,
+                                                 @PathVariable("id") long id) {
+        return shopService.orderShoppingCart(resolveToken(token), id);
+    }
+
+    @PostMapping("/goods/review")
+    public Map<String, Object> leaveReview(@RequestHeader(value = "Authorization") String token,
+                                           @RequestBody LeaveGoodsReviewRequest request) {
+        return shopService.leaveReview(resolveToken(token), request);
+    }
+
+    @PatchMapping("/goods/review")
+    public Map<String, Object> modifyGoodsReview(@RequestHeader(value = "Authorization") String token,
+                                                 @RequestBody ModifyGoodsReviewRequest request) {
+        return shopService.modifyGoodsReview(resolveToken(token), request);
+    }
+
+    @DeleteMapping("/goods/review/{id}")
+    public Map<String, Object> deleteReview(@RequestHeader(value = "Authorization") String token,
+                                            @PathVariable("id") long id) {
+        return shopService.deleteReview(resolveToken(token), id);
+    }
 
 }

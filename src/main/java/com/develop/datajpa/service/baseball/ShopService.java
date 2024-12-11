@@ -1,52 +1,76 @@
 package com.develop.datajpa.service.baseball;
 
+import com.develop.datajpa.dto.shop.OrderDto;
 import com.develop.datajpa.dto.user.LoginInfo;
-import com.develop.datajpa.entity.Cart;
-import com.develop.datajpa.entity.Goods;
 import com.develop.datajpa.entity.MatchType.TeamCode;
-import com.develop.datajpa.entity.QReview;
-import com.develop.datajpa.entity.Restaurants;
-import com.develop.datajpa.entity.Review;
 import com.develop.datajpa.entity.User;
-import com.develop.datajpa.entity.Wish;
+import com.develop.datajpa.entity.shop.Cart;
+import com.develop.datajpa.entity.shop.Goods;
+import com.develop.datajpa.entity.shop.GoodsReview;
+import com.develop.datajpa.entity.shop.GoodsReviewRepository;
+import com.develop.datajpa.entity.shop.GoodsReviewType.State;
+import com.develop.datajpa.entity.shop.OrderMenuRepository;
+import com.develop.datajpa.entity.shop.QOrderMenu;
+import com.develop.datajpa.entity.shop.QReceipt;
+import com.develop.datajpa.entity.shop.ReceiptRepository;
+import com.develop.datajpa.entity.shop.Wish;
 import com.develop.datajpa.repository.CartRepository;
 import com.develop.datajpa.repository.GoodsRepository;
-import com.develop.datajpa.repository.RestaurantsRepository;
-import com.develop.datajpa.repository.ReviewRepository;
+import com.develop.datajpa.repository.UserRepository;
 import com.develop.datajpa.repository.WishRepository;
-import com.develop.datajpa.request.baseball.AddCartRequest;
-import com.develop.datajpa.request.baseball.LeaveReviewRequest;
+import com.develop.datajpa.request.baseball.GetGoodsListRequest;
+import com.develop.datajpa.request.shop.AddCartRequest;
+import com.develop.datajpa.request.shop.LeaveGoodsReviewRequest;
+import com.develop.datajpa.request.shop.ModifyGoodsReviewRequest;
+import com.develop.datajpa.request.shop.PurchaseGoodsRequest;
 import com.develop.datajpa.response.ClientException;
 import com.develop.datajpa.service.user.UserService;
+import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static com.develop.datajpa.service.security.JwtProvider.resolveToken;
 import static com.develop.datajpa.service.security.JwtProvider.validateToken;
+import static java.util.Objects.isNull;
 
 @Service
 @RequiredArgsConstructor
 public class ShopService {
 
     private final GoodsRepository goodsRepository;
-    private final RestaurantsRepository restaurantsRepository;
     private final UserService userService;
-    private final ReviewRepository reviewRepository;
     private final WishRepository wishRepository;
     private final CartRepository cartRepository;
+    private final UserRepository userRepository;
+    private final ReceiptRepository receiptRepository;
+    private final OrderMenuRepository orderMenuRepository;
+    private final GoodsReviewRepository goodsReviewRepository;
 
     @Autowired
     EntityManager em;
 
-    public Map<String, Object> getGoodsList(TeamCode team) {
-        List<Goods> goodsList = goodsRepository.findByTeamAndOnSaleOrderByIdx(team, true);
+    public Map<String, Object> getGoodsList(GetGoodsListRequest request) {
+        List<Goods> goodsList;
+        if (TeamCode.ALL.name().equals(request.getTeam().toUpperCase())) {
+            goodsList = goodsRepository.findByOnSale
+                (true, PageRequest.of(request.getPage() - 1, 10, Sort.by("idx").descending()));
+        } else {
+            goodsList = goodsRepository.findByTeamAndOnSale
+                (request.getTeam(), true, PageRequest.of(request.getPage() - 1,
+                    10, Sort.by("idx").descending()));
+        }
 
         return Map.of(
             "result", goodsList
@@ -72,36 +96,6 @@ public class ShopService {
                 "result", goods
             );
         }
-    }
-
-    public Map<String, Object> leaveReview(LoginInfo loginInfo, LeaveReviewRequest request) {
-        userService.checkUser(loginInfo.getUserId());
-
-        Restaurants restaurants = restaurantsRepository.findById((long) request.getId())
-            .orElseThrow(() -> new ClientException("식당 정보가 확인되지 않습니다."));
-
-        Review review = Review.builder()
-            .restaurantsId(request.getId())
-            .star(request.getStar())
-            .content(request.getContent())
-            .userId(loginInfo.getUserId())
-            .build();
-        reviewRepository.save(review);
-
-        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
-        QReview r = QReview.review;
-
-        double avg = queryFactory.select(r.star.avg())
-            .from(r)
-            .where(r.restaurantsId.eq(request.getId()).and(r.state.eq(0)))
-            .fetchOne();
-
-        restaurants.setStar(avg);
-        restaurantsRepository.save(restaurants);
-
-        return Map.of(
-            "message", review
-        );
     }
 
     public Map<String, Object> toggleWish(LoginInfo loginInfo, long id) {
@@ -196,6 +190,132 @@ public class ShopService {
 
         return Map.of(
             "message", "장바구니를 비웠습니다."
+        );
+    }
+
+    @Transactional
+    public Map<String, Object> PurchaseGoods(LoginInfo loginInfo, PurchaseGoodsRequest request) {
+        User user = userService.checkUser(loginInfo.getUserId());
+
+        Goods goods = goodsRepository.findById(request.getId())
+            .orElseThrow(() -> new ClientException("제품 정보가 확인되지 않습니다."));
+
+        String orderCode = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmSS")) + loginInfo.getUserId();
+        long price = goods.getPrice() * request.getCount();
+        if (goods.isOnSale()) {
+            price = (long) (price * ((100 - goods.getDiscountRate()) / 100));
+        }
+
+//        Receipt order = Receipt.builder()
+//            .receiptCode(orderCode)
+//            .userId(loginInfo.getUserId())
+//            .payment(request.getPayType().getValue())
+//            .payId(request.getPayId()) // TODO : 결제 api 연결 후 재점검 필요..
+//            .totalPrice(price)
+//            .build();
+//        receiptRepository.save(order);
+//
+//        OrderMenu orderMenu = OrderMenu.builder()
+//            .goodIdx(goods.getIdx())
+//            .price(price / request.getCount())
+//            .count(request.getCount())
+//            .build();
+//        orderMenuRepository.save(orderMenu);
+//
+//        if (goods.getPointRate() > 0) {
+//            user.updatePoint((long) (price * goods.getPointRate()));
+//            userRepository.save(user);
+//        }
+//
+//        goods.updateStock(-request.getCount());
+//        goodsRepository.save(goods);
+
+        return Map.of(
+            "message", "결제가 완료되었습니다"
+        );
+    }
+
+    @Transactional
+    public Map<String, Object> orderShoppingCart(LoginInfo loginInfo, long id) {
+        userService.checkUser(loginInfo.getUserId());
+
+        // TODO : PurchaseGoods api 완성 후 작성하기
+
+        return Map.of(
+            "message", "결제가 완료되었습니다"
+        );
+    }
+
+    @Transactional
+    public Map<String, Object> leaveReview(LoginInfo loginInfo, LeaveGoodsReviewRequest request) {
+        userService.checkUser(loginInfo.getUserId());
+
+        goodsRepository.findById(request.getId())
+            .orElseThrow(() -> new ClientException("제품 정보가 확인되지 않습니다."));
+
+        JPAQueryFactory queryFactory = new JPAQueryFactory(em);
+        QReceipt r = QReceipt.receipt;
+        QOrderMenu o = QOrderMenu.orderMenu;
+
+        OrderDto order = queryFactory.select(Projections.constructor(OrderDto.class, r, o))
+            .from(r).join(o).on(r.receiptCode.eq(o.receiptCode))
+            .where(r.userId.eq(loginInfo.getUserId())
+                .and(o.goodIdx.eq(request.getId()))
+                .and(o.review.eq(false)))
+            .fetchOne();
+        if (isNull(order)) {
+            throw new ClientException("구입 기록이 확인되지 않습니다");
+        }
+
+        queryFactory.update(o)
+            .set(o.review, true)
+            .where(o.orderMenuIdx.eq(order.getOrderMenuIdx()))
+            .execute();
+
+        GoodsReview review = GoodsReview.builder()
+            .goodsId(request.getId())
+            .star(request.getStar())
+            .content(request.getContent())
+            .userId(loginInfo.getUserId())
+            .build();
+        goodsReviewRepository.save(review);
+
+        // TODO : batch 모듈 추가하면 리뷰 평점 재평균 내주는 job 추가하가
+
+        return Map.of(
+            "message", review
+        );
+    }
+
+
+    @Transactional
+    public Map<String, Object> modifyGoodsReview(LoginInfo loginInfo, ModifyGoodsReviewRequest request) {
+        userService.checkUser(loginInfo.getUserId());
+
+        GoodsReview review = goodsReviewRepository.findById(request.getId())
+            .orElseThrow(() -> new ClientException("리뷰가 확인되지 않습니다."));
+
+        review.setStar(request.getStar());
+        review.setContent(request.getContent());
+        goodsReviewRepository.save(review);
+
+        return Map.of(
+            "message", "수정이 완료되었습니다"
+        );
+    }
+
+    @Transactional
+    public Map<String, Object> deleteReview(LoginInfo loginInfo, long id) {
+        userService.checkUser(loginInfo.getUserId());
+
+        GoodsReview review = goodsReviewRepository.findById(id)
+            .orElseThrow(() -> new ClientException("리뷰가 확인되지 않습니다."));
+
+        review.setState(State.REMOVED.ordinal());
+        goodsReviewRepository.save(review);
+
+        return Map.of(
+            "message", "리뷰가 삭제되었습니다"
         );
     }
 

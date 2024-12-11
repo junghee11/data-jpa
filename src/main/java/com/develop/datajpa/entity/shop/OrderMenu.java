@@ -1,4 +1,4 @@
-package com.develop.datajpa.entity;
+package com.develop.datajpa.entity.shop;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -19,22 +19,30 @@ import org.hibernate.annotations.DynamicUpdate;
 @NoArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-@Table(name = "wish")
-public class Wish {
+@Table(name = "order_menu")
+public class OrderMenu {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idx;
+    @Column(name = "order_menu_idx")
+    private Long orderMenuIdx;
 
-    @Column(name = "user_id")
-    private String userId;
+    @Column(name = "receipt_code")
+    private String receiptCode;
 
-    @Column(name = "goods_idx")
-    private Long goodsIdx;
+    @Column(name = "good_idx")
+    private Long goodIdx;
+
+    private Long price;
+
+    private Integer count;
+
+    private Boolean review;
 
     @Builder
-    public Wish(String userId, Long goodsIdx) {
-        this.userId = userId;
-        this.goodsIdx = goodsIdx;
+    public OrderMenu(Long goodIdx, Long price, Integer count) {
+        this.goodIdx = goodIdx;
+        this.price = price;
+        this.count = count;
     }
 }

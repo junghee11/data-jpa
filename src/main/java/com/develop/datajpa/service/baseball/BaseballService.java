@@ -165,7 +165,7 @@ public class BaseballService {
             .where(
                 r.restaurantsId.eq(id)
                     .and(r.state.eq(0))
-                    .and(u.state.eq(0)))
+                    .and(u.role.eq(0)))
             .orderBy(r.createdAt.desc())
             .limit(10)
             .fetch();

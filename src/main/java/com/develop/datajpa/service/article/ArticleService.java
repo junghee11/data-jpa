@@ -2,15 +2,11 @@ package com.develop.datajpa.service.article;
 
 import com.develop.datajpa.dto.article.ArticleDto;
 import com.develop.datajpa.dto.article.CommentDto;
-import com.develop.datajpa.dto.baseball.ReviewDto;
 import com.develop.datajpa.dto.user.LoginInfo;
 import com.develop.datajpa.entity.Article;
 import com.develop.datajpa.entity.ArticleType.State;
 import com.develop.datajpa.entity.Comment;
 import com.develop.datajpa.entity.CommentRepository;
-import com.develop.datajpa.entity.QArticle;
-import com.develop.datajpa.entity.QReview;
-import com.develop.datajpa.entity.QUser;
 import com.develop.datajpa.entity.User;
 import com.develop.datajpa.entity.UserType.Role;
 import com.develop.datajpa.repository.ArticleRepository;
@@ -21,8 +17,6 @@ import com.develop.datajpa.request.article.GetCommentListRequest;
 import com.develop.datajpa.request.article.ModifyArticleRequest;
 import com.develop.datajpa.response.ClientException;
 import com.develop.datajpa.service.user.UserService;
-import com.querydsl.core.types.Projections;
-import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,7 +62,7 @@ public class ArticleService {
         User user = userRepository.findOptionalByUserId(article.getUserId())
             .orElseThrow(() -> new ClientException("작성자 정보가 확인되지 않습니다."));
 
-        if(isNull(user) || Role.WITHDRAWAL.ordinal() == user.getRole()) {
+        if (isNull(user) || Role.WITHDRAWAL.ordinal() == user.getRole()) {
             throw new ClientException("탈퇴처리된 회원의 게시글입니다.");
         }
 

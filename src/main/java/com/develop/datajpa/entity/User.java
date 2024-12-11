@@ -1,5 +1,6 @@
 package com.develop.datajpa.entity;
 
+import com.develop.datajpa.response.ClientException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -32,6 +33,8 @@ public class User {
 
     private Integer grade;
 
+    private Long point;
+
     private Integer role;
 
     @Column(name = "profile_img_url")
@@ -42,6 +45,13 @@ public class User {
     private String ip;
 
     private LocalDateTime created_at;
+
+    public void updatePoint(Long amount) {
+        if (this.point + amount < 0) {
+            throw new ClientException("포인트가 부족합니다.");
+        }
+        this.point += amount;
+    }
 
     public void setProfileImgUrl(String profileImgUrl) {
         this.profileImgUrl = profileImgUrl;

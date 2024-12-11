@@ -1,4 +1,4 @@
-package com.develop.datajpa.request.baseball;
+package com.develop.datajpa.request.shop;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
