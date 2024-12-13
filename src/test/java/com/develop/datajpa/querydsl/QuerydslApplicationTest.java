@@ -1,7 +1,7 @@
 package com.develop.datajpa.querydsl;
 
-import com.develop.datajpa.entity.Food;
-import com.develop.datajpa.entity.QFood;
+import com.develop.datajpa.entity.baseball.Food;
+import com.develop.datajpa.entity.baseball.QFood;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Assertions;
@@ -20,7 +20,7 @@ public class QuerydslApplicationTest {
 
     @BeforeEach
     public void before() {
-        Food food = new Food(1, "name", "description", 5000);
+        Food food = new Food(1L, "name", "description", 5000, "img.jpg");
         em.persist(food);
     }
 

@@ -1,6 +1,6 @@
 package com.develop.datajpa.dto.baseball;
 
-import com.develop.datajpa.entity.MatchSchedule;
+import com.develop.datajpa.entity.baseball.MatchSchedule;
 import lombok.Data;
 
 import java.time.LocalDate;

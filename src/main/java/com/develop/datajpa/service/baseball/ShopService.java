@@ -2,8 +2,8 @@ package com.develop.datajpa.service.baseball;
 
 import com.develop.datajpa.dto.shop.OrderDto;
 import com.develop.datajpa.dto.user.LoginInfo;
-import com.develop.datajpa.entity.MatchType.TeamCode;
 import com.develop.datajpa.entity.User;
+import com.develop.datajpa.entity.baseball.MatchType.TeamCode;
 import com.develop.datajpa.entity.shop.Cart;
 import com.develop.datajpa.entity.shop.Goods;
 import com.develop.datajpa.entity.shop.GoodsReview;

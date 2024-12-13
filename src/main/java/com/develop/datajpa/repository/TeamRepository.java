@@ -1,7 +1,7 @@
 package com.develop.datajpa.repository;
 
-import com.develop.datajpa.entity.MatchType.TeamCode;
-import com.develop.datajpa.entity.Team;
+import com.develop.datajpa.entity.baseball.MatchType.TeamCode;
+import com.develop.datajpa.entity.baseball.Team;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

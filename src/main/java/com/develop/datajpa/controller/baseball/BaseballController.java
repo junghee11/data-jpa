@@ -1,7 +1,7 @@
 package com.develop.datajpa.controller.baseball;
 
 
-import com.develop.datajpa.entity.MatchType.TeamCode;
+import com.develop.datajpa.entity.baseball.MatchType.TeamCode;
 import com.develop.datajpa.request.baseball.GetPlayerInfoRequest;
 import com.develop.datajpa.request.baseball.GetStadiumInfoRequest;
 import com.develop.datajpa.request.baseball.LeaveReviewRequest;
@@ -66,6 +66,11 @@ public class BaseballController {
     public Map<String, Object> deleteReview(@RequestHeader(value = "Authorization") String token,
                                             @PathVariable("id") long id) {
         return baseballService.deleteReview(resolveToken(token), id);
+    }
+
+    @GetMapping("/restaurant/food/{id}")
+    public Map<String, Object> getFoodInfo(@PathVariable("id") long foodId) {
+        return baseballService.getFoodInfo(foodId);
     }
 
 }

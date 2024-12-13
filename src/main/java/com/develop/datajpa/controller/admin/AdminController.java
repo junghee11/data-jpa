@@ -1,15 +1,24 @@
 package com.develop.datajpa.controller.admin;
 
 
+import com.develop.datajpa.request.admin.AddFoodMenuOnRestaurantRequest;
 import com.develop.datajpa.request.admin.RecordMatchResultRequest;
+import com.develop.datajpa.request.admin.RegisterRestaurantRequest;
+import com.develop.datajpa.request.admin.UpdateFoodInfoRequest;
+import com.develop.datajpa.request.admin.UpdateRestaurantInfoRequest;
 import com.develop.datajpa.service.admin.AdminService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
+
+import static com.develop.datajpa.service.security.JwtProvider.resolveToken;
 
 @RequiredArgsConstructor
 @RestController
@@ -19,13 +28,45 @@ public class AdminController {
     private final AdminService adminService;
 
     @PatchMapping("/baseball/result")
-    public Map<String, Object> recordMatchResult(RecordMatchResultRequest request) {
-        return adminService.recordMatchResult(request);
+    public Map<String, Object> recordMatchResult(@RequestHeader(value = "Authorization") String token,
+                                                 RecordMatchResultRequest request) {
+        return adminService.recordMatchResult(resolveToken(token), request);
     }
 
     @PatchMapping("/baseball/{id}")
-    public Map<String, Object> cancelMatch(@PathVariable long id) {
-        return adminService.cancelMatch(id);
+    public Map<String, Object> cancelMatch(@RequestHeader(value = "Authorization") String token,
+                                           @PathVariable long id) {
+        return adminService.cancelMatch(resolveToken(token), id);
+    }
+
+    @PostMapping("/baseball/restaurant")
+    public Map<String, Object> registerRestaurant(@RequestHeader(value = "Authorization") String token,
+                                                  RegisterRestaurantRequest request) {
+        return adminService.registerRestaurant(resolveToken(token), request);
+    }
+
+    @PatchMapping("/baseball/restaurant")
+    public Map<String, Object> updateRestaurantInfo(@RequestHeader(value = "Authorization") String token,
+                                                    UpdateRestaurantInfoRequest request) {
+        return adminService.updateRestaurantInfo(resolveToken(token), request);
+    }
+
+    @PostMapping("/baseball/restaurant/food")
+    public Map<String, Object> addFoodMenuOnRestaurant(@RequestHeader(value = "Authorization") String token,
+                                                       AddFoodMenuOnRestaurantRequest request) {
+        return adminService.addFoodMenuOnRestaurant(resolveToken(token), request);
+    }
+
+    @PatchMapping("/baseball/restaurant/food")
+    public Map<String, Object> updateFoodInfo(@RequestHeader(value = "Authorization") String token,
+                                                       UpdateFoodInfoRequest request) {
+        return adminService.updateFoodInfo(resolveToken(token), request);
+    }
+
+    @DeleteMapping("/baseball/restaurant/food/{id}")
+    public Map<String, Object> deleteFoodInfo(@RequestHeader(value = "Authorization") String token,
+                                              @PathVariable long id) {
+        return adminService.deleteFoodInfo(resolveToken(token), id);
     }
 
 }

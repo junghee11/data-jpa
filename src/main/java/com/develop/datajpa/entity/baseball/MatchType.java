@@ -1,4 +1,4 @@
-package com.develop.datajpa.entity;
+package com.develop.datajpa.entity.baseball;
 
 public class MatchType {
 

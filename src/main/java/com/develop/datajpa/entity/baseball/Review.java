@@ -1,4 +1,4 @@
-package com.develop.datajpa.entity;
+package com.develop.datajpa.entity.baseball;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -20,44 +21,37 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-@Table(name = "restaurants")
-public class Restaurants {
+@Table(name = "review")
+public class Review {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idx;
 
-    private String name;
+    @Column(name = "restaurants_id")
+    private Integer restaurantsId;
 
-    private long stadium;
+    private Integer star;
 
-    private boolean inside;
+    private String content;
 
-    private Double star;
+    @Column(name = "user_id")
+    private String userId;
 
-    private String address;
-
-    private Integer up;
-
-    private Integer down;
-
-    private String phone;
-
-    @Column(name = "opening_hours")
-    private String openingHours;
-
-    private String website;
-
-    @Column(name = "img_url")
-    private String imgUrl;
+    private Integer state;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    public void setState(Integer state) {
+        this.state = state;
+    }
 
-    public void setStar(Double star) {
+    @Builder
+    public Review(Integer restaurantsId, Integer star, String content, String userId) {
+        this.restaurantsId = restaurantsId;
         this.star = star;
+        this.content = content;
+        this.userId = userId;
     }
 }

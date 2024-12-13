@@ -1,8 +1,8 @@
 package com.develop.datajpa.repository;
 
-import com.develop.datajpa.entity.MatchSchedule;
-import com.develop.datajpa.entity.MatchType.MatchResult;
-import com.develop.datajpa.entity.MatchType.TeamCode;
+import com.develop.datajpa.entity.baseball.MatchSchedule;
+import com.develop.datajpa.entity.baseball.MatchType.MatchResult;
+import com.develop.datajpa.entity.baseball.MatchType.TeamCode;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

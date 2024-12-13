@@ -1,4 +1,4 @@
-package com.develop.datajpa.entity;
+package com.develop.datajpa.entity.baseball;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,7 +12,7 @@ import lombok.ToString;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Getter
 @Entity
@@ -20,8 +20,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-@Table(name = "player")
-public class Player {
+@Table(name = "stadium")
+public class Stadium {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,30 +29,22 @@ public class Player {
 
     private String name;
 
-    private String num;
-
-    private String position;
-
-    private LocalDateTime birth;
-
-    private String body;
+    private String address;
 
     private String team;
 
-    private String awards;
+    private String phone;
 
-    private String song;
+    @Column(name = "ticketLink")
+    private String ticketLink;
 
     @Column(name = "img_url")
     private String imgUrl;
 
-    private int pay;
+    private LocalDate open;
 
-    private int hit;
+    private Integer sit;
 
-    @Column(name = "home_run")
-    private int homeRun;
-
-    private int run;
+    private String desc;
 
 }

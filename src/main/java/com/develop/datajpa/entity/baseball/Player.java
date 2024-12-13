@@ -1,4 +1,4 @@
-package com.develop.datajpa.entity;
+package com.develop.datajpa.entity.baseball;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -6,7 +6,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -21,36 +20,39 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @DynamicInsert
 @DynamicUpdate
-@Table(name = "food")
-public class Food {
+@Table(name = "player")
+public class Player {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer idx;
 
-    @Column(name = "restaurants_id")
-    private Integer restaurantsId;
-
     private String name;
 
-    private String description;
+    private String num;
 
-    private Integer price;
+    private String position;
+
+    private LocalDateTime birth;
+
+    private String body;
+
+    private String team;
+
+    private String awards;
+
+    private String song;
 
     @Column(name = "img_url")
     private String imgUrl;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+    private int pay;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+    private int hit;
 
-    @Builder
-    public Food(Integer restaurantsId, String name, String description, Integer price) {
-        this.restaurantsId = restaurantsId;
-        this.name = name;
-        this.description = description;
-        this.price = price;
-    }
+    @Column(name = "home_run")
+    private int homeRun;
+
+    private int run;
+
 }

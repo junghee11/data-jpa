@@ -5,6 +5,7 @@ public class UserType {
     public enum Role {
         GENERAL,
         DEVELOPER,
+        ADMIN,
         SUPPORTERS,
         DORMANT,
         WITHDRAWAL;

@@ -1,4 +1,4 @@
-package com.develop.datajpa.entity;
+package com.develop.datajpa.entity.baseball;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

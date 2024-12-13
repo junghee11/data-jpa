@@ -1,6 +1,6 @@
 package com.develop.datajpa.repository;
 
-import com.develop.datajpa.entity.Food;
+import com.develop.datajpa.entity.baseball.Food;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

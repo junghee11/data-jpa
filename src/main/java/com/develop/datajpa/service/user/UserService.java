@@ -3,6 +3,7 @@ package com.develop.datajpa.service.user;
 import com.develop.datajpa.dto.user.LoginInfo;
 import com.develop.datajpa.dto.user.UserDto;
 import com.develop.datajpa.entity.User;
+import com.develop.datajpa.entity.UserType.Role;
 import com.develop.datajpa.repository.UserRepository;
 import com.develop.datajpa.request.user.CheckUserPhoneRequest;
 import com.develop.datajpa.request.user.FindUserIdRequest;
@@ -39,6 +40,19 @@ public class UserService {
         Optional<User> user = userRepository.findOptionalByUserId(id);
         if (user.isEmpty()) {
             throw new ClientException("가입정보가 확인되지 않습니다.");
+        } else if (user.get().getRole() == Role.DORMANT.ordinal()) {
+            throw new ClientException("휴면회원 입니다. 휴면해제 후 로그인 해주세요.");
+        } else if (user.get().getRole() == Role.WITHDRAWAL.ordinal()) {
+            throw new ClientException("탈퇴처리된 회원입니다.");
+        }
+
+        return user.get();
+    }
+
+    public User checkAdmin(String id) {
+        Optional<User> user = userRepository.findOptionalByUserId(id);
+        if (user.isEmpty() || user.get().getRole() != Role.ADMIN.ordinal()) {
+            throw new ClientException("관리자가 아닙니다.");
         }
 
         return user.get();

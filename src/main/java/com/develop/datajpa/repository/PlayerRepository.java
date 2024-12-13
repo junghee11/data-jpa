@@ -1,6 +1,6 @@
 package com.develop.datajpa.repository;
 
-import com.develop.datajpa.entity.Player;
+import com.develop.datajpa.entity.baseball.Player;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

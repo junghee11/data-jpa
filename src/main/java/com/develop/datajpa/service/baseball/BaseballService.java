@@ -3,15 +3,15 @@ package com.develop.datajpa.service.baseball;
 import com.develop.datajpa.dto.baseball.MatchDto;
 import com.develop.datajpa.dto.baseball.ReviewDto;
 import com.develop.datajpa.dto.user.LoginInfo;
-import com.develop.datajpa.entity.Food;
-import com.develop.datajpa.entity.MatchSchedule;
-import com.develop.datajpa.entity.MatchType.TeamCode;
-import com.develop.datajpa.entity.Player;
-import com.develop.datajpa.entity.QReview;
 import com.develop.datajpa.entity.QUser;
-import com.develop.datajpa.entity.Restaurants;
-import com.develop.datajpa.entity.Review;
-import com.develop.datajpa.entity.Stadium;
+import com.develop.datajpa.entity.baseball.Food;
+import com.develop.datajpa.entity.baseball.MatchSchedule;
+import com.develop.datajpa.entity.baseball.MatchType.TeamCode;
+import com.develop.datajpa.entity.baseball.Player;
+import com.develop.datajpa.entity.baseball.QReview;
+import com.develop.datajpa.entity.baseball.Restaurants;
+import com.develop.datajpa.entity.baseball.Review;
+import com.develop.datajpa.entity.baseball.Stadium;
 import com.develop.datajpa.repository.FoodRepository;
 import com.develop.datajpa.repository.MatchScheduleRepository;
 import com.develop.datajpa.repository.PlayerRepository;
@@ -236,6 +236,15 @@ public class BaseballService {
 
         return Map.of(
             "message", review
+        );
+    }
+
+    public Map<String, Object> getFoodInfo(long id) {
+        Food food = foodRepository.findById(id)
+            .orElseThrow(() -> new ClientException("조회되는 음식이 없습니다."));
+
+        return Map.of(
+            "result", food
         );
     }
 
