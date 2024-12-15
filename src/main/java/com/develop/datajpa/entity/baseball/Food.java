@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,15 +27,19 @@ public class Food {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer idx;
+    private Long idx;
 
     @Column(name = "restaurants_id")
     private Long restaurantsId;
 
+    @NotNull
+    @Column(nullable = false)
     private String name;
 
     private String description;
 
+    @NotNull
+    @Column(nullable = false)
     private Integer price;
 
     @Column(name = "img_url")

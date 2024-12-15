@@ -12,7 +12,7 @@ public class ArticleType {
 
     public enum State {
         ACTIVE,
-        REMOVED;
+        REMOVED
 
     }
 

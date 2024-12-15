@@ -59,7 +59,7 @@ public class AdminController {
 
     @PatchMapping("/baseball/restaurant/food")
     public Map<String, Object> updateFoodInfo(@RequestHeader(value = "Authorization") String token,
-                                                       UpdateFoodInfoRequest request) {
+                                              UpdateFoodInfoRequest request) {
         return adminService.updateFoodInfo(resolveToken(token), request);
     }
 

@@ -26,7 +26,7 @@ public class Review {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer idx;
+    private Long idx;
 
     @Column(name = "restaurants_id")
     private Integer restaurantsId;

@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Data
 public class ReviewDto {
 
-    private Integer idx;
+    private Long idx;
 
     private Integer restaurantsId;
 
