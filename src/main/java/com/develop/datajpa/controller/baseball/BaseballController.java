@@ -52,13 +52,13 @@ public class BaseballController {
     }
 
     @GetMapping("/restaurant/{id}")
-    public Map<String, Object> getRestaurantInfo(@PathVariable("id") int restaurantId) {
+    public Map<String, Object> getRestaurantInfo(@PathVariable("id") long restaurantId) {
         return baseballService.getRestaurantInfo(restaurantId);
     }
 
     @PostMapping("/restaurant/review")
     public Map<String, Object> leaveReview(@RequestHeader(value = "Authorization") String token,
-                                           @RequestBody LeaveReviewRequest request) {
+                                           @Valid @RequestBody LeaveReviewRequest request) {
         return baseballService.leaveReview(resolveToken(token), request);
     }
 

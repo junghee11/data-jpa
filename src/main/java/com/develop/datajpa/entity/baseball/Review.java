@@ -29,7 +29,7 @@ public class Review {
     private Long idx;
 
     @Column(name = "restaurants_id")
-    private Integer restaurantsId;
+    private Long restaurantsId;
 
     private Integer star;
 
@@ -48,7 +48,7 @@ public class Review {
     }
 
     @Builder
-    public Review(Integer restaurantsId, Integer star, String content, String userId) {
+    public Review(Long restaurantsId, Integer star, String content, String userId) {
         this.restaurantsId = restaurantsId;
         this.star = star;
         this.content = content;

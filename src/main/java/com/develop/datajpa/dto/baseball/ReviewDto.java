@@ -11,7 +11,7 @@ public class ReviewDto {
 
     private Long idx;
 
-    private Integer restaurantsId;
+    private Long restaurantsId;
 
     private Integer star;
 

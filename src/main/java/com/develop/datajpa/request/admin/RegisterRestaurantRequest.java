@@ -15,10 +15,10 @@ public class RegisterRestaurantRequest {
     private String name;
 
     @NotNull(message = "경기장을 선택해주세요")
-    private int stadium;
+    private Integer stadium;
 
     @NotNull(message = "경기장 내/외부를 선택해주세요")
-    private boolean inside;
+    private Boolean inside;
 
     @NotBlank(message = "식당 주소를 확인해주세요")
     private String address;

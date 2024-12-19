@@ -151,7 +151,7 @@ public class BaseballService {
         }
     }
 
-    public Map<String, Object> getRestaurantInfo(int id) {
+    public Map<String, Object> getRestaurantInfo(long id) {
 
         JPAQueryFactory queryFactory = new JPAQueryFactory(em);
         QReview r = QReview.review;
@@ -185,7 +185,7 @@ public class BaseballService {
     public Map<String, Object> leaveReview(LoginInfo loginInfo, LeaveReviewRequest request) {
         userService.checkUser(loginInfo.getUserId());
 
-        Restaurants restaurants = restaurantsRepository.findById((long) request.getId())
+        Restaurants restaurants = restaurantsRepository.findById(request.getId())
             .orElseThrow(() -> new ClientException("식당 정보가 확인되지 않습니다."));
 
         Review review = Review.builder()
@@ -208,7 +208,7 @@ public class BaseballService {
         restaurantsRepository.save(restaurants);
 
         return Map.of(
-            "message", review
+            "review", review
         );
     }
 

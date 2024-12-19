@@ -14,11 +14,11 @@ import lombok.ToString;
 public class LeaveReviewRequest {
 
     @NotNull(message = "리뷰하실 식당을 확인해주세요")
-    private int id;
+    private Long id;
 
     @NotNull(message = "평점을 입력해주세요")
     @Min(value = 1, message = "평점은 최소 1점 이상이여야 합니다")
-    @Max(value = 5, message = "평점은 5점이 최대입니다")
+    @Max(value = 5, message = "평점은 최대 5점을 초과할 수 없습니다")
     private int star;
 
     @NotBlank(message = "리뷰 내용을 작성해주세요")

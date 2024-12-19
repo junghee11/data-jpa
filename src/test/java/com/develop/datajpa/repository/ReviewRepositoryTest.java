@@ -23,14 +23,14 @@ public class ReviewRepositoryTest {
     @Autowired
     ReviewRepository reviewRepository;
 
-    private int restaurantsId;
+    private Long restaurantsId;
     private int star;
     private String content;
     private String userId;
 
     @BeforeEach
     void setUp() {
-        restaurantsId = 1;
+        restaurantsId = 1L;
         star = 5;
         content = "분위기 좋고 맛있어요";
         userId = "user1";

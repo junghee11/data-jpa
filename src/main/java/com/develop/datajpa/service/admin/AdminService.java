@@ -72,7 +72,7 @@ public class AdminService {
         Restaurants newRestaurant = Restaurants.builder()
             .name(request.getName())
             .stadium(request.getStadium())
-            .inside(request.isInside())
+            .inside(request.getInside())
             .address(request.getAddress())
             .phone(request.getPhone())
             .openingHours(request.getOpeningHours())
@@ -93,7 +93,7 @@ public class AdminService {
             .orElseThrow(() -> new ClientException("식당 정보가 확인되지 않습니다."));
 
         restaurant.setName(request.getName());
-        restaurant.setInside(request.isInside());
+        restaurant.setInside(request.getInside());
         restaurant.setAddress(request.getAddress());
         restaurant.setPhone(request.getPhone());
         restaurant.setOpeningHours(request.getOpeningHours());
@@ -104,7 +104,7 @@ public class AdminService {
         restaurantsRepository.save(restaurant);
 
         return Map.of(
-            "message", "식당이 등록되었습니다."
+            "message", "식당 정보가 수정되었습니다."
         );
     }
 
@@ -124,7 +124,7 @@ public class AdminService {
         foodRepository.save(food);
 
         return Map.of(
-            "message", "식당이 등록되었습니다."
+            "message", "메뉴가 등록되었습니다."
         );
     }
 
@@ -142,7 +142,7 @@ public class AdminService {
         foodRepository.save(food);
 
         return Map.of(
-            "message", "식당이 등록되었습니다."
+            "message", "메뉴 정보가 수정되었습니다."
         );
     }
 

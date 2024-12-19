@@ -12,13 +12,13 @@ import lombok.ToString;
 public class AddFoodMenuOnRestaurantRequest {
 
     @NotNull(message = "식당번호가 확인되지 않습니다.")
-    private long id;
+    private Long id;
 
-    @NotBlank(message = "요리 이름을 확인해주세요")
+    @NotBlank(message = "메뉴 이름이 확인되지 않습니다.")
     private String name;
 
-    @NotNull(message = "요리 가격을 확인해주세요")
-    private int price;
+    @NotNull(message = "가격 정보가 확인되지 않습니다.")
+    private Integer price;
 
     private String desc;
 
