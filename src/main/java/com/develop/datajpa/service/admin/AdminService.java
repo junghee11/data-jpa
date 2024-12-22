@@ -5,20 +5,25 @@ import com.develop.datajpa.entity.baseball.Food;
 import com.develop.datajpa.entity.baseball.MatchSchedule;
 import com.develop.datajpa.entity.baseball.MatchType.MatchResult;
 import com.develop.datajpa.entity.baseball.Restaurants;
+import com.develop.datajpa.entity.shop.Goods;
 import com.develop.datajpa.repository.FoodRepository;
 import com.develop.datajpa.repository.MatchScheduleRepository;
 import com.develop.datajpa.repository.RestaurantsRepository;
+import com.develop.datajpa.repository.shop.GoodsRepository;
 import com.develop.datajpa.request.admin.AddFoodMenuOnRestaurantRequest;
+import com.develop.datajpa.request.admin.AddTeamGoodsRequest;
 import com.develop.datajpa.request.admin.RecordMatchResultRequest;
 import com.develop.datajpa.request.admin.RegisterRestaurantRequest;
 import com.develop.datajpa.request.admin.UpdateFoodInfoRequest;
 import com.develop.datajpa.request.admin.UpdateRestaurantInfoRequest;
+import com.develop.datajpa.request.admin.UpdateTeamGoodsInfoRequest;
 import com.develop.datajpa.response.ClientException;
 import com.develop.datajpa.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Map;
 
 @Service
@@ -29,6 +34,7 @@ public class AdminService {
     private final MatchScheduleRepository matchScheduleRepository;
     private final RestaurantsRepository restaurantsRepository;
     private final FoodRepository foodRepository;
+    private final GoodsRepository goodsRepository;
 
     public Map<String, Object> recordMatchResult(LoginInfo loginInfo, RecordMatchResultRequest request) {
         userService.checkAdmin(loginInfo.getUserId());
@@ -156,6 +162,68 @@ public class AdminService {
 
         return Map.of(
             "message", "해당 메뉴가 삭제되었습니다."
+        );
+    }
+
+    public Map<String, Object> addTeamGoods(LoginInfo loginInfo, AddTeamGoodsRequest request) {
+        userService.checkAdmin(loginInfo.getUserId());
+
+        String currentTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmm"));
+
+        Goods goods = Goods.builder()
+            .goodsCode(request.getTeam().get().substring(0, 2) + currentTime)
+            .name(request.getName())
+            .team(request.getTeam().get())
+            .description(request.getDescription())
+            .price(request.getPrice())
+            .stock(request.getStock())
+            .onSale(request.getOnSale())
+            .imgUrl(request.getImgUrl())
+            .discountRate(request.getDiscountRate())
+            .pointRate(request.getPointRate())
+            .build();
+        goodsRepository.save(goods);
+
+        return Map.of(
+            "message", "상품이 등록되었습니다."
+        );
+    }
+
+    public Map<String, Object> deleteTeamGoods(LoginInfo loginInfo, String id) {
+        userService.checkAdmin(loginInfo.getUserId());
+
+        Goods goods = goodsRepository.findByGoodsCode(id)
+            .orElseThrow(() -> new ClientException("상품 정보가 확인되지 않습니다."));
+
+        if (goods.isOnSale()) {
+            throw new ClientException("이미 삭제된 상품입니다");
+        }
+        goods.setOnSale(false);
+        goodsRepository.save(goods);
+
+        return Map.of(
+            "message", "상품이 삭제되었습니다."
+        );
+    }
+
+    public Map<String, Object> updateTeamGoodsInfo(LoginInfo loginInfo, UpdateTeamGoodsInfoRequest request) {
+        userService.checkAdmin(loginInfo.getUserId());
+
+        Goods goods = goodsRepository.findByGoodsCode(request.getId())
+            .orElseThrow(() -> new ClientException("상품 정보가 확인되지 않습니다."));
+
+        goods.setName(request.getName());
+        goods.setPrice(request.getPrice());
+        goods.setDescription(request.getDescription());
+        goods.setStock(request.getStock());
+        goods.setImgUrl(request.getImgUrl());
+        goods.setDiscountRate(request.getDiscountRate());
+        goods.setPointRate(request.getPointRate());
+
+        goodsRepository.save(goods);
+
+        return Map.of(
+            "message", "상품정보가 수정되었습니다."
         );
     }
 

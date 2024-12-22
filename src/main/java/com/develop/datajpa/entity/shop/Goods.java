@@ -3,8 +3,6 @@ package com.develop.datajpa.entity.shop;
 import com.develop.datajpa.response.ClientException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Builder;
@@ -13,6 +11,8 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+
+import java.time.LocalDateTime;
 
 @Getter
 @Entity
@@ -24,8 +24,8 @@ import org.hibernate.annotations.DynamicUpdate;
 public class Goods {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idx;
+    @Column(name = "goods_code")
+    private String goodsCode;
 
     private String name;
 
@@ -49,6 +49,41 @@ public class Goods {
     @Column(name = "point_rate")
     private Double pointRate;
 
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setStock(Integer stock) {
+        this.stock = stock;
+    }
+
+    public void setPrice(Long price) {
+        this.price = price;
+    }
+
+    public void setOnSale(boolean onSale) {
+        this.onSale = onSale;
+    }
+
+    public void setImgUrl(String imgUrl) {
+        this.imgUrl = imgUrl;
+    }
+
+    public void setDiscountRate(Double discountRate) {
+        this.discountRate = discountRate;
+    }
+
+    public void setPointRate(Double pointRate) {
+        this.pointRate = pointRate;
+    }
+
     public void updateStock(Integer amount) {
         if (this.stock + amount < 0) {
             throw new ClientException("재고가 부족합니다");
@@ -58,8 +93,9 @@ public class Goods {
     }
 
     @Builder
-    public Goods(String name, String team, String description, Long price, Integer stock, boolean onSale,
+    public Goods(String goodsCode, String name, String team, String description, Long price, Integer stock, boolean onSale,
                  String imgUrl, Double discountRate, Double pointRate) {
+        this.goodsCode = goodsCode;
         this.name = name;
         this.team = team;
         this.description = description;

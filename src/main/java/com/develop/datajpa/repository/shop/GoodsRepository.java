@@ -1,4 +1,4 @@
-package com.develop.datajpa.repository;
+package com.develop.datajpa.repository.shop;
 
 import com.develop.datajpa.entity.shop.Goods;
 import org.springframework.data.domain.Pageable;
@@ -11,10 +11,12 @@ import java.util.Optional;
 @Repository
 public interface GoodsRepository extends JpaRepository<Goods, Long> {
 
-    Optional<Goods> findByIdxAndOnSaleOrderByIdx(long idx, boolean sale);
+    Optional<Goods> findByGoodsCodeAndOnSaleOrderByCreatedAt(String code, boolean sale);
 
     List<Goods> findByOnSale(boolean sale, Pageable pageable);
 
     List<Goods> findByTeamAndOnSale(String team, boolean sale, Pageable pageable);
+
+    Optional<Goods> findByGoodsCode(String code);
 
 }

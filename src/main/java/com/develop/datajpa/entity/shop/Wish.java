@@ -29,12 +29,12 @@ public class Wish {
     @Column(name = "user_id")
     private String userId;
 
-    @Column(name = "goods_idx")
-    private Long goodsIdx;
+    @Column(name = "goods_code")
+    private String goodsCode;
 
     @Builder
-    public Wish(String userId, Long goodsIdx) {
+    public Wish(String userId, String goodsCode) {
         this.userId = userId;
-        this.goodsIdx = goodsIdx;
+        this.goodsCode = goodsCode;
     }
 }

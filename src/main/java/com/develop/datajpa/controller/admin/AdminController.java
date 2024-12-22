@@ -2,10 +2,12 @@ package com.develop.datajpa.controller.admin;
 
 
 import com.develop.datajpa.request.admin.AddFoodMenuOnRestaurantRequest;
+import com.develop.datajpa.request.admin.AddTeamGoodsRequest;
 import com.develop.datajpa.request.admin.RecordMatchResultRequest;
 import com.develop.datajpa.request.admin.RegisterRestaurantRequest;
 import com.develop.datajpa.request.admin.UpdateFoodInfoRequest;
 import com.develop.datajpa.request.admin.UpdateRestaurantInfoRequest;
+import com.develop.datajpa.request.admin.UpdateTeamGoodsInfoRequest;
 import com.develop.datajpa.service.admin.AdminService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -69,6 +71,24 @@ public class AdminController {
     public Map<String, Object> deleteFoodInfo(@RequestHeader(value = "Authorization") String token,
                                               @PathVariable("id") long id) {
         return adminService.deleteFoodInfo(resolveToken(token), id);
+    }
+
+    @PostMapping("/baseball/shop/goods")
+    public Map<String, Object> addTeamGoods(@RequestHeader(value = "Authorization") String token,
+                                            @Valid @RequestBody AddTeamGoodsRequest request) {
+        return adminService.addTeamGoods(resolveToken(token), request);
+    }
+
+    @DeleteMapping("/baseball/shop/goods/{id}")
+    public Map<String, Object> deleteTeamGoods(@RequestHeader(value = "Authorization") String token,
+                                               @PathVariable("id") String id) {
+        return adminService.deleteTeamGoods(resolveToken(token), id);
+    }
+
+    @PatchMapping("/baseball/shop/goods/{id}")
+    public Map<String, Object> updateTeamGoodsInfo(@RequestHeader(value = "Authorization") String token,
+                                                   @Valid @RequestBody UpdateTeamGoodsInfoRequest request) {
+        return adminService.updateTeamGoodsInfo(resolveToken(token), request);
     }
 
 }

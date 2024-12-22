@@ -7,7 +7,6 @@ import com.develop.datajpa.entity.baseball.MatchType.TeamCode;
 import com.develop.datajpa.entity.shop.Cart;
 import com.develop.datajpa.entity.shop.Goods;
 import com.develop.datajpa.entity.shop.GoodsReview;
-import com.develop.datajpa.entity.shop.GoodsReviewRepository;
 import com.develop.datajpa.entity.shop.GoodsReviewType.State;
 import com.develop.datajpa.entity.shop.OrderMenuRepository;
 import com.develop.datajpa.entity.shop.QOrderMenu;
@@ -15,9 +14,10 @@ import com.develop.datajpa.entity.shop.QReceipt;
 import com.develop.datajpa.entity.shop.ReceiptRepository;
 import com.develop.datajpa.entity.shop.Wish;
 import com.develop.datajpa.repository.CartRepository;
-import com.develop.datajpa.repository.GoodsRepository;
 import com.develop.datajpa.repository.UserRepository;
-import com.develop.datajpa.repository.WishRepository;
+import com.develop.datajpa.repository.shop.GoodsRepository;
+import com.develop.datajpa.repository.shop.GoodsReviewRepository;
+import com.develop.datajpa.repository.shop.WishRepository;
 import com.develop.datajpa.request.baseball.GetGoodsListRequest;
 import com.develop.datajpa.request.shop.AddCartRequest;
 import com.develop.datajpa.request.shop.LeaveGoodsReviewRequest;
@@ -77,14 +77,14 @@ public class ShopService {
         );
     }
 
-    public Map<String, Object> getGoodsInfo(String token, long idx) {
-        Goods goods = goodsRepository.findByIdxAndOnSaleOrderByIdx(idx, true)
+    public Map<String, Object> getGoodsInfo(String token, String id) {
+        Goods goods = goodsRepository.findByGoodsCodeAndOnSaleOrderByCreatedAt(id, true)
             .orElseThrow(() -> new ClientException("판매중이 아니거나 존재하지 않는 상품입니다."));
 
         if (validateToken(token)) {
             User user = userService.checkUser(resolveToken(token).getUserId());
 
-            Optional<Wish> wish = wishRepository.findByGoodsIdxAndUserId(idx, user.getUserId());
+            Optional<Wish> wish = wishRepository.findByGoodsCodeAndUserId(id, user.getUserId());
 
             return Map.of(
                 "wish", wish.isPresent(),
@@ -98,14 +98,14 @@ public class ShopService {
         }
     }
 
-    public Map<String, Object> toggleWish(LoginInfo loginInfo, long id) {
+    public Map<String, Object> toggleWish(LoginInfo loginInfo, String id) {
         userService.checkUser(loginInfo.getUserId());
 
-        goodsRepository.findById(id).orElseThrow(() -> {
+        goodsRepository.findByGoodsCode(id).orElseThrow(() -> {
             throw new ClientException("상품 정보가 확인되지 않습니다.");
         });
 
-        Optional<Wish> wish = wishRepository.findById(id);
+        Optional<Wish> wish = wishRepository.findByGoodsCodeAndUserId(id, loginInfo.getUserId());
         if (wish.isPresent()) {
             wishRepository.delete(wish.get());
 
@@ -115,7 +115,7 @@ public class ShopService {
         } else {
             Wish newWish = Wish.builder()
                 .userId(loginInfo.getUserId())
-                .goodsIdx(id)
+                .goodsCode(id)
                 .build();
             wishRepository.save(newWish);
 

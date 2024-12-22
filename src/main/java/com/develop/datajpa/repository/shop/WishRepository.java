@@ -1,4 +1,4 @@
-package com.develop.datajpa.repository;
+package com.develop.datajpa.repository.shop;
 
 import com.develop.datajpa.entity.shop.Wish;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,6 +9,6 @@ import java.util.Optional;
 @Repository
 public interface WishRepository extends JpaRepository<Wish, Long> {
 
-    Optional<Wish> findByGoodsIdxAndUserId(long idx, String userId);
+    Optional<Wish> findByGoodsCodeAndUserId(String goodsCode, String userId);
 
 }

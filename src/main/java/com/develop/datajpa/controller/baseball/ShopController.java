@@ -35,15 +35,15 @@ public class ShopController {
         return shopService.getGoodsList(request);
     }
 
-    @GetMapping("/goods/{idx}")
+    @GetMapping("/goods/{id}")
     public Map<String, Object> getGoodsInfo(@RequestHeader(value = "Authorization", required = false) String token,
-                                            @PathVariable("idx") long idx) {
-        return shopService.getGoodsInfo(token, idx);
+                                            @PathVariable("id") String id) {
+        return shopService.getGoodsInfo(token, id);
     }
 
     @PostMapping("/goods/wish/{id}")
     public Map<String, Object> toggleWish(@RequestHeader(value = "Authorization") String token,
-                                          @PathVariable("id") long id) {
+                                          @PathVariable("id") String id) {
         return shopService.toggleWish(resolveToken(token), id);
     }
 
