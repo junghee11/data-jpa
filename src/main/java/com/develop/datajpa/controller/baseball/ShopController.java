@@ -55,7 +55,7 @@ public class ShopController {
 
     @DeleteMapping("/goods/cart/{id}")
     public Map<String, Object> removeCart(@RequestHeader(value = "Authorization") String token,
-                                          @PathVariable("id") long id) {
+                                          @PathVariable("id") String id) {
         return shopService.removeCart(resolveToken(token), id);
     }
 

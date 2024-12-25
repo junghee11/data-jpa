@@ -13,8 +13,8 @@ import lombok.ToString;
 @ToString
 public class LeaveGoodsReviewRequest {
 
-    @NotNull(message = "리뷰하실 식당을 확인해주세요")
-    private long id;
+    @NotNull(message = "상품코드를 확인해주세요")
+    private String id;
 
     @NotNull(message = "평점을 입력해주세요")
     @Min(value = 1, message = "평점은 최소 1점 이상이여야 합니다")

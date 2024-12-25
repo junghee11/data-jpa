@@ -6,6 +6,7 @@ import com.develop.datajpa.entity.baseball.MatchSchedule;
 import com.develop.datajpa.entity.baseball.MatchType.MatchResult;
 import com.develop.datajpa.entity.baseball.Restaurants;
 import com.develop.datajpa.entity.shop.Goods;
+import com.develop.datajpa.entity.shop.GoodsType.State;
 import com.develop.datajpa.repository.FoodRepository;
 import com.develop.datajpa.repository.MatchScheduleRepository;
 import com.develop.datajpa.repository.RestaurantsRepository;
@@ -195,10 +196,10 @@ public class AdminService {
         Goods goods = goodsRepository.findByGoodsCode(id)
             .orElseThrow(() -> new ClientException("상품 정보가 확인되지 않습니다."));
 
-        if (goods.isOnSale()) {
-            throw new ClientException("이미 삭제된 상품입니다");
+        if (goods.getGoodsState() != State.NORMAL) {
+            throw new ClientException("이미 삭제되었거나 판매 승인 거부 상품입니다. 관리자에게 문의해주세요.");
         }
-        goods.setOnSale(false);
+        goods.setGoodsState(State.REMOVED);
         goodsRepository.save(goods);
 
         return Map.of(
@@ -211,6 +212,10 @@ public class AdminService {
 
         Goods goods = goodsRepository.findByGoodsCode(request.getId())
             .orElseThrow(() -> new ClientException("상품 정보가 확인되지 않습니다."));
+
+        if (goods.getGoodsState() != State.NORMAL) {
+            throw new ClientException("판매 승인 거부 상품입니다. 관리자에게 문의해주세요.");
+        }
 
         goods.setName(request.getName());
         goods.setPrice(request.getPrice());

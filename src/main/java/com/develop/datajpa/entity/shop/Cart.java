@@ -31,8 +31,8 @@ public class Cart {
     @Column(name = "user_id")
     private String userId;
 
-    @Column(name = "goods_idx")
-    private Long goodsIdx;
+    @Column(name = "goods_code")
+    private String goodsCode;
 
     private Integer count;
 
@@ -44,9 +44,9 @@ public class Cart {
     }
 
     @Builder
-    public Cart(String userId, Long goodsIdx, Integer count) {
+    public Cart(String userId, String goodsCode, Integer count) {
         this.userId = userId;
-        this.goodsIdx = goodsIdx;
+        this.goodsCode = goodsCode;
         this.count = count;
     }
 }

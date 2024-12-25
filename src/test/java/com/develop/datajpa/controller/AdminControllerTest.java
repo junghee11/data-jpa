@@ -1,9 +1,12 @@
 package com.develop.datajpa.controller;
 
 import com.develop.datajpa.dto.user.LoginInfo;
+import com.develop.datajpa.entity.baseball.MatchType;
 import com.develop.datajpa.request.admin.AddFoodMenuOnRestaurantRequest;
+import com.develop.datajpa.request.admin.AddTeamGoodsRequest;
 import com.develop.datajpa.request.admin.RegisterRestaurantRequest;
 import com.develop.datajpa.request.admin.UpdateRestaurantInfoRequest;
+import com.develop.datajpa.request.admin.UpdateTeamGoodsInfoRequest;
 import com.develop.datajpa.service.admin.AdminService;
 import com.develop.datajpa.service.security.JwtProvider;
 import com.google.gson.Gson;
@@ -262,6 +265,155 @@ public class AdminControllerTest {
         );
 
         mockMvc.perform(delete("/admin/baseball/restaurant/food/" + foodId))
+            .andExpect(status().isBadRequest())
+            .andDo(print());
+    }
+
+    @Test
+    @DisplayName("신규 굿즈 추가하기 - success")
+    void addTeamGoodsSuccess() throws Exception {
+        LoginInfo loginInfo = LoginInfo.builder().userId(userId).build();
+
+        AddTeamGoodsRequest request = new AddTeamGoodsRequest();
+        request.setName("루피 머리띠");
+        request.setTeam(MatchType.TeamCode.LG);
+        request.setPrice(10000L);
+        request.setDescription("나야.. 루피, 야구장의 귀요미는 나! 귀염뽀짝 루피인형 머리띠");
+        request.setStock(10);
+        request.setOnSale(true);
+        request.setImgUrl("img1.jpg");
+        request.setDiscountRate(0.1);
+        request.setPointRate(0.03);
+
+        given(adminService.addTeamGoods(loginInfo, request)).willReturn(
+            Map.of("message", "상품이 등록되었습니다.")
+        );
+
+        Gson gson = new Gson();
+        String requestBody = gson.toJson(request);
+
+        mockMvc.perform(post("/admin/baseball/shop/goods")
+                .header("Authorization", "Bearer " + jwtToken)
+                .content(requestBody)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andDo(print());
+    }
+
+    @Test
+    @DisplayName("신규 굿즈 추가하기 - fail")
+    void addTeamGoodsFail() throws Exception {
+        LoginInfo loginInfo = LoginInfo.builder().userId(userId).build();
+
+        AddTeamGoodsRequest request = new AddTeamGoodsRequest();
+        request.setName("루피 머리띠");
+        request.setTeam(MatchType.TeamCode.LG);
+        request.setPrice(10000L);
+        request.setDescription("나야.. 루피, 야구장의 귀요미는 나! 귀염뽀짝 루피인형 머리띠");
+        request.setStock(10);
+        request.setOnSale(true);
+        request.setImgUrl("img1.jpg");
+        request.setDiscountRate(10D);
+        request.setPointRate(0.03);
+
+        given(adminService.addTeamGoods(loginInfo, request)).willReturn(
+            Map.of("message", "할인율은 1 이하여야 합니다.")
+        );
+
+        Gson gson = new Gson();
+        String requestBody = gson.toJson(request);
+
+        mockMvc.perform(post("/admin/baseball/shop/goods")
+                .header("Authorization", "Bearer " + jwtToken)
+                .content(requestBody)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest())
+            .andDo(print());
+    }
+
+    @Test
+    @DisplayName("굿즈 삭제하기 - success")
+    void deleteTeamGoodsSuccess() throws Exception {
+        LoginInfo loginInfo = LoginInfo.builder().userId(userId).build();
+
+        String foodCode = "GOODS123";
+        given(adminService.deleteTeamGoods(loginInfo, foodCode)).willReturn(
+            Map.of("message", "상품이 삭제되었습니다.")
+        );
+
+        mockMvc.perform(delete("/admin/baseball/shop/goods/" + foodCode)
+                .header("Authorization", "Bearer " + jwtToken))
+            .andExpect(status().isOk())
+            .andDo(print());
+    }
+
+    @Test
+    @DisplayName("굿즈 삭제하기 - fail")
+    void deleteTeamGoodsFail() throws Exception {
+        String goodsCode = "TEST123123";
+
+        mockMvc.perform(delete("/admin/baseball/shop/goods/" + goodsCode)
+                .header("Authorization", "invalid-user-token"))
+            .andExpect(status().isUnauthorized())
+            .andDo(print());
+    }
+
+    @Test
+    @DisplayName("굿즈 정보 수정하기 - success")
+    void updateTeamGoodsInfoSuccess() throws Exception {
+        LoginInfo loginInfo = LoginInfo.builder().userId(userId).build();
+
+        UpdateTeamGoodsInfoRequest request = new UpdateTeamGoodsInfoRequest();
+        request.setId("TEST123123");
+        request.setName("루피 머리띠");
+        request.setPrice(10000L);
+        request.setDescription("나야.. 루피, 야구장의 귀요미는 나! 귀염뽀짝 루피인형 머리띠");
+        request.setStock(10);
+        request.setImgUrl("img1.jpg");
+        request.setDiscountRate(0.1);
+        request.setPointRate(0.03);
+
+        given(adminService.updateTeamGoodsInfo(loginInfo, request)).willReturn(
+            Map.of("message", "굿즈 정보가 수정되었습니다.")
+        );
+
+        Gson gson = new Gson();
+        String requestBody = gson.toJson(request);
+
+        mockMvc.perform(patch("/admin/baseball/shop/goods")
+                .header("Authorization", "Bearer " + jwtToken)
+                .content(requestBody)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andDo(print());
+    }
+
+    @Test
+    @DisplayName("굿즈 정보 수정하기 - fail")
+    void updateTeamGoodsInfoFail() throws Exception {
+        LoginInfo loginInfo = LoginInfo.builder().userId(userId).build();
+
+        UpdateTeamGoodsInfoRequest request = new UpdateTeamGoodsInfoRequest();
+        request.setId("TEST123123");
+        request.setName("루피 머리띠");
+//        request.setPrice(10000L);
+        request.setDescription("나야.. 루피, 야구장의 귀요미는 나! 귀염뽀짝 루피인형 머리띠");
+        request.setStock(10);
+        request.setImgUrl("img1.jpg");
+        request.setDiscountRate(0.1);
+        request.setPointRate(0.03);
+
+        given(adminService.updateTeamGoodsInfo(loginInfo, request)).willReturn(
+            Map.of("message", "가격 정보가 확인되지 않습니다.")
+        );
+
+        Gson gson = new Gson();
+        String requestBody = gson.toJson(request);
+
+        mockMvc.perform(patch("/admin/baseball/shop/goods")
+                .header("Authorization", "Bearer " + jwtToken)
+                .content(requestBody)
+                .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isBadRequest())
             .andDo(print());
     }

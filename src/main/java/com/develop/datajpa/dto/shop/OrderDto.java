@@ -15,7 +15,7 @@ public class OrderDto {
 
     private Long orderMenuIdx;
 
-    private Long goodIdx;
+    private String goodsCode;
 
     private Long price;
 
@@ -28,7 +28,7 @@ public class OrderDto {
         this.userId = receipt.getUserId();
         this.payment = receipt.getPayment();
         this.orderMenuIdx = orderMenu.getOrderMenuIdx();
-        this.goodIdx = orderMenu.getGoodIdx();
+        this.goodsCode = orderMenu.getGoodsCode();
         this.price = orderMenu.getPrice();
         this.count = orderMenu.getCount();
         this.review = orderMenu.getReview();

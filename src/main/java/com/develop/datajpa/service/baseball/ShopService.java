@@ -7,7 +7,8 @@ import com.develop.datajpa.entity.baseball.MatchType.TeamCode;
 import com.develop.datajpa.entity.shop.Cart;
 import com.develop.datajpa.entity.shop.Goods;
 import com.develop.datajpa.entity.shop.GoodsReview;
-import com.develop.datajpa.entity.shop.GoodsReviewType.State;
+import com.develop.datajpa.entity.shop.GoodsReviewType;
+import com.develop.datajpa.entity.shop.GoodsType;
 import com.develop.datajpa.entity.shop.OrderMenuRepository;
 import com.develop.datajpa.entity.shop.QOrderMenu;
 import com.develop.datajpa.entity.shop.QReceipt;
@@ -64,11 +65,11 @@ public class ShopService {
     public Map<String, Object> getGoodsList(GetGoodsListRequest request) {
         List<Goods> goodsList;
         if (TeamCode.ALL.name().equals(request.getTeam().toUpperCase())) {
-            goodsList = goodsRepository.findByOnSale
-                (true, PageRequest.of(request.getPage() - 1, 10, Sort.by("idx").descending()));
+            goodsList = goodsRepository.findByOnSaleAndGoodsState
+                (true, GoodsType.State.NORMAL, PageRequest.of(request.getPage() - 1, 10, Sort.by("idx").descending()));
         } else {
-            goodsList = goodsRepository.findByTeamAndOnSale
-                (request.getTeam(), true, PageRequest.of(request.getPage() - 1,
+            goodsList = goodsRepository.findByTeamAndOnSaleAndGoodsState
+                (request.getTeam(), true, GoodsType.State.NORMAL, PageRequest.of(request.getPage() - 1,
                     10, Sort.by("idx").descending()));
         }
 
@@ -78,7 +79,7 @@ public class ShopService {
     }
 
     public Map<String, Object> getGoodsInfo(String token, String id) {
-        Goods goods = goodsRepository.findByGoodsCodeAndOnSaleOrderByCreatedAt(id, true)
+        Goods goods = goodsRepository.findByGoodsCodeAndOnSaleAndGoodsStateOrderByCreatedAt(id, true, GoodsType.State.NORMAL)
             .orElseThrow(() -> new ClientException("판매중이 아니거나 존재하지 않는 상품입니다."));
 
         if (validateToken(token)) {
@@ -101,7 +102,7 @@ public class ShopService {
     public Map<String, Object> toggleWish(LoginInfo loginInfo, String id) {
         userService.checkUser(loginInfo.getUserId());
 
-        goodsRepository.findByGoodsCode(id).orElseThrow(() -> {
+        goodsRepository.findByGoodsCodeAndOnSaleAndGoodsState(id, true, GoodsType.State.NORMAL).orElseThrow(() -> {
             throw new ClientException("상품 정보가 확인되지 않습니다.");
         });
 
@@ -128,14 +129,14 @@ public class ShopService {
     public Map<String, Object> addCart(LoginInfo loginInfo, AddCartRequest request) {
         userService.checkUser(loginInfo.getUserId());
 
-        Optional<Goods> goods = goodsRepository.findById(request.getId());
+        Optional<Goods> goods = goodsRepository.findByGoodsCode(request.getId());
         if (goods.isEmpty() || goods.get().isOnSale()) {
             throw new ClientException("판매중인 상품이 아닙니다.");
         } else if (goods.get().getStock() <= 0) {
             throw new ClientException("상품의 재고가 부족합니다입니다.");
         }
 
-        Optional<Cart> cart = cartRepository.findById(request.getId());
+        Optional<Cart> cart = cartRepository.findByGoodsCode(request.getId());
         if (cart.isPresent()) {
             int count = cart.get().getCount() + request.getCount();
 
@@ -146,7 +147,7 @@ public class ShopService {
         } else {
             Cart newCart = Cart.builder()
                 .userId(loginInfo.getUserId())
-                .goodsIdx(request.getId())
+                .goodsCode(request.getId())
                 .count(request.getCount())
                 .build();
             cartRepository.save(newCart);
@@ -157,17 +158,17 @@ public class ShopService {
         );
     }
 
-    public Map<String, Object> removeCart(LoginInfo loginInfo, long id) {
+    public Map<String, Object> removeCart(LoginInfo loginInfo, String id) {
         userService.checkUser(loginInfo.getUserId());
 
-        Optional<Goods> goods = goodsRepository.findById(id);
+        Optional<Goods> goods = goodsRepository.findByGoodsCode(id);
         if (goods.isEmpty() || goods.get().isOnSale()) {
             throw new ClientException("판매중인 상품이 아닙니다.");
         } else if (goods.get().getStock() <= 0) {
             throw new ClientException("상품의 재고가 부족합니다입니다.");
         }
 
-        Cart cart = cartRepository.findById(id).orElseThrow(() -> {
+        Cart cart = cartRepository.findByGoodsCode(id).orElseThrow(() -> {
             throw new ClientException("이미 삭제된 항목입니다.");
         });
 
@@ -193,11 +194,12 @@ public class ShopService {
         );
     }
 
+    // TODO : 이미 결제된 건이 아닌지 검증 필요!!
     @Transactional
     public Map<String, Object> PurchaseGoods(LoginInfo loginInfo, PurchaseGoodsRequest request) {
         User user = userService.checkUser(loginInfo.getUserId());
 
-        Goods goods = goodsRepository.findById(request.getId())
+        Goods goods = goodsRepository.findByGoodsCode(request.getId())
             .orElseThrow(() -> new ClientException("제품 정보가 확인되지 않습니다."));
 
         String orderCode = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmSS")) + loginInfo.getUserId();
@@ -250,7 +252,7 @@ public class ShopService {
     public Map<String, Object> leaveReview(LoginInfo loginInfo, LeaveGoodsReviewRequest request) {
         userService.checkUser(loginInfo.getUserId());
 
-        goodsRepository.findById(request.getId())
+        goodsRepository.findByGoodsCode(request.getId())
             .orElseThrow(() -> new ClientException("제품 정보가 확인되지 않습니다."));
 
         JPAQueryFactory queryFactory = new JPAQueryFactory(em);
@@ -260,7 +262,7 @@ public class ShopService {
         OrderDto order = queryFactory.select(Projections.constructor(OrderDto.class, r, o))
             .from(r).join(o).on(r.receiptCode.eq(o.receiptCode))
             .where(r.userId.eq(loginInfo.getUserId())
-                .and(o.goodIdx.eq(request.getId()))
+                .and(o.goodsCode.eq(request.getId()))
                 .and(o.review.eq(false)))
             .fetchOne();
         if (isNull(order)) {
@@ -273,7 +275,7 @@ public class ShopService {
             .execute();
 
         GoodsReview review = GoodsReview.builder()
-            .goodsId(request.getId())
+            .goodsCode(request.getId())
             .star(request.getStar())
             .content(request.getContent())
             .userId(loginInfo.getUserId())
@@ -311,7 +313,7 @@ public class ShopService {
         GoodsReview review = goodsReviewRepository.findById(id)
             .orElseThrow(() -> new ClientException("리뷰가 확인되지 않습니다."));
 
-        review.setState(State.REMOVED.ordinal());
+        review.setState(GoodsReviewType.State.REMOVED.ordinal());
         goodsReviewRepository.save(review);
 
         return Map.of(

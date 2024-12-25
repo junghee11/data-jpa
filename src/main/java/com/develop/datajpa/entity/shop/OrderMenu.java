@@ -30,8 +30,8 @@ public class OrderMenu {
     @Column(name = "receipt_code")
     private String receiptCode;
 
-    @Column(name = "good_idx")
-    private Long goodIdx;
+    @Column(name = "good_code")
+    private String goodsCode;
 
     private Long price;
 
@@ -40,8 +40,8 @@ public class OrderMenu {
     private Boolean review;
 
     @Builder
-    public OrderMenu(Long goodIdx, Long price, Integer count) {
-        this.goodIdx = goodIdx;
+    public OrderMenu(String goodsCode, Long price, Integer count) {
+        this.goodsCode = goodsCode;
         this.price = price;
         this.count = count;
     }

@@ -40,6 +40,9 @@ public class Goods {
     @Column(name = "on_sale")
     private boolean onSale;
 
+    @Column(name = "goods_state")
+    private GoodsType.State goodsState;
+
     @Column(name = "img_url")
     private String imgUrl;
 
@@ -70,6 +73,10 @@ public class Goods {
 
     public void setOnSale(boolean onSale) {
         this.onSale = onSale;
+    }
+
+    public void setGoodsState(GoodsType.State goodsState) {
+        this.goodsState = goodsState;
     }
 
     public void setImgUrl(String imgUrl) {

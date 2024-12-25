@@ -14,7 +14,7 @@ import lombok.ToString;
 public class PurchaseGoodsRequest {
 
     @NotBlank(message = "상품정보가 확인되지 않습니다")
-    private Long id;
+    private String id;
 
     @NotBlank(message = "갯수를 확인해주세요")
     @Min(value = 1, message = "갯수가 1 이상이여야 합니다")

@@ -1,6 +1,7 @@
 package com.develop.datajpa.repository.shop;
 
 import com.develop.datajpa.entity.shop.Goods;
+import com.develop.datajpa.entity.shop.GoodsType.State;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -11,12 +12,14 @@ import java.util.Optional;
 @Repository
 public interface GoodsRepository extends JpaRepository<Goods, Long> {
 
-    Optional<Goods> findByGoodsCodeAndOnSaleOrderByCreatedAt(String code, boolean sale);
+    Optional<Goods> findByGoodsCodeAndOnSaleAndGoodsStateOrderByCreatedAt(String code, boolean sale, State state);
 
-    List<Goods> findByOnSale(boolean sale, Pageable pageable);
+    List<Goods> findByOnSaleAndGoodsState(boolean sale, State state, Pageable pageable);
 
-    List<Goods> findByTeamAndOnSale(String team, boolean sale, Pageable pageable);
+    List<Goods> findByTeamAndOnSaleAndGoodsState(String team, boolean sale, State state, Pageable pageable);
 
     Optional<Goods> findByGoodsCode(String code);
+
+    Optional<Goods> findByGoodsCodeAndOnSaleAndGoodsState(String code, boolean sale, State state);
 
 }

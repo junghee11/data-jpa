@@ -85,7 +85,7 @@ public class AdminController {
         return adminService.deleteTeamGoods(resolveToken(token), id);
     }
 
-    @PatchMapping("/baseball/shop/goods/{id}")
+    @PatchMapping("/baseball/shop/goods")
     public Map<String, Object> updateTeamGoodsInfo(@RequestHeader(value = "Authorization") String token,
                                                    @Valid @RequestBody UpdateTeamGoodsInfoRequest request) {
         return adminService.updateTeamGoodsInfo(resolveToken(token), request);

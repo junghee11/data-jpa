@@ -28,8 +28,8 @@ public class GoodsReview {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idx;
 
-    @Column(name = "goods_id")
-    private Long goodsId;
+    @Column(name = "goods_code")
+    private String goodsCode;
 
     private Integer star;
 
@@ -56,8 +56,8 @@ public class GoodsReview {
     }
 
     @Builder
-    public GoodsReview(Long goodsId, Integer star, String content, String userId) {
-        this.goodsId = goodsId;
+    public GoodsReview(String goodsCode, Integer star, String content, String userId) {
+        this.goodsCode = goodsCode;
         this.star = star;
         this.content = content;
         this.userId = userId;
