@@ -170,7 +170,7 @@ public class BaseballService {
             .limit(10)
             .fetch();
 
-        Restaurants restaurants = restaurantsRepository.findById((long) id)
+        Restaurants restaurants = restaurantsRepository.findById(id)
             .orElseThrow(() -> new ClientException("조회되는 식당이 없습니다."));
 
         List<Food> food = foodRepository.findByRestaurantsId(id);
@@ -220,7 +220,7 @@ public class BaseballService {
         review.setState(2);
         reviewRepository.save(review);
 
-        Optional<Restaurants> restaurants = restaurantsRepository.findById((long) review.getRestaurantsId());
+        Optional<Restaurants> restaurants = restaurantsRepository.findById(review.getRestaurantsId());
         if (restaurants.isPresent()) {
             JPAQueryFactory queryFactory = new JPAQueryFactory(em);
             QReview r = QReview.review;

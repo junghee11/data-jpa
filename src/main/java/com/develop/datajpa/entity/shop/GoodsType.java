@@ -5,7 +5,7 @@ public class GoodsType {
     public enum State {
         NORMAL,
         REMOVED,
-        FORBIDDEN;
+        FORBIDDEN
     }
 
 }

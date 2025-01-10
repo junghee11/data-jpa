@@ -37,10 +37,21 @@ public class Receipt {
     @Column(name = "total_price")
     private Long totalPrice;
 
-    private String status;
+    private Boolean status;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    @Column(name = "canceled_at")
+    private LocalDateTime canceledAt;
+
+    public void setStatus(Boolean status) {
+        this.status = status;
+    }
+
+    public void setCanceledAt(LocalDateTime canceledAt) {
+        this.canceledAt = canceledAt;
+    }
 
     @Builder
     public Receipt(String receiptCode, String userId, String payment, String payId, Long totalPrice) {

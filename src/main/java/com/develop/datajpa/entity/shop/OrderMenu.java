@@ -2,8 +2,6 @@ package com.develop.datajpa.entity.shop;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Builder;
@@ -23,9 +21,8 @@ import org.hibernate.annotations.DynamicUpdate;
 public class OrderMenu {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "order_menu_idx")
-    private Long orderMenuIdx;
+    @Column(name = "order_menu_code")
+    private String orderMenuCode;
 
     @Column(name = "receipt_code")
     private String receiptCode;
@@ -33,15 +30,24 @@ public class OrderMenu {
     @Column(name = "good_code")
     private String goodsCode;
 
+    @Column(name = "user_id")
+    private String userId;
+
     private Long price;
 
     private Integer count;
 
     private Boolean review;
 
+    public void setReceiptCode(String receiptCode) {
+        this.receiptCode = receiptCode;
+    }
+
     @Builder
-    public OrderMenu(String goodsCode, Long price, Integer count) {
+    public OrderMenu(String orderMenuCode, String goodsCode, String userId, Long price, Integer count) {
+        this.orderMenuCode = orderMenuCode;
         this.goodsCode = goodsCode;
+        this.userId = userId;
         this.price = price;
         this.count = count;
     }

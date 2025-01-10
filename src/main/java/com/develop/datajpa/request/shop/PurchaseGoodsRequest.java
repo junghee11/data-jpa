@@ -22,9 +22,6 @@ public class PurchaseGoodsRequest {
     private Integer count;
 
     @NotBlank(message = "결제 방식을 확인해주세요")
-    private Payment payType;
-
-    @NotBlank(message = "결제 진행 중 오류가 발생했습니다")
-    private String payId;
+    private Payment payType = Payment.KAKAO_PAY;
 
 }

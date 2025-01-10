@@ -1,11 +1,13 @@
 package com.develop.datajpa.controller.baseball;
 
 
+import com.develop.datajpa.dto.kakao.KakaoPayReadyDto;
 import com.develop.datajpa.request.baseball.GetGoodsListRequest;
 import com.develop.datajpa.request.shop.AddCartRequest;
 import com.develop.datajpa.request.shop.LeaveGoodsReviewRequest;
 import com.develop.datajpa.request.shop.ModifyGoodsReviewRequest;
 import com.develop.datajpa.request.shop.PurchaseGoodsRequest;
+import com.develop.datajpa.response.ClientException;
 import com.develop.datajpa.service.baseball.ShopService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Map;
@@ -64,10 +67,38 @@ public class ShopController {
         return shopService.clearCart(resolveToken(token));
     }
 
+    // TODO : test code 추가하기
     @PostMapping("/goods")
-    public Map<String, Object> PurchaseGoods(@RequestHeader(value = "Authorization") String token,
-                                             @RequestBody PurchaseGoodsRequest request) {
+    public KakaoPayReadyDto PurchaseGoods(@RequestHeader(value = "Authorization") String token,
+                                          @RequestBody PurchaseGoodsRequest request) {
         return shopService.PurchaseGoods(resolveToken(token), request);
+    }
+
+    @GetMapping("/kakao-pay/success")
+    public Map<String, Object> afterPayRequest(@RequestParam("pg_token") String pgToken) {
+        return shopService.approvePayment(pgToken);
+    }
+
+    @GetMapping("/kakao-pay/cancel")
+    public void cancel() {
+        throw new ClientException("오류가 발생했습니다.\n사유 : 결제 진행 중 취소");
+    }
+
+    @GetMapping("/kakao-pay/fail")
+    public void fail() {
+        throw new ClientException("오류가 발생했습니다.\n사유 : 결제 실패");
+    }
+
+    @PostMapping("/kakao-pay/cancel/{code}")
+    public Map<String, Object> kakaoPayCancel(@RequestHeader(value = "Authorization") String token,
+                                              @PathVariable("code") String receiptCode) {
+        return shopService.cancelPayment(resolveToken(token), receiptCode);
+    }
+
+    @GetMapping("/kakao-pay/info/{code}")
+    public Map<String, Object> getPayInfo(@RequestHeader(value = "Authorization") String token,
+                                          @PathVariable("code") String receiptCode) {
+        return shopService.getPaymentInfo(resolveToken(token), receiptCode);
     }
 
     @PostMapping("/goods/{id}")

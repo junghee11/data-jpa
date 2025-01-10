@@ -6,7 +6,7 @@ public class GoodsReviewType {
         ACTIVE,
         HOLD,
         REPORTED,
-        REMOVED;
+        REMOVED
 
     }
 
