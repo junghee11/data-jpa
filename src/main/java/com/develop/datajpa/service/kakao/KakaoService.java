@@ -39,16 +39,16 @@ public class KakaoService {
     private static final String KAKAO_PAY_GET_INFO_URL = "https://open-api.kakaopay.com/online/v1/payment/order";
     private static final String KAKAO_PAY_CANCEL_URL = "https://open-api.kakaopay.com/online/v1/payment/cancel";
 
-    public KakaoPayReadyDto kakaoPayReady(Goods goods, OrderMenu orderMenu) {
+    public KakaoPayReadyDto kakaoPayReady(String itemCode, String itemName, long totalPrice) {
         Map<String, Object> requestBody = new HashMap<>();
         requestBody.put("cid", cid);
         requestBody.put("partner_order_id", "가맹점 주문 번호");
         requestBody.put("partner_user_id", "가맹점 회원 ID");
-        requestBody.put("item_name", goods.getName());
-        requestBody.put("item_code", goods.getGoodsCode());
-        requestBody.put("quantity", orderMenu.getCount()); // 주문 수량
-        requestBody.put("total_amount", orderMenu.getPrice()); // 총 금액
-//        requestBody.put("vat_amount", orderMenu.getPrice() / 10); // 부가세
+        requestBody.put("item_name", itemName);
+        requestBody.put("item_code", itemCode);
+        requestBody.put("quantity", 1); // 주문 수량
+        requestBody.put("total_amount", totalPrice); // 총 금액
+//        requestBody.put("vat_amount", totalPrice / 10); // 부가세
         requestBody.put("tax_free_amount", 1); // 상품 비과세 금액??
         requestBody.put("approval_url", "http://localhost:8080/shop/kakao-pay/success"); // 성공 시 redirect url
         requestBody.put("cancel_url", "http://localhost:8080/shop/kakao-pay/cancel"); // 취소 시 redirect url

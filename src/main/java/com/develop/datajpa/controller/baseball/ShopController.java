@@ -69,9 +69,9 @@ public class ShopController {
 
     // TODO : test code 추가하기
     @PostMapping("/goods")
-    public KakaoPayReadyDto PurchaseGoods(@RequestHeader(value = "Authorization") String token,
+    public KakaoPayReadyDto purchaseGoods(@RequestHeader(value = "Authorization") String token,
                                           @RequestBody PurchaseGoodsRequest request) {
-        return shopService.PurchaseGoods(resolveToken(token), request);
+        return shopService.purchaseGoods(resolveToken(token), request);
     }
 
     @GetMapping("/kakao-pay/success")
@@ -102,9 +102,8 @@ public class ShopController {
     }
 
     @PostMapping("/goods/{id}")
-    public Map<String, Object> orderShoppingCart(@RequestHeader(value = "Authorization") String token,
-                                                 @PathVariable("id") long id) {
-        return shopService.orderShoppingCart(resolveToken(token), id);
+    public Map<String, Object> orderShoppingCart(@RequestHeader(value = "Authorization") String token) {
+        return shopService.orderShoppingCart(resolveToken(token));
     }
 
     @PostMapping("/goods/review")

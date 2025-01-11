@@ -25,7 +25,11 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -166,10 +170,23 @@ public class AdminService {
         );
     }
 
+    private String getRandomCode(int length) {
+        Random random = new Random();
+
+        StringBuffer buffer = new StringBuffer();
+        for(int i = 0; i < length; i++) {
+            if(random.nextBoolean())
+                buffer.append((char)(random.nextInt(26) + 65));   // 0~25(26개) + 65
+            else
+                buffer.append(random.nextInt(10));
+        }
+        return buffer.toString();
+    }
+
     public Map<String, Object> addTeamGoods(LoginInfo loginInfo, AddTeamGoodsRequest request) {
         userService.checkAdmin(loginInfo.getUserId());
 
-        String currentTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmm"));
+        String currentTime = getRandomCode(10);
 
         Goods goods = Goods.builder()
             .goodsCode(request.getTeam().get().substring(0, 2) + currentTime)

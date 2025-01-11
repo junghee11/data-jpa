@@ -50,6 +50,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.develop.datajpa.service.security.JwtProvider.resolveToken;
 import static com.develop.datajpa.service.security.JwtProvider.validateToken;
@@ -205,27 +206,22 @@ public class ShopService {
     }
 
     @Transactional
-    public KakaoPayReadyDto PurchaseGoods(LoginInfo loginInfo, PurchaseGoodsRequest request) {
+    public KakaoPayReadyDto purchaseGoods(LoginInfo loginInfo, PurchaseGoodsRequest request) {
         userService.checkUser(loginInfo.getUserId());
 
-        Goods goods = goodsRepository.findByGoodsCode(request.getId())
-            .orElseThrow(() -> new ClientException("제품 정보가 확인되지 않습니다."));
+        Goods goods = getGoods(request.getId(), request.getCount());
 
-        String orderCode = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmSS")) + loginInfo.getUserId();
-        long price = goods.getPrice() * request.getCount();
-        if (goods.isOnSale()) {
-            price = (long) (price * ((100 - goods.getDiscountRate()) / 100));
-        }
+        long price = (long) (goods.getPrice() * request.getCount() * ((100 - goods.getDiscountRate()) / 100));
 
         OrderMenu orderMenu = OrderMenu.builder()
-            .orderMenuCode(orderCode)
+            .orderMenuCode(createOrderCode(goods.getGoodsCode()))
             .goodsCode(goods.getGoodsCode())
             .userId(loginInfo.getUserId())
             .price(price)
             .count(request.getCount())
             .build();
 
-        KakaoPayReadyDto ready = kakaoService.kakaoPayReady(goods, orderMenu);
+        KakaoPayReadyDto ready = kakaoService.kakaoPayReady(goods.getGoodsCode(), goods.getName(), price);
 
         orderMenu.setReceiptCode(ready.getTid());
         orderMenuRepository.save(orderMenu);
@@ -233,37 +229,50 @@ public class ShopService {
         return ready;
     }
 
+    private Goods getGoods(String goodsCode, int count) {
+        Goods goods = goodsRepository.findByGoodsCode(goodsCode)
+            .orElseThrow(() -> new ClientException("제품 정보가 확인되지 않습니다."));
+        if(goods.isOnSale()) {
+            throw new ClientException(goods.getName() + "은/는 현재 판매중인 상품이 아닙니다");
+        } else if(goods.getStock() < count) {
+            throw new ClientException("상품 재고가 부족합니다");
+        }
+        return goods;
+    }
+
     @Transactional
     public Map<String, Object> approvePayment(String pgToken) {
         KakaoPayApproveDto response = kakaoService.approveResponse(pgToken);
 
-        OrderMenu orderMenu = orderMenuRepository.findByReceiptCode(response.getTid());
-
-        Goods goods = goodsRepository.findByGoodsCode(orderMenu.getGoodsCode())
-            .orElseThrow(() -> new ClientException("제품 정보가 확인되지 않습니다."));
-
-        if (orderMenu.getPrice() != response.getAmount().getTotal()) {
-            throw new ClientException("오류가 발생했습니다 : 결제금액 불일치");
+        List<OrderMenu> orderList = orderMenuRepository.findByReceiptCode(response.getTid());
+        if(orderList.isEmpty()) {
+            throw new ClientException("결제에 오류가 발생하였습니다.");
         }
 
-        User user = userService.checkUser(orderMenu.getUserId());
+        User user = userService.checkUser(orderList.get(0).getUserId());
 
-        Receipt order = Receipt.builder()
+        Receipt receipt = Receipt.builder()
             .receiptCode(response.getTid())
             .userId(user.getUserId())
             .payment(Payment.KAKAO_PAY.name())
             .payId(response.getAid())
-            .totalPrice(orderMenu.getPrice())
+            .totalPrice((long) response.getAmount().getTotal())
             .build();
-        receiptRepository.save(order);
+        receiptRepository.save(receipt);
 
-        if (goods.getPointRate() > 0) {
-            user.updatePoint((long) (orderMenu.getPrice() * goods.getPointRate()));
-            userRepository.save(user);
-        }
+        orderList.stream().forEach(orderMenu -> {
+            Goods goods = goodsRepository.findByGoodsCode(orderMenu.getGoodsCode())
+                .orElseThrow(() -> new ClientException("제품 정보가 확인되지 않습니다."));
 
-        goods.updateStock(-orderMenu.getCount());
-        goodsRepository.save(goods);
+            if (goods.getPointRate() > 0) {
+                user.updatePoint((long) (orderMenu.getPrice() * goods.getPointRate()));
+            }
+
+            goods.updateStock(-orderMenu.getCount());
+            goodsRepository.save(goods);
+        });
+
+        userRepository.save(user);
 
         return Map.of(
             "message", "결제가 완료되었습니다"
@@ -281,21 +290,29 @@ public class ShopService {
             throw new ClientException("결제 취소는 본인만 가능합니다.");
         }
 
-        KakaoPayCancelDto response = kakaoService.kakaoPayCancel(receipt, "고객 취소요청");
+        List<OrderMenu> orderList = orderMenuRepository.findByReceiptCode(code);
+        if(orderList.isEmpty()) {
+            throw new ClientException("주문 정보가 확인되지 않습니다.");
+        }
 
-        Goods goods = goodsRepository.findByGoodsCode(response.getItem_code())
-            .orElseThrow(() -> new ClientException("제품 정보가 확인되지 않습니다."));
+        orderList.stream().forEach(order -> {
+            Goods goods = goodsRepository.findByGoodsCode(order.getGoodsCode())
+                .orElseThrow(() -> new ClientException("제품 정보가 확인되지 않습니다."));
 
-        goods.updateStock(response.getQuantity());
-        goodsRepository.save(goods);
+            goods.updateStock(order.getCount());
+            goodsRepository.save(goods);
+
+            if (goods.getPointRate() > 0) {
+                user.updatePoint((long) -(receipt.getTotalPrice() * goods.getPointRate()));
+            }
+        });
+
+        userRepository.save(user);
+
+        kakaoService.kakaoPayCancel(receipt, "고객 취소요청");
 
         receipt.setStatus(false);
         receiptRepository.save(receipt);
-
-        if (goods.getPointRate() > 0) {
-            user.updatePoint((long) -(receipt.getTotalPrice() * goods.getPointRate()));
-            userRepository.save(user);
-        }
 
         return Map.of(
             "message", "결제가 취소되었습니다"
@@ -321,14 +338,48 @@ public class ShopService {
     }
 
     @Transactional
-    public Map<String, Object> orderShoppingCart(LoginInfo loginInfo, long id) {
+    public Map<String, Object> orderShoppingCart(LoginInfo loginInfo) {
         userService.checkUser(loginInfo.getUserId());
 
-        // TODO : PurchaseGoods api 완성 후 작성하기
+        List<Cart> cartList = cartRepository.findByUserId(loginInfo.getUserId());
+        if(cartList.isEmpty()) {
+            throw new ClientException("장바구니가 비어있습니다");
+        }
+
+        List<OrderMenu> orderList = cartList.stream().map(cart -> {
+            Goods goods = getGoods(cart.getGoodsCode(), cart.getCount());
+
+            long price = (long) (goods.getPrice() * cart.getCount() * ((100 - goods.getDiscountRate()) / 100));
+
+            OrderMenu orderMenu = OrderMenu.builder()
+                .orderMenuCode(createOrderCode(goods.getGoodsCode()))
+                .goodsCode(goods.getGoodsCode())
+                .userId(loginInfo.getUserId())
+                .price(price)
+                .count(cart.getCount())
+                .build();
+
+            return orderMenu;
+        }).collect(Collectors.toList());
+
+        KakaoPayReadyDto ready = kakaoService.kakaoPayReady(
+            cartList.get(0).getGoodsCode(),
+            "장바구니 결제 총" + cartList.size() + "건",
+            orderList.stream().mapToLong(OrderMenu::getPrice).sum()
+        );
+
+        orderList.stream().forEach(orderMenu -> {
+            orderMenu.setReceiptCode(ready.getTid());
+            orderMenuRepository.save(orderMenu);
+        });
 
         return Map.of(
             "message", "결제가 완료되었습니다"
         );
+    }
+
+    private static String createOrderCode(String goodsCode) {
+        return LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyMMddHHmmSS")) + goodsCode;
     }
 
     @Transactional
