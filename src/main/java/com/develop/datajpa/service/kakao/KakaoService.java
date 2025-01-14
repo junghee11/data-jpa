@@ -5,8 +5,6 @@ import com.develop.datajpa.dto.kakao.KakaoPayCancelDto;
 import com.develop.datajpa.dto.kakao.KakaoPayErrorDto;
 import com.develop.datajpa.dto.kakao.KakaoPayGetInfoDto;
 import com.develop.datajpa.dto.kakao.KakaoPayReadyDto;
-import com.develop.datajpa.entity.shop.Goods;
-import com.develop.datajpa.entity.shop.OrderMenu;
 import com.develop.datajpa.entity.shop.Receipt;
 import com.develop.datajpa.response.ClientException;
 import lombok.RequiredArgsConstructor;

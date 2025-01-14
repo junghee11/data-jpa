@@ -1,7 +1,6 @@
 package com.develop.datajpa.controller.baseball;
 
 
-import com.develop.datajpa.dto.kakao.KakaoPayReadyDto;
 import com.develop.datajpa.request.baseball.GetGoodsListRequest;
 import com.develop.datajpa.request.shop.AddCartRequest;
 import com.develop.datajpa.request.shop.LeaveGoodsReviewRequest;
@@ -67,10 +66,9 @@ public class ShopController {
         return shopService.clearCart(resolveToken(token));
     }
 
-    // TODO : test code 추가하기
     @PostMapping("/goods")
-    public KakaoPayReadyDto purchaseGoods(@RequestHeader(value = "Authorization") String token,
-                                          @RequestBody PurchaseGoodsRequest request) {
+    public Map<String, Object> purchaseGoods(@RequestHeader(value = "Authorization") String token,
+                                             @Valid @RequestBody PurchaseGoodsRequest request) {
         return shopService.purchaseGoods(resolveToken(token), request);
     }
 
@@ -101,20 +99,20 @@ public class ShopController {
         return shopService.getPaymentInfo(resolveToken(token), receiptCode);
     }
 
-    @PostMapping("/goods/{id}")
+    @PostMapping("/goods/order-cart")
     public Map<String, Object> orderShoppingCart(@RequestHeader(value = "Authorization") String token) {
         return shopService.orderShoppingCart(resolveToken(token));
     }
 
     @PostMapping("/goods/review")
     public Map<String, Object> leaveReview(@RequestHeader(value = "Authorization") String token,
-                                           @RequestBody LeaveGoodsReviewRequest request) {
+                                           @Valid @RequestBody LeaveGoodsReviewRequest request) {
         return shopService.leaveReview(resolveToken(token), request);
     }
 
     @PatchMapping("/goods/review")
     public Map<String, Object> modifyGoodsReview(@RequestHeader(value = "Authorization") String token,
-                                                 @RequestBody ModifyGoodsReviewRequest request) {
+                                                 @Valid @RequestBody ModifyGoodsReviewRequest request) {
         return shopService.modifyGoodsReview(resolveToken(token), request);
     }
 

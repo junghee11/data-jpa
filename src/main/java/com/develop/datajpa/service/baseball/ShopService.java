@@ -1,7 +1,6 @@
 package com.develop.datajpa.service.baseball;
 
 import com.develop.datajpa.dto.kakao.KakaoPayApproveDto;
-import com.develop.datajpa.dto.kakao.KakaoPayCancelDto;
 import com.develop.datajpa.dto.kakao.KakaoPayGetInfoDto;
 import com.develop.datajpa.dto.kakao.KakaoPayReadyDto;
 import com.develop.datajpa.dto.shop.OrderDto;
@@ -206,7 +205,7 @@ public class ShopService {
     }
 
     @Transactional
-    public KakaoPayReadyDto purchaseGoods(LoginInfo loginInfo, PurchaseGoodsRequest request) {
+    public Map<String, Object> purchaseGoods(LoginInfo loginInfo, PurchaseGoodsRequest request) {
         userService.checkUser(loginInfo.getUserId());
 
         Goods goods = getGoods(request.getId(), request.getCount());
@@ -226,15 +225,17 @@ public class ShopService {
         orderMenu.setReceiptCode(ready.getTid());
         orderMenuRepository.save(orderMenu);
 
-        return ready;
+        return Map.of(
+            "result", ready
+        );
     }
 
     private Goods getGoods(String goodsCode, int count) {
         Goods goods = goodsRepository.findByGoodsCode(goodsCode)
             .orElseThrow(() -> new ClientException("제품 정보가 확인되지 않습니다."));
-        if(goods.isOnSale()) {
+        if (goods.isOnSale()) {
             throw new ClientException(goods.getName() + "은/는 현재 판매중인 상품이 아닙니다");
-        } else if(goods.getStock() < count) {
+        } else if (goods.getStock() < count) {
             throw new ClientException("상품 재고가 부족합니다");
         }
         return goods;
@@ -245,7 +246,7 @@ public class ShopService {
         KakaoPayApproveDto response = kakaoService.approveResponse(pgToken);
 
         List<OrderMenu> orderList = orderMenuRepository.findByReceiptCode(response.getTid());
-        if(orderList.isEmpty()) {
+        if (orderList.isEmpty()) {
             throw new ClientException("결제에 오류가 발생하였습니다.");
         }
 
@@ -291,7 +292,7 @@ public class ShopService {
         }
 
         List<OrderMenu> orderList = orderMenuRepository.findByReceiptCode(code);
-        if(orderList.isEmpty()) {
+        if (orderList.isEmpty()) {
             throw new ClientException("주문 정보가 확인되지 않습니다.");
         }
 
@@ -342,7 +343,7 @@ public class ShopService {
         userService.checkUser(loginInfo.getUserId());
 
         List<Cart> cartList = cartRepository.findByUserId(loginInfo.getUserId());
-        if(cartList.isEmpty()) {
+        if (cartList.isEmpty()) {
             throw new ClientException("장바구니가 비어있습니다");
         }
 

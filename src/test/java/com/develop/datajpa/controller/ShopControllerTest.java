@@ -1,7 +1,9 @@
 package com.develop.datajpa.controller;
 
+import com.develop.datajpa.dto.kakao.KakaoPayReadyDto;
 import com.develop.datajpa.dto.user.LoginInfo;
 import com.develop.datajpa.request.shop.AddCartRequest;
+import com.develop.datajpa.request.shop.PurchaseGoodsRequest;
 import com.develop.datajpa.service.baseball.ShopService;
 import com.develop.datajpa.service.security.JwtProvider;
 import com.google.gson.Gson;
@@ -157,4 +159,87 @@ public class ShopControllerTest {
             .andExpect(status().isUnauthorized())
             .andDo(print());
     }
+
+    @Test
+    @DisplayName("물건 구입하기 - success")
+    void purchaseGoodsSuccess() throws Exception {
+        LoginInfo loginInfo = LoginInfo.builder().userId(userId).build();
+
+        PurchaseGoodsRequest request = new PurchaseGoodsRequest();
+        request.setId(goodsId);
+        request.setCount(count);
+
+        given(shopService.purchaseGoods(loginInfo, request)).willReturn(
+            Map.of("result", new KakaoPayReadyDto())
+
+        );
+
+        Gson gson = new Gson();
+        String requestBody = gson.toJson(request);
+
+        mockMvc.perform(post("/shop/goods")
+                .header("Authorization", "Bearer " + jwtToken)
+                .content(requestBody)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andDo(print());
+    }
+
+    @Test
+    @DisplayName("물건 구입하기 - fail")
+    void purchaseGoodsFail() throws Exception {
+        LoginInfo loginInfo = LoginInfo.builder().userId(userId).build();
+
+        PurchaseGoodsRequest request = new PurchaseGoodsRequest();
+//        request.setId(goodsId);
+        request.setCount(count);
+
+        given(shopService.purchaseGoods(loginInfo, request)).willReturn(
+            Map.of("message", "상품정보가 확인되지 않습니다")
+        );
+
+        Gson gson = new Gson();
+        String requestBody = gson.toJson(request);
+
+        mockMvc.perform(post("/shop/goods")
+                .header("Authorization", "Bearer " + jwtToken)
+                .content(requestBody)
+                .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(status().isBadRequest())
+            .andDo(print());
+    }
+
+    @Test
+    @DisplayName("장바구니 물건 구입하기 - success")
+    void orderShoppingCartSuccess() throws Exception {
+        LoginInfo loginInfo = LoginInfo.builder().userId(userId).build();
+
+        given(shopService.orderShoppingCart(loginInfo)).willReturn(
+            Map.of("result", "결제가 완료되었습니다")
+
+        );
+
+        Gson gson = new Gson();
+
+        mockMvc.perform(post("/shop/goods/order-cart")
+                .header("Authorization", "Bearer " + jwtToken))
+            .andExpect(status().isOk())
+            .andDo(print());
+    }
+
+    @Test
+    @DisplayName("장바구니 물건 구입하기 - fail")
+    void orderShoppingCartFail() throws Exception {
+        LoginInfo loginInfo = LoginInfo.builder().userId(userId).build();
+
+        given(shopService.orderShoppingCart(loginInfo)).willReturn(
+            Map.of("message", "로그인 정보가 확인되지 않습니다.")
+        );
+
+        mockMvc.perform(post("/shop/goods/order-cart")
+                .header("Authorization", "invalid-user-token"))
+            .andExpect(status().isUnauthorized())
+            .andDo(print());
+    }
+
 }
