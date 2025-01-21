@@ -18,4 +18,6 @@ public class GetCommentListRequest {
     @NotNull(message = "페이지 번호를 확인해주세요")
     private int page;
 
+    private Long commentId;
+
 }

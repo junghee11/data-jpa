@@ -1,11 +1,16 @@
 package com.develop.datajpa.controller;
 
 import com.develop.datajpa.dto.user.LoginInfo;
-import com.develop.datajpa.entity.Article;
-import com.develop.datajpa.entity.ArticleType.Category;
+import com.develop.datajpa.entity.article.Article;
+import com.develop.datajpa.entity.article.ArticleType;
+import com.develop.datajpa.entity.article.ArticleType.Category;
+import com.develop.datajpa.entity.article.Comment;
+import com.develop.datajpa.entity.article.CommentRecommend;
+import com.develop.datajpa.request.article.AddCommentRequest;
 import com.develop.datajpa.request.article.CreateArticleRequest;
 import com.develop.datajpa.request.article.GetArticleListRequest;
 import com.develop.datajpa.request.article.ModifyArticleRequest;
+import com.develop.datajpa.request.article.ToggleCommentRequest;
 import com.develop.datajpa.service.article.ArticleService;
 import com.develop.datajpa.service.security.JwtProvider;
 import com.google.gson.Gson;
@@ -279,6 +284,145 @@ public class ArticleControllerTest {
         @DisplayName("fail")
         public void deleteArticleFail() throws Exception {
             mockMvc.perform(delete("/article/" + 1))
+                .andExpect(status().isBadRequest())
+                .andDo(print());
+        }
+    }
+
+    @DisplayName("댓글달기")
+    @Nested
+    class addCommentTest {
+        @Test
+        @DisplayName("success")
+        public void addCommentSuccess() throws Exception {
+            LoginInfo loginInfo = LoginInfo.builder().userId(userId).build();
+
+            AddCommentRequest request = new AddCommentRequest();
+            request.setArticleId(1L);
+//            request.setCommentId(3L); // 대댓글
+            request.setContent(content);
+
+            Gson gson = new Gson();
+            String requestBody = gson.toJson(request);
+
+            given(articleService.addComment(loginInfo, request)).willReturn(
+                Map.of("message", "댓글 작성이 완료되었습니다")
+            );
+
+            mockMvc.perform(post("/article/comment")
+                    .header("Authorization", "Bearer " + jwtToken)
+                    .content(requestBody)
+                    .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print());
+        }
+
+        @Test
+        @DisplayName("fail")
+        public void addCommentFail() throws Exception {
+            LoginInfo loginInfo = LoginInfo.builder().userId("test").build();
+
+            AddCommentRequest request = new AddCommentRequest();
+            request.setArticleId(1L);
+            request.setContent("test");
+
+            Gson gson = new Gson();
+            String requestBody = gson.toJson(request);
+
+            given(articleService.addComment(loginInfo, request)).willReturn(
+                Map.of("message", "댓글은 최소 10자 이상, 최대 300자 이하로 작성해주세요")
+            );
+
+            mockMvc.perform(post("/article/comment")
+                    .header("Authorization", "Bearer " + jwtToken)
+                    .content(requestBody)
+                    .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andDo(print());
+        }
+    }
+
+    @DisplayName("댓글 삭제하기")
+    @Nested
+    class deleteCommentTest {
+        @Test
+        @DisplayName("success")
+        public void deleteCommentSuccess() throws Exception {
+            LoginInfo loginInfo = LoginInfo.builder().userId(userId).build();
+
+            given(articleService.deleteComment(loginInfo, 1L)).willReturn(
+                Map.of(
+                    "message", "댓글이 삭제되었습니다.")
+            );
+
+            mockMvc.perform(delete("/article/comment/" + 1)
+                    .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isOk())
+                .andDo(print());
+        }
+
+        @Test
+        @DisplayName("fail")
+        public void deleteCommentFail() throws Exception {
+            given(articleService.deleteComment(null, 1L)).willReturn(
+                Map.of(
+                    "message", "Required header 'Authorization' is not present.")
+            );
+
+            mockMvc.perform(delete("/article/comment/" + 1))
+                .andExpect(status().isBadRequest())
+                .andDo(print());
+        }
+    }
+
+    @DisplayName("댓글 추천하기")
+    @Nested
+    class toggleCommentTest {
+        @Test
+        @DisplayName("success")
+        public void toggleCommentSuccess() throws Exception {
+            LoginInfo loginInfo = LoginInfo.builder().userId(userId).build();
+
+            ToggleCommentRequest request = new ToggleCommentRequest();
+            request.setCommentId(1L);
+            request.setRecommend(ArticleType.Recommend.UP);
+
+            Gson gson = new Gson();
+            String requestBody = gson.toJson(request);
+
+            given(articleService.toggleComment(loginInfo, request)).willReturn(
+                Map.of("comment", new Comment(),
+                    "recommend", new CommentRecommend())
+            );
+
+            mockMvc.perform(patch("/article/comment")
+                    .header("Authorization", "Bearer " + jwtToken)
+                    .content(requestBody)
+                    .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print());
+        }
+
+        @Test
+        @DisplayName("fail")
+        public void toggleCommentFail() throws Exception {
+            LoginInfo loginInfo = LoginInfo.builder().userId("test").build();
+
+            ToggleCommentRequest request = new ToggleCommentRequest();
+            request.setCommentId(1L);
+//            request.setRecommend(ArticleType.Recommend.UP);
+
+            Gson gson = new Gson();
+            String requestBody = gson.toJson(request);
+
+            given(articleService.toggleComment(loginInfo, request)).willReturn(
+                Map.of("message", "추천 혹은 비추천을 선택해주세요")
+            );
+
+            mockMvc.perform(patch("/article/comment")
+                    .header("Authorization", "Bearer " + jwtToken)
+                    .content(requestBody)
+                    .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andDo(print());
         }

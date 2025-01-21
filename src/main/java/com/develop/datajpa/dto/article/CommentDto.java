@@ -1,7 +1,7 @@
 package com.develop.datajpa.dto.article;
 
-import com.develop.datajpa.entity.Comment;
 import com.develop.datajpa.entity.User;
+import com.develop.datajpa.entity.article.Comment;
 import lombok.Builder;
 import lombok.Data;
 

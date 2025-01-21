@@ -1,10 +1,12 @@
 package com.develop.datajpa.controller.article;
 
 
+import com.develop.datajpa.request.article.AddCommentRequest;
 import com.develop.datajpa.request.article.CreateArticleRequest;
 import com.develop.datajpa.request.article.GetArticleListRequest;
 import com.develop.datajpa.request.article.GetCommentListRequest;
 import com.develop.datajpa.request.article.ModifyArticleRequest;
+import com.develop.datajpa.request.article.ToggleCommentRequest;
 import com.develop.datajpa.service.article.ArticleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -41,7 +43,6 @@ public class ArticleController {
         return articleService.getArticle(id);
     }
 
-
     @PostMapping("")
     public Map<String, Object> createArticle(@RequestHeader(value = "Authorization") String token,
                                              @Valid @RequestBody CreateArticleRequest request) {
@@ -64,6 +65,24 @@ public class ArticleController {
     public Map<String, Object> getCommentList(@RequestHeader(value = "Authorization", required = false) String token,
                                               @Valid GetCommentListRequest request) {
         return articleService.getCommentList(request);
+    }
+
+    @PostMapping("/comment")
+    public Map<String, Object> addComment(@RequestHeader(value = "Authorization") String token,
+                                          @Valid @RequestBody AddCommentRequest request) {
+        return articleService.addComment(resolveToken(token), request);
+    }
+
+    @DeleteMapping("/comment/{id}")
+    public Map<String, Object> deleteComment(@RequestHeader(value = "Authorization") String token,
+                                             @PathVariable(value = "id") long id) {
+        return articleService.deleteComment(resolveToken(token), id);
+    }
+
+    @PatchMapping("/comment")
+    public Map<String, Object> toggleComment(@RequestHeader(value = "Authorization") String token,
+                                             @Valid @RequestBody ToggleCommentRequest request) {
+        return articleService.toggleComment(resolveToken(token), request);
     }
 
 }

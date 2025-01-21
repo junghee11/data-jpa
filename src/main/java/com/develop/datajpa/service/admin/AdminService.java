@@ -1,6 +1,10 @@
 package com.develop.datajpa.service.admin;
 
 import com.develop.datajpa.dto.user.LoginInfo;
+import com.develop.datajpa.entity.article.Article;
+import com.develop.datajpa.entity.article.ArticleType.ArticleState;
+import com.develop.datajpa.entity.article.ArticleType.CommentState;
+import com.develop.datajpa.entity.article.Comment;
 import com.develop.datajpa.entity.baseball.Food;
 import com.develop.datajpa.entity.baseball.MatchSchedule;
 import com.develop.datajpa.entity.baseball.MatchType.MatchResult;
@@ -10,6 +14,8 @@ import com.develop.datajpa.entity.shop.GoodsType.State;
 import com.develop.datajpa.repository.FoodRepository;
 import com.develop.datajpa.repository.MatchScheduleRepository;
 import com.develop.datajpa.repository.RestaurantsRepository;
+import com.develop.datajpa.repository.article.ArticleRepository;
+import com.develop.datajpa.repository.article.CommentRepository;
 import com.develop.datajpa.repository.shop.GoodsRepository;
 import com.develop.datajpa.request.admin.AddFoodMenuOnRestaurantRequest;
 import com.develop.datajpa.request.admin.AddTeamGoodsRequest;
@@ -36,6 +42,8 @@ public class AdminService {
     private final RestaurantsRepository restaurantsRepository;
     private final FoodRepository foodRepository;
     private final GoodsRepository goodsRepository;
+    private final ArticleRepository articleRepository;
+    private final CommentRepository commentRepository;
 
     public Map<String, Object> recordMatchResult(LoginInfo loginInfo, RecordMatchResultRequest request) {
         userService.checkAdmin(loginInfo.getUserId());
@@ -242,6 +250,34 @@ public class AdminService {
 
         return Map.of(
             "message", "상품정보가 수정되었습니다."
+        );
+    }
+
+    public Map<String, Object> blockArticle(LoginInfo loginInfo, Long id) {
+        userService.checkAdmin(loginInfo.getUserId());
+
+        Article article = articleRepository.findByIdxAndState(id, ArticleState.ACTIVE.ordinal())
+            .orElseThrow(() -> new ClientException("삭제되었거나 존재하지 않는 게시글입니다."));
+
+        article.setState(ArticleState.BLOCKED.ordinal());
+        articleRepository.save(article);
+
+        return Map.of(
+            "message", "해당 게시글이 차단 처리되었습니다."
+        );
+    }
+
+    public Map<String, Object> blockComment(LoginInfo loginInfo, Long id) {
+        userService.checkAdmin(loginInfo.getUserId());
+
+        Comment comment = commentRepository.findByArticleIdxAndState(id, CommentState.ACTIVE.ordinal())
+            .orElseThrow(() -> new ClientException("삭제되었거나 존재하지 않는 댓글입니다."));
+
+        comment.setState(CommentState.BLOCKED.ordinal());
+        commentRepository.save(comment);
+
+        return Map.of(
+            "message", "해당 댓글이 차단 처리되었습니다."
         );
     }
 

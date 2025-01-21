@@ -91,4 +91,16 @@ public class AdminController {
         return adminService.updateTeamGoodsInfo(resolveToken(token), request);
     }
 
+    @PatchMapping("/article/{id}")
+    public Map<String, Object> blockArticle(@RequestHeader(value = "Authorization") String token,
+                                            @PathVariable("id") long id) {
+        return adminService.blockArticle(resolveToken(token), id);
+    }
+
+    @PatchMapping("/article/comment/{id}")
+    public Map<String, Object> blockComment(@RequestHeader(value = "Authorization") String token,
+                                            @PathVariable("id") long id) {
+        return adminService.blockComment(resolveToken(token), id);
+    }
+
 }

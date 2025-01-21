@@ -1,7 +1,7 @@
 package com.develop.datajpa.dto.article;
 
-import com.develop.datajpa.entity.Article;
 import com.develop.datajpa.entity.User;
+import com.develop.datajpa.entity.article.Article;
 import lombok.Data;
 
 import java.time.LocalDateTime;

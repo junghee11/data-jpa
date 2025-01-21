@@ -1,7 +1,8 @@
 package com.develop.datajpa.repository;
 
-import com.develop.datajpa.entity.Article;
-import com.develop.datajpa.entity.ArticleType;
+import com.develop.datajpa.entity.article.Article;
+import com.develop.datajpa.entity.article.ArticleType;
+import com.develop.datajpa.repository.article.ArticleRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

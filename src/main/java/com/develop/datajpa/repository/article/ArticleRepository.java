@@ -1,6 +1,6 @@
-package com.develop.datajpa.repository;
+package com.develop.datajpa.repository.article;
 
-import com.develop.datajpa.entity.Article;
+import com.develop.datajpa.entity.article.Article;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

@@ -3,18 +3,24 @@ package com.develop.datajpa.service.article;
 import com.develop.datajpa.dto.article.ArticleDto;
 import com.develop.datajpa.dto.article.CommentDto;
 import com.develop.datajpa.dto.user.LoginInfo;
-import com.develop.datajpa.entity.Article;
-import com.develop.datajpa.entity.ArticleType.State;
-import com.develop.datajpa.entity.Comment;
-import com.develop.datajpa.entity.CommentRepository;
 import com.develop.datajpa.entity.User;
 import com.develop.datajpa.entity.UserType.Role;
-import com.develop.datajpa.repository.ArticleRepository;
+import com.develop.datajpa.entity.article.Article;
+import com.develop.datajpa.entity.article.ArticleType.ArticleState;
+import com.develop.datajpa.entity.article.ArticleType.CommentState;
+import com.develop.datajpa.entity.article.ArticleType.Recommend;
+import com.develop.datajpa.entity.article.Comment;
+import com.develop.datajpa.entity.article.CommentRecommend;
 import com.develop.datajpa.repository.UserRepository;
+import com.develop.datajpa.repository.article.ArticleRepository;
+import com.develop.datajpa.repository.article.CommentRecommendRepository;
+import com.develop.datajpa.repository.article.CommentRepository;
+import com.develop.datajpa.request.article.AddCommentRequest;
 import com.develop.datajpa.request.article.CreateArticleRequest;
 import com.develop.datajpa.request.article.GetArticleListRequest;
 import com.develop.datajpa.request.article.GetCommentListRequest;
 import com.develop.datajpa.request.article.ModifyArticleRequest;
+import com.develop.datajpa.request.article.ToggleCommentRequest;
 import com.develop.datajpa.response.ClientException;
 import com.develop.datajpa.service.user.UserService;
 import jakarta.persistence.EntityManager;
@@ -31,6 +37,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 @Service
 @RequiredArgsConstructor
@@ -40,13 +47,14 @@ public class ArticleService {
     private final UserService userService;
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
+    private final CommentRecommendRepository commentRecommendRepository;
 
     @Autowired
     EntityManager em;
 
     public Map<String, Object> getArticleList(GetArticleListRequest request) {
         Page<Article> articles = articleRepository.findByCategoryAndStateOrderByCreatedAtDesc
-            (request.getCategory().name(), State.ACTIVE.ordinal(), PageRequest.of(request.getPage() - 1, 10));
+            (request.getCategory().name(), ArticleState.ACTIVE.ordinal(), PageRequest.of(request.getPage() - 1, 10));
 
         return Map.of(
             "pageCount", articles.getTotalPages(),
@@ -56,7 +64,7 @@ public class ArticleService {
 
     @Transactional
     public Map<String, Object> getArticle(long id) {
-        Article article = articleRepository.findByIdxAndState(id, State.ACTIVE.ordinal())
+        Article article = articleRepository.findByIdxAndState(id, ArticleState.ACTIVE.ordinal())
             .orElseThrow(() -> new ClientException("삭제되었거나 존재하지 않는 게시글입니다."));
 
         User user = userRepository.findOptionalByUserId(article.getUserId())
@@ -96,7 +104,7 @@ public class ArticleService {
     public Map<String, Object> modifyArticle(LoginInfo loginInfo, ModifyArticleRequest request) {
         User user = userService.checkUser(loginInfo.getUserId());
 
-        Article article = articleRepository.findByIdxAndState(request.getId(), State.ACTIVE.ordinal())
+        Article article = articleRepository.findByIdxAndState(request.getId(), ArticleState.ACTIVE.ordinal())
             .orElseThrow(() -> new ClientException("삭제되었거나 존재하지 않는 게시글입니다."));
         if (article.getUserId() != user.getUserId()) {
             throw new ClientException("해당 게시글 작성자가 아닙니다");
@@ -112,7 +120,7 @@ public class ArticleService {
     public Map<String, Object> deleteArticle(LoginInfo loginInfo, long articleId) {
         User user = userService.checkUser(loginInfo.getUserId());
 
-        Article article = articleRepository.findByIdxAndState(articleId, State.ACTIVE.ordinal())
+        Article article = articleRepository.findByIdxAndState(articleId, ArticleState.ACTIVE.ordinal())
             .orElseThrow(() -> new ClientException("삭제되었거나 존재하지 않는 게시글입니다."));
         if (article.getUserId() != user.getUserId()) {
             throw new ClientException("해당 게시글 작성자가 아닙니다");
@@ -125,8 +133,15 @@ public class ArticleService {
 
     @Transactional
     public Map<String, Object> getCommentList(GetCommentListRequest request) {
-        Page<Comment> comments = commentRepository.findByArticleIdxAndStateAndDepth
-            (request.getId(), State.ACTIVE.ordinal(), 0, PageRequest.of(request.getPage() - 1, 10));
+        Page<Comment> comments;
+        if (isNull(request.getCommentId())) {
+            comments = commentRepository.findByArticleIdxAndStateAndDepth
+                (request.getId(), ArticleState.ACTIVE.ordinal(), 0, PageRequest.of(request.getPage() - 1, 10));
+        } else {
+            comments = commentRepository.findByArticleIdxAndStateAndCommentGroupAndDepth
+                (request.getId(), ArticleState.ACTIVE.ordinal(), request.getCommentId(), 1, PageRequest.of(request.getPage() - 1, 10));
+        }
+
         if (comments.isEmpty()) {
             return Map.of(
                 "result", List.of()
@@ -147,4 +162,93 @@ public class ArticleService {
             "page", comments.getTotalPages()
         );
     }
+
+    @Transactional
+    public Map<String, Object> addComment(LoginInfo loginInfo, AddCommentRequest request) {
+        userService.checkUser(loginInfo.getUserId());
+
+        articleRepository.findByIdxAndState(request.getArticleId(), ArticleState.ACTIVE.ordinal())
+            .orElseThrow(() -> new ClientException("삭제되었거나 존재하지 않는 게시글입니다."));
+
+        Comment newComment = Comment.builder()
+            .articleIdx(request.getArticleId())
+            .commentGroup(nonNull(request.getCommentId()) ? request.getCommentId() : 0)
+            .userId(loginInfo.getUserId())
+            .content(request.getContent())
+            .depth(nonNull(request.getCommentId()) ? 1 : 0)
+            .build();
+        Comment savedComment = commentRepository.save(newComment);
+
+        return Map.of(
+            "message", "댓글 작성이 완료되었습니다.",
+            "result", savedComment
+        );
+    }
+
+    @Transactional
+    public Map<String, Object> deleteComment(LoginInfo loginInfo, long commentId) {
+        User user = userService.checkUser(loginInfo.getUserId());
+
+        Comment comment = commentRepository.findByArticleIdxAndState(commentId, CommentState.ACTIVE.ordinal())
+            .orElseThrow(() -> new ClientException("삭제되었거나 존재하지 않는 댓글입니다."));
+        if (comment.getUserId() != user.getUserId()) {
+            throw new ClientException("해당 댓글 작성자가 아닙니다");
+        }
+
+        comment.setState(CommentState.REMOVED.ordinal());
+        comment.updateUp(-comment.getUp());
+        comment.updateDown(-comment.getDown());
+        commentRepository.save(comment);
+
+        List<CommentRecommend> recommends = commentRecommendRepository.findByCommentId(commentId);
+        if (!recommends.isEmpty()) {
+            commentRecommendRepository.deleteAll(recommends);
+        }
+
+        return Map.of("result", "댓글이 삭제되었습니다.");
+    }
+
+    @Transactional
+    public Map<String, Object> toggleComment(LoginInfo loginInfo, ToggleCommentRequest request) {
+        User user = userService.checkUser(loginInfo.getUserId());
+
+        Comment comment = commentRepository.findByArticleIdxAndState(request.getCommentId(), CommentState.ACTIVE.ordinal())
+            .orElseThrow(() -> new ClientException("삭제되었거나 존재하지 않는 댓글입니다."));
+
+        Boolean isUp = request.getRecommend() == Recommend.UP;
+
+        CommentRecommend recommend = commentRecommendRepository.findByCommentIdAndUserId(comment.getIdx(), user.getUserId());
+        if (isNull(recommend)) {
+            CommentRecommend newRecommend = CommentRecommend.builder()
+                .commentId(comment.getIdx())
+                .userId(user.getUserId())
+                .up(isUp)
+                .down(!isUp)
+                .build();
+            commentRecommendRepository.save(newRecommend);
+
+            return Map.of(
+                "comment", comment,
+                "recommend", newRecommend
+            );
+
+        }
+
+        if (isUp) {
+            comment.updateUp(recommend.getUp() ? -1 : 1);
+            recommend.setUp(!recommend.getUp());
+        } else {
+            comment.updateDown(recommend.getDown() ? -1 : 1);
+            recommend.setDown(!recommend.getDown());
+        }
+
+        commentRepository.save(comment);
+        commentRecommendRepository.save(recommend);
+
+        return Map.of(
+            "comment", comment,
+            "recommend", recommend
+        );
+    }
+
 }
