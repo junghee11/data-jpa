@@ -418,4 +418,63 @@ public class AdminControllerTest {
             .andDo(print());
     }
 
+    @Test
+    @DisplayName("게시글 차단하기 - success")
+    void blockArticleSuccess() throws Exception {
+        LoginInfo loginInfo = LoginInfo.builder().userId(userId).build();
+
+        Long articleId = 1L;
+        given(adminService.blockArticle(loginInfo, articleId)).willReturn(
+            Map.of("message", "해당 게시글이 차단 처리되었습니다.")
+        );
+
+        mockMvc.perform(patch("/admin/article/" + articleId)
+                .header("Authorization", "Bearer " + jwtToken))
+            .andExpect(status().isOk())
+            .andDo(print());
+    }
+
+    @Test
+    @DisplayName("게시글 차단하기 - fail")
+    void blockArticleFail() throws Exception {
+        String articleId = "bad ID type";
+
+        mockMvc.perform(patch("/admin/article/" + articleId)
+                .header("Authorization", "Bearer " + jwtToken))
+            .andExpect(status().isBadRequest())
+            .andDo(print());
+    }
+
+    @Test
+    @DisplayName("댓글 차단하기 - success")
+    void blockCommentSuccess() throws Exception {
+        LoginInfo loginInfo = LoginInfo.builder().userId(userId).build();
+
+        Long commentId = 1L;
+        given(adminService.blockComment(loginInfo, commentId)).willReturn(
+            Map.of("message", "해당 댓글이 차단 처리되었습니다.")
+        );
+
+        mockMvc.perform(patch("/admin/article/comment/" + commentId)
+                .header("Authorization", "Bearer " + jwtToken))
+            .andExpect(status().isOk())
+            .andDo(print());
+    }
+
+    @Test
+    @DisplayName("댓글 차단하기 - fail")
+    void blockCommentFail() throws Exception {
+        LoginInfo loginInfo = LoginInfo.builder().userId("invalid-user-id").build();
+
+        Long commentId = 1L;
+        given(adminService.blockComment(loginInfo, commentId)).willReturn(
+            Map.of("message", "로그인 정보가 확인되지 않습니다.")
+        );
+
+        mockMvc.perform(patch("/admin/article/comment/" + commentId)
+                .header("Authorization", "invalid-user-token"))
+            .andExpect(status().isUnauthorized())
+            .andDo(print());
+    }
+
 }

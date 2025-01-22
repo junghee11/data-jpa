@@ -36,6 +36,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.develop.datajpa.service.security.JwtProvider.resolveToken;
+import static com.develop.datajpa.service.security.JwtProvider.validateToken;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
@@ -132,7 +134,38 @@ public class ArticleService {
     }
 
     @Transactional
-    public Map<String, Object> getCommentList(GetCommentListRequest request) {
+    public Map<String, Object> getCommentList(String token, GetCommentListRequest request) {
+        Page<Comment> comments = getComments(request);
+
+        Map<String, User> users = getUserInfo(comments.getContent());
+
+        if (!validateToken(token)) {
+            List<CommentDto> result = comments.getContent().stream().map(comment -> {
+                return new CommentDto(comment, users.get(comment.getUserId()), null);
+            }).collect(Collectors.toList());
+
+            return Map.of(
+                "result", result,
+                "page", comments.getTotalPages()
+            );
+        }
+
+        LoginInfo loginInfo = resolveToken(token);
+
+        Map<Long, CommentRecommend> recommends = getCommentRecommends(comments.getContent(), loginInfo.getUserId());
+
+        List<CommentDto> result = comments.getContent().stream().map(comment -> {
+            return new CommentDto(comment, users.get(comment.getUserId()), recommends.get(comment.getIdx()));
+        }).collect(Collectors.toList());
+
+        return Map.of(
+            "result", result,
+            "page", comments.getTotalPages()
+        );
+
+    }
+
+    private Page<Comment> getComments(GetCommentListRequest request) {
         Page<Comment> comments;
         if (isNull(request.getCommentId())) {
             comments = commentRepository.findByArticleIdxAndStateAndDepth
@@ -141,26 +174,25 @@ public class ArticleService {
             comments = commentRepository.findByArticleIdxAndStateAndCommentGroupAndDepth
                 (request.getId(), ArticleState.ACTIVE.ordinal(), request.getCommentId(), 1, PageRequest.of(request.getPage() - 1, 10));
         }
+        return comments;
+    }
 
-        if (comments.isEmpty()) {
-            return Map.of(
-                "result", List.of()
-            );
-        }
-
+    private Map<String, User> getUserInfo(List<Comment> comments) {
         Set<String> userIds = comments.stream().map(Comment::getUserId).collect(Collectors.toSet());
 
         Map<String, User> users = userRepository.findByUserIdIn(userIds).stream()
             .collect(Collectors.toMap(User::getUserId, u -> u));
 
-        List<CommentDto> result = comments.getContent().stream().map(comment -> {
-            return new CommentDto(comment, users.get(comment.getUserId()));
-        }).collect(Collectors.toList());
+        return users;
+    }
 
-        return Map.of(
-            "result", result,
-            "page", comments.getTotalPages()
-        );
+    private Map<Long, CommentRecommend> getCommentRecommends(List<Comment> comments, String userId) {
+        Set<Long> commentIds = comments.stream().map(Comment::getIdx).collect(Collectors.toSet());
+
+        Map<Long, CommentRecommend> recommends = commentRecommendRepository.findByCommentIdInAndUserId
+            (commentIds, userId).stream().collect(Collectors.toMap(CommentRecommend::getCommentId, c -> c));
+
+        return recommends;
     }
 
     @Transactional

@@ -64,7 +64,7 @@ public class ArticleController {
     @GetMapping("/comments")
     public Map<String, Object> getCommentList(@RequestHeader(value = "Authorization", required = false) String token,
                                               @Valid GetCommentListRequest request) {
-        return articleService.getCommentList(request);
+        return articleService.getCommentList(token, request);
     }
 
     @PostMapping("/comment")

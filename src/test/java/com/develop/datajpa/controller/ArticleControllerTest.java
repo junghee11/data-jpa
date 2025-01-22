@@ -1,5 +1,6 @@
 package com.develop.datajpa.controller;
 
+import com.develop.datajpa.dto.article.CommentDto;
 import com.develop.datajpa.dto.user.LoginInfo;
 import com.develop.datajpa.entity.article.Article;
 import com.develop.datajpa.entity.article.ArticleType;
@@ -9,6 +10,7 @@ import com.develop.datajpa.entity.article.CommentRecommend;
 import com.develop.datajpa.request.article.AddCommentRequest;
 import com.develop.datajpa.request.article.CreateArticleRequest;
 import com.develop.datajpa.request.article.GetArticleListRequest;
+import com.develop.datajpa.request.article.GetCommentListRequest;
 import com.develop.datajpa.request.article.ModifyArticleRequest;
 import com.develop.datajpa.request.article.ToggleCommentRequest;
 import com.develop.datajpa.service.article.ArticleService;
@@ -285,6 +287,52 @@ public class ArticleControllerTest {
         public void deleteArticleFail() throws Exception {
             mockMvc.perform(delete("/article/" + 1))
                 .andExpect(status().isBadRequest())
+                .andDo(print());
+        }
+    }
+
+    @DisplayName("댓글 리스트 가져오기")
+    @Nested
+    class getCommentListTest {
+
+        @Test
+        @DisplayName("success")
+        public void getCommentListSuccess() throws Exception {
+            List<CommentDto> mockComments = List.of(new CommentDto());
+            Map<String, Object> mockResponse = Map.of(
+                "page", 1,
+                "result", mockComments
+            );
+
+            GetCommentListRequest request = new GetCommentListRequest();
+//            request.setId(3L);
+            request.setPage(1);
+            request.setCommentId(3L); // 대댓글 리스트 가져오기
+
+//            when(articleService.getCommentList(jwtToken, request))
+            when(articleService.getCommentList(null, request))
+                .thenReturn(mockResponse);
+
+            mockMvc.perform(get("/article/comments")
+                    .param("id", "3")
+                    .param("page", "1")
+//                    .param("commentId", "3")
+//                    .header("Authorization", "Bearer " + jwtToken))
+                    .header("Authorization", "Bearer " + null))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andDo(print());
+        }
+
+        @Test
+        @DisplayName("fail")
+        public void getCommentListFail() throws Exception {
+            mockMvc.perform(get("/article/comments")
+                    .param("id", "3")
+                    .param("page", "0")
+                    .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("페이지값은 1보다 작을 수 없습니다"))
                 .andDo(print());
         }
     }
