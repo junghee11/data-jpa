@@ -76,11 +76,11 @@ public class ShopService {
         List<Goods> goodsList;
         if (TeamCode.ALL.name().equals(request.getTeam().toUpperCase())) {
             goodsList = goodsRepository.findByOnSaleAndGoodsState
-                (true, GoodsType.State.NORMAL, PageRequest.of(request.getPage() - 1, 10, Sort.by("idx").descending()));
+                (true, GoodsType.State.NORMAL, PageRequest.of(request.getPage() - 1, 10, Sort.by("goodsCode").descending()));
         } else {
             goodsList = goodsRepository.findByTeamAndOnSaleAndGoodsState
                 (request.getTeam(), true, GoodsType.State.NORMAL, PageRequest.of(request.getPage() - 1,
-                    10, Sort.by("idx").descending()));
+                    10, Sort.by("goodsCode").descending()));
         }
 
         return Map.of(
@@ -416,8 +416,6 @@ public class ShopService {
             .userId(loginInfo.getUserId())
             .build();
         goodsReviewRepository.save(review);
-
-        // TODO : batch 모듈 추가하면 리뷰 평점 재평균 내주는 job 추가하가
 
         return Map.of(
             "message", review

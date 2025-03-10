@@ -31,7 +31,7 @@ public class GoodsReview {
     @Column(name = "goods_code")
     private String goodsCode;
 
-    private Integer star;
+    private Double star;
 
     private String content;
 
@@ -43,7 +43,7 @@ public class GoodsReview {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    public void setStar(Integer star) {
+    public void setStar(Double star) {
         this.star = star;
     }
 
@@ -56,7 +56,7 @@ public class GoodsReview {
     }
 
     @Builder
-    public GoodsReview(String goodsCode, Integer star, String content, String userId) {
+    public GoodsReview(String goodsCode, Double star, String content, String userId) {
         this.goodsCode = goodsCode;
         this.star = star;
         this.content = content;

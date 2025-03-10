@@ -3,6 +3,8 @@ package com.develop.datajpa.entity.shop;
 import com.develop.datajpa.response.ClientException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Builder;
@@ -11,6 +13,8 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 
@@ -35,12 +39,16 @@ public class Goods {
 
     private Long price;
 
+    private Double star;
+
     private Integer stock;
 
     @Column(name = "on_sale")
     private boolean onSale;
 
-    @Column(name = "goods_state")
+    @Column(name = "goods_state", columnDefinition = "goods_state")
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private GoodsType.State goodsState;
 
     @Column(name = "img_url")
@@ -61,6 +69,10 @@ public class Goods {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public void setStar(Double star) {
+        this.star = star;
     }
 
     public void setStock(Integer stock) {

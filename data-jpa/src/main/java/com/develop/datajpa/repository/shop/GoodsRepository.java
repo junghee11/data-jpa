@@ -16,6 +16,8 @@ public interface GoodsRepository extends JpaRepository<Goods, Long> {
 
     List<Goods> findByOnSaleAndGoodsState(boolean sale, State state, Pageable pageable);
 
+    List<Goods> findByOnSaleAndGoodsState(boolean sale, State state);
+
     List<Goods> findByTeamAndOnSaleAndGoodsState(String team, boolean sale, State state, Pageable pageable);
 
     Optional<Goods> findByGoodsCode(String code);
