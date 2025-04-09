@@ -1,8 +1,8 @@
 package com.develop.datajpa.dto.article;
 
-import com.develop.datajpa.entity.User;
 import com.develop.datajpa.entity.article.Comment;
 import com.develop.datajpa.entity.article.CommentRecommend;
+import com.develop.datajpa.entity.user.User;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;

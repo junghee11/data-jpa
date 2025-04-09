@@ -1,6 +1,7 @@
 package com.develop.datajpa.repository;
 
 import com.develop.datajpa.entity.baseball.Restaurants;
+import com.develop.datajpa.repository.baseball.RestaurantsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

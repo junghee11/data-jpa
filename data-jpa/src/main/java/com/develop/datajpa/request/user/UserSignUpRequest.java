@@ -30,6 +30,8 @@ public class UserSignUpRequest {
     @Pattern(regexp = "[0-9]{10,11}$", message = "전화번호는 '-'를 제외하고 입력해주세요")
     private String phone;
 
+    private String country;
+
     @NotBlank(message = "정보가 확인되지 않습니다.")
     private String ip;
 

@@ -6,6 +6,7 @@ import com.develop.datajpa.request.user.CheckUserPhoneRequest;
 import com.develop.datajpa.request.user.FindUserIdRequest;
 import com.develop.datajpa.request.user.FindUserPwRequest;
 import com.develop.datajpa.request.user.ResetUserPwRequest;
+import com.develop.datajpa.request.user.SendPhoneSmsRequest;
 import com.develop.datajpa.request.user.UserLoginRequest;
 import com.develop.datajpa.request.user.UserSignUpRequest;
 import com.develop.datajpa.service.user.UserService;
@@ -42,13 +43,18 @@ public class UserController {
     }
 
     @GetMapping("/check/id")
-    public Map<String, Object> checkId(@Valid @RequestBody CheckUserIdRequest request) {
-        return userService.checkMemberId(request.getMemberId());
+    public Map<String, Object> checkUserId(@Valid CheckUserIdRequest request) {
+        return userService.checkUserId(request.getUserId());
     }
 
     @GetMapping("/check/nickname")
-    public Map<String, Object> checkNickname(@Valid @RequestBody CheckNicknameRequest request) {
+    public Map<String, Object> checkNickname(@Valid CheckNicknameRequest request) {
         return userService.checkNickname(request.getNickname());
+    }
+
+    @PostMapping("/phone-sms/verification-code")
+    public Map<String, Object> sendPhoneSms(@Valid @RequestBody SendPhoneSmsRequest request) {
+        return userService.sendPhoneSms(request);
     }
 
     @PostMapping("/check/phone")

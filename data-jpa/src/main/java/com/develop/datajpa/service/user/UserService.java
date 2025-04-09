@@ -2,29 +2,37 @@ package com.develop.datajpa.service.user;
 
 import com.develop.datajpa.dto.user.LoginInfo;
 import com.develop.datajpa.dto.user.UserDto;
-import com.develop.datajpa.entity.User;
-import com.develop.datajpa.entity.UserType.Role;
-import com.develop.datajpa.repository.UserRepository;
+import com.develop.datajpa.entity.user.SmsType.VerificationType;
+import com.develop.datajpa.entity.user.SmsVerification;
+import com.develop.datajpa.entity.user.User;
+import com.develop.datajpa.entity.user.UserType.Role;
+import com.develop.datajpa.repository.user.SmsVerificationRepository;
+import com.develop.datajpa.repository.user.UserRepository;
 import com.develop.datajpa.request.user.CheckUserPhoneRequest;
 import com.develop.datajpa.request.user.FindUserIdRequest;
 import com.develop.datajpa.request.user.FindUserPwRequest;
 import com.develop.datajpa.request.user.ResetUserPwRequest;
+import com.develop.datajpa.request.user.SendPhoneSmsRequest;
 import com.develop.datajpa.request.user.UserLoginRequest;
 import com.develop.datajpa.request.user.UserSignUpRequest;
 import com.develop.datajpa.response.ClientException;
 import com.develop.datajpa.service.security.JwtProvider;
+import com.develop.datajpa.service.sms.SmsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.lang.module.FindException;
 import java.security.SecureRandom;
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import static com.develop.datajpa.util.RandomCodeUtil.generateVerificationCode;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
@@ -34,7 +42,10 @@ import static java.util.Objects.nonNull;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final SmsVerificationRepository smsVerificationRepository;
+
     private final JwtProvider jwtProvider;
+    private final SmsService smsService;
 
     public User checkUser(String id) {
         Optional<User> user = userRepository.findOptionalByUserId(id);
@@ -88,7 +99,7 @@ public class UserService {
         "ADMIN", "UNDEFINED", "NULL", "관리자", "운영자", "LOCALHOST", "DEVELOP"
     );
 
-    public Map<String, Object> checkMemberId(String memberId) {
+    public Map<String, Object> checkUserId(String memberId) {
         if (FORBIDDEN_NAME.contains(memberId.toUpperCase())) {
             throw new ClientException("사용하실 수 없는 아이디입니다.");
         }
@@ -118,25 +129,99 @@ public class UserService {
         );
     }
 
-    public Map<String, Object> userPhoneCheck(CheckUserPhoneRequest request) {
+    @Transactional
+    public Map<String, Object> sendPhoneSms(SendPhoneSmsRequest request) {
         User user = userRepository.findByPhone(request.getPhone());
-        if (nonNull(user)) {
-            throw new FindException("이미 가입된 정보가 있습니다.");
+
+        String code = generateVerificationCode();
+        String message = "[Baseball Hub]인증번호는 [" + code + "] 입니다.";
+
+        SmsVerification sms = smsVerificationRepository.findByPhone(request.getPhone());
+
+        if (VerificationType.SIGN_UP.equals(request.getType())) {
+            if (nonNull(user)) {
+                throw new FindException("이미 가입된 정보가 있습니다.");
+            } else if (isNull(sms)) {
+                SmsVerification newVerification = SmsVerification.builder()
+                    .phone(request.getPhone())
+                    .name(request.getName())
+                    .verificationType(VerificationType.SIGN_UP)
+                    .code(code)
+                    .build();
+                smsVerificationRepository.save(newVerification);
+            } else if (sms.getState() || !VerificationType.SIGN_UP.equals(sms.getVerificationType())) {
+                throw new ClientException("이미 가입된 정보가 있습니다");
+            } else {
+                sms.setCode(code);
+                sms.setState(false);
+                sms.setVerificationTime(LocalDateTime.now());
+                smsVerificationRepository.save(sms);
+            }
+
+        } else if (VerificationType.FIND_ID.equals(request.getType()) || VerificationType.FIND_PW.equals(request.getType())) {
+            if (isNull(user) || isNull(sms)) {
+                throw new ClientException("가입정보가 확인되지 않습니다.");
+            } else if (!user.getName().equals(sms.getName())) {
+                throw new ClientException("기존 가입 정보와 일치하지 않습니다.");
+            }
+
+            sms.setVerificationType(request.getType());
+            sms.setCode(code);
+            sms.setState(false);
+            sms.setVerificationTime(LocalDateTime.now());
+            smsVerificationRepository.save(sms);
+
+        } else {
+            throw new FindException("잘못된 요청입니다.");
         }
 
-        // TODO : 외부 API로 작업필요
-        // TODO : signup api에서 검증내용 한번 더 확인해주기
-        request.getName();
+        smsService.sendSms(request.getPhone(), message);
 
         return Map.of(
-            "message", "실명인증이 완료되었습니다."
+            "message", "문자로 발송된 인증번호를 입력해주세요."
         );
     }
 
+    @Transactional
+    public Map<String, Object> userPhoneCheck(CheckUserPhoneRequest request) {
+        User user = userRepository.findByPhone(request.getPhone());
+
+        SmsVerification sms = smsVerificationRepository.findByPhoneAndName(request.getPhone(), request.getName())
+            .orElseThrow(() -> {
+                throw new ClientException("인증 문자를 요청해주세요");
+            });
+
+        if (sms.getState()) {
+            throw new ClientException("인증 문자를 요청해주세요");
+        } else if (!request.getCode().equals(sms.getCode())) {
+            throw new ClientException("인증정보가 일치하지 않습니다");
+        } else if (VerificationType.SIGN_UP.equals(request.getType())) {
+            if (nonNull(user) || !VerificationType.SIGN_UP.equals(sms.getVerificationType())) {
+                throw new FindException("이미 가입된 정보가 있습니다.");
+            }
+        } else if (VerificationType.FIND_ID.equals(request.getType()) || VerificationType.FIND_PW.equals(request.getType())) {
+            if (isNull(user)) {
+                throw new ClientException("가입정보가 확인되지 않습니다.");
+            }
+        } else {
+            throw new FindException("잘못된 요청입니다.");
+        }
+
+        return Map.of(
+            "message", "본인인증이 완료되었습니다."
+        );
+    }
+
+    @Transactional
     public Map<String, Object> userSignUp(UserSignUpRequest request) {
         User user = userRepository.findByUserIdOrNicknameOrPhone(request.getUserId(), request.getNickname(), request.getPhone());
         if (nonNull(user)) {
             throw new ClientException("이미 존재하는 회원정보입니다.");
+        }
+
+        SmsVerification sms = smsVerificationRepository.findByPhone(request.getPhone());
+        if (isNull(sms) || sms.getState()) {
+            throw new ClientException("휴대폰 인증정보에 오류가 있습니다.");
         }
 
         User newMember = User.builder()
@@ -145,8 +230,14 @@ public class UserService {
             .nickname(request.getNickname())
             .phone(request.getPhone())
             .pw(request.getPassword())
+            .country(request.getCountry())
+            .ip(request.getIp())
             .build();
         userRepository.save(newMember);
+
+        sms.setState(true);
+        sms.setVerificationTime(LocalDateTime.now());
+        smsVerificationRepository.save(sms);
 
         return Map.of(
             "message", "회원가입이 완료되었습니다."
@@ -154,20 +245,42 @@ public class UserService {
     }
 
     public Map<String, Object> findUserId(FindUserIdRequest request) {
-        User user = userRepository.findByNameAndPhone(request.getName(), request.getPhone());
-        if (isNull(user)) {
-            throw new ClientException("가입하신 정보가 확인되지 않습니다.");
+        User user = userRepository.findByNameAndPhone(request.getName(), request.getPhone())
+            .orElseThrow(() -> {
+                throw new ClientException("가입하신 정보가 확인되지 않습니다.");
+            });
+
+        SmsVerification sms = smsVerificationRepository.findByPhoneAndName(request.getPhone(), request.getName())
+            .orElseThrow(() -> {
+                throw new ClientException("인증 정보가 확인되지 않습니다.");
+            });
+        if (sms.getState() || !VerificationType.FIND_ID.equals(sms.getVerificationType())) {
+            throw new ClientException("휴대폰 인증에 오류가 있습니다.");
+        } else if (sms.getVerificationTime().isBefore(LocalDateTime.now().minusMinutes(30))) {
+            throw new ClientException("휴대폰 인증이 만료되었습니다. 재인증 후 시도해주세요");
         }
+
+        sms.setState(true);
+        sms.setVerificationTime(LocalDateTime.now());
+        smsVerificationRepository.save(sms);
 
         return Map.of(
             "userId", user.getUserId()
         );
     }
 
+    @Transactional
     public Map<String, Object> findPassword(FindUserPwRequest request) {
-        User user = userRepository.findByUserIdAndNameAndPhone(request.getUserId(), request.getName(), request.getPhone());
-        if (isNull(user)) {
-            throw new ClientException("가입하신 정보가 확인되지 않습니다.");
+        User user = userRepository.findByUserIdAndNameAndPhone(request.getUserId(), request.getName(), request.getPhone())
+            .orElseThrow(() -> {
+                throw new ClientException("가입하신 정보가 확인되지 않습니다.");
+            });
+
+        SmsVerification sms = smsVerificationRepository.findByPhone(request.getPhone());
+        if (isNull(sms) || sms.getState() || !VerificationType.FIND_PW.equals(sms.getVerificationType())) {
+            throw new ClientException("휴대폰 인증에 오류가 있습니다.");
+        } else if (sms.getVerificationTime().isBefore(LocalDateTime.now().minusMinutes(30))) {
+            throw new ClientException("휴대폰 인증이 만료되었습니다. 재인증 후 시도해주세요");
         }
 
         int tempPwLength = 10;
@@ -180,11 +293,16 @@ public class UserService {
             tempPw.append(CHARACTERS.charAt(index));
         }
 
+        sms.setState(true);
+        sms.setVerificationTime(LocalDateTime.now());
+        smsVerificationRepository.save(sms);
+
         user.setPw(tempPw.toString());
         userRepository.save(user);
 
         return Map.of(
-            "tempPw", tempPw
+            "tempPw", tempPw,
+            "message", "임시 비밀번호입니다. 로그인 후 비밀번호를 변경해주세요"
         );
     }
 

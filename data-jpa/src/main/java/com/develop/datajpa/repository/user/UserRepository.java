@@ -1,7 +1,7 @@
-package com.develop.datajpa.repository;
+package com.develop.datajpa.repository.user;
 
 import com.develop.datajpa.dto.user.UserDto;
-import com.develop.datajpa.entity.User;
+import com.develop.datajpa.entity.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -22,9 +22,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     User findByUserIdOrNicknameOrPhone(String id, String nick, String phone);
 
-    User findByNameAndPhone(String name, String phone);
+    Optional<User> findByNameAndPhone(String name, String phone);
 
-    User findByUserIdAndNameAndPhone(String id, String name, String phone);
+    Optional<User> findByUserIdAndNameAndPhone(String id, String name, String phone);
 
     User findByUserIdAndPw(String id, String pw);
 

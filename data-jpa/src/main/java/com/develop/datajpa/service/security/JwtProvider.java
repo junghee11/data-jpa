@@ -1,7 +1,7 @@
 package com.develop.datajpa.service.security;
 
 import com.develop.datajpa.dto.user.LoginInfo;
-import com.develop.datajpa.entity.User;
+import com.develop.datajpa.entity.user.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;

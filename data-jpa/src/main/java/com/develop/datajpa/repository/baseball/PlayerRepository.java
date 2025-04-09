@@ -1,4 +1,4 @@
-package com.develop.datajpa.repository;
+package com.develop.datajpa.repository.baseball;
 
 import com.develop.datajpa.entity.baseball.Player;
 import org.springframework.data.domain.Page;

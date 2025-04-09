@@ -1,4 +1,4 @@
-package com.develop.datajpa.entity;
+package com.develop.datajpa.entity.user;
 
 import com.develop.datajpa.response.ClientException;
 import jakarta.persistence.Column;
@@ -25,6 +25,8 @@ public class User {
     @Column(name = "user_id")
     private String userId;
 
+    private String pw;
+
     private String name;
 
     private String nickname;
@@ -40,7 +42,7 @@ public class User {
     @Column(name = "profile_img_url")
     private String profileImgUrl;
 
-    private String pw;
+    private String country;
 
     private String ip;
 
@@ -62,11 +64,13 @@ public class User {
     }
 
     @Builder
-    public User(String userId, String name, String nickname, String phone, String pw) {
+    public User(String userId, String pw, String name, String nickname, String phone, String country, String ip) {
         this.userId = userId;
+        this.pw = pw;
         this.name = name;
         this.nickname = nickname;
         this.phone = phone;
-        this.pw = pw;
+        this.country = country;
+        this.ip = ip;
     }
 }

@@ -1,4 +1,4 @@
-package com.develop.datajpa.repository;
+package com.develop.datajpa.repository.shop;
 
 import com.develop.datajpa.entity.shop.Cart;
 import org.springframework.data.jpa.repository.JpaRepository;

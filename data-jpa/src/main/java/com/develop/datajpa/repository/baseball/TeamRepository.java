@@ -1,4 +1,4 @@
-package com.develop.datajpa.repository;
+package com.develop.datajpa.repository.baseball;
 
 import com.develop.datajpa.entity.baseball.MatchType.TeamCode;
 import com.develop.datajpa.entity.baseball.Team;

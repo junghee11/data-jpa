@@ -1,6 +1,7 @@
 package com.develop.datajpa.repository;
 
 import com.develop.datajpa.entity.baseball.Review;
+import com.develop.datajpa.repository.baseball.ReviewRepository;
 import com.develop.datajpa.response.ClientException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
