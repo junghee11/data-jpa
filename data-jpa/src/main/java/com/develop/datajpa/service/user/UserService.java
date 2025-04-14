@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
 
-import java.lang.module.FindException;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -140,7 +139,7 @@ public class UserService {
 
         if (VerificationType.SIGN_UP.equals(request.getType())) {
             if (nonNull(user)) {
-                throw new FindException("이미 가입된 정보가 있습니다.");
+                throw new ClientException("이미 가입된 정보가 있습니다.");
             } else if (isNull(sms)) {
                 SmsVerification newVerification = SmsVerification.builder()
                     .phone(request.getPhone())
@@ -172,10 +171,11 @@ public class UserService {
             smsVerificationRepository.save(sms);
 
         } else {
-            throw new FindException("잘못된 요청입니다.");
+            throw new ClientException("잘못된 요청입니다.");
         }
 
-        smsService.sendSms(request.getPhone(), message);
+        // TODO : 비용발생방지용 주석처리, 운영 시... 주석제거하기
+//        smsService.sendSms(request.getPhone(), message);
 
         return Map.of(
             "message", "문자로 발송된 인증번호를 입력해주세요."
@@ -187,24 +187,24 @@ public class UserService {
         User user = userRepository.findByPhone(request.getPhone());
 
         SmsVerification sms = smsVerificationRepository.findByPhoneAndName(request.getPhone(), request.getName())
-            .orElseThrow(() -> {
-                throw new ClientException("인증 문자를 요청해주세요");
-            });
+            .orElseThrow(() -> new ClientException("인증 문자를 요청해주세요"));
 
         if (sms.getState()) {
             throw new ClientException("인증 문자를 요청해주세요");
+        } else if (sms.getVerificationTime().isBefore(LocalDateTime.now().minusMinutes(5))) {
+            throw new ClientException("인증번호가 만료되었습니다. 인증번호 재발급 후 시도해주세요");
         } else if (!request.getCode().equals(sms.getCode())) {
             throw new ClientException("인증정보가 일치하지 않습니다");
         } else if (VerificationType.SIGN_UP.equals(request.getType())) {
             if (nonNull(user) || !VerificationType.SIGN_UP.equals(sms.getVerificationType())) {
-                throw new FindException("이미 가입된 정보가 있습니다.");
+                throw new ClientException("이미 가입된 정보가 있습니다.");
             }
         } else if (VerificationType.FIND_ID.equals(request.getType()) || VerificationType.FIND_PW.equals(request.getType())) {
             if (isNull(user)) {
                 throw new ClientException("가입정보가 확인되지 않습니다.");
             }
         } else {
-            throw new FindException("잘못된 요청입니다.");
+            throw new ClientException("잘못된 요청입니다.");
         }
 
         return Map.of(
@@ -246,18 +246,14 @@ public class UserService {
 
     public Map<String, Object> findUserId(FindUserIdRequest request) {
         User user = userRepository.findByNameAndPhone(request.getName(), request.getPhone())
-            .orElseThrow(() -> {
-                throw new ClientException("가입하신 정보가 확인되지 않습니다.");
-            });
+            .orElseThrow(() -> new ClientException("가입하신 정보가 확인되지 않습니다."));
 
         SmsVerification sms = smsVerificationRepository.findByPhoneAndName(request.getPhone(), request.getName())
-            .orElseThrow(() -> {
-                throw new ClientException("인증 정보가 확인되지 않습니다.");
-            });
+            .orElseThrow(() -> new ClientException("인증 정보가 확인되지 않습니다."));
         if (sms.getState() || !VerificationType.FIND_ID.equals(sms.getVerificationType())) {
             throw new ClientException("휴대폰 인증에 오류가 있습니다.");
-        } else if (sms.getVerificationTime().isBefore(LocalDateTime.now().minusMinutes(30))) {
-            throw new ClientException("휴대폰 인증이 만료되었습니다. 재인증 후 시도해주세요");
+        } else if (sms.getVerificationTime().isBefore(LocalDateTime.now().minusMinutes(10))) {
+            throw new ClientException("인증시간이 만료되었습니다. 재인증 후 시도해주세요");
         }
 
         sms.setState(true);
@@ -272,15 +268,13 @@ public class UserService {
     @Transactional
     public Map<String, Object> findPassword(FindUserPwRequest request) {
         User user = userRepository.findByUserIdAndNameAndPhone(request.getUserId(), request.getName(), request.getPhone())
-            .orElseThrow(() -> {
-                throw new ClientException("가입하신 정보가 확인되지 않습니다.");
-            });
+            .orElseThrow(() -> new ClientException("가입하신 정보가 확인되지 않습니다."));
 
         SmsVerification sms = smsVerificationRepository.findByPhone(request.getPhone());
         if (isNull(sms) || sms.getState() || !VerificationType.FIND_PW.equals(sms.getVerificationType())) {
             throw new ClientException("휴대폰 인증에 오류가 있습니다.");
-        } else if (sms.getVerificationTime().isBefore(LocalDateTime.now().minusMinutes(30))) {
-            throw new ClientException("휴대폰 인증이 만료되었습니다. 재인증 후 시도해주세요");
+        } else if (sms.getVerificationTime().isBefore(LocalDateTime.now().minusMinutes(10))) {
+            throw new ClientException("인증시간이 만료되었습니다. 재인증 후 시도해주세요");
         }
 
         int tempPwLength = 10;
@@ -302,21 +296,24 @@ public class UserService {
 
         return Map.of(
             "tempPw", tempPw,
-            "message", "임시 비밀번호입니다. 로그인 후 비밀번호를 변경해주세요"
+            "message", "임시 비밀번호로 로그인 후 비밀번호를 재설정해주세요"
         );
     }
 
-    public Map<String, Object> resetUserPassword(ResetUserPwRequest request) {
-        User user = userRepository.findByUserIdAndPw(request.getUserId(), request.getTempPw());
-        if (isNull(user)) {
-            throw new ClientException("잘못된 요청입니다.");
+    public Map<String, Object> resetUserPassword(LoginInfo loginInfo, ResetUserPwRequest request) {
+        User user = checkUser(loginInfo.getUserId());
+
+        if (!user.getPw().equals(request.getOriginalPw())) {
+            throw new ClientException("기존 비밀번호 정보가 일치하지 않습니다");
+        } else if (request.getOriginalPw().equals(request.getNewPw())) {
+            throw new ClientException("새 비밀번호는 기존과 다르게 설정해주세요");
         }
 
         user.setPw(request.getNewPw());
         userRepository.save(user);
 
         return Map.of(
-            "message", "비밀번호가 재설정되었습니다. 새 비밀번호로 로그인 해주세요"
+            "message", "비밀번호가 재설정되었습니다."
         );
     }
 }

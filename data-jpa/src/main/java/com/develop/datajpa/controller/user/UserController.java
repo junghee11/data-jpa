@@ -68,18 +68,19 @@ public class UserController {
     }
 
     @GetMapping("/user-id")
-    public Map<String, Object> findUserId(@Valid @RequestBody FindUserIdRequest request) {
+    public Map<String, Object> findUserId(@Valid FindUserIdRequest request) {
         return userService.findUserId(request);
     }
 
     @GetMapping("/user-pw")
-    public Map<String, Object> findPassword(@Valid @RequestBody FindUserPwRequest request) {
+    public Map<String, Object> findPassword(@Valid FindUserPwRequest request) {
         return userService.findPassword(request);
     }
 
     @PostMapping("/user-pw")
-    public Map<String, Object> resetUserPassword(@Valid @RequestBody ResetUserPwRequest request) {
-        return userService.resetUserPassword(request);
+    public Map<String, Object> resetUserPassword(@RequestHeader(value = "Authorization") String token,
+                                                 @Valid @RequestBody ResetUserPwRequest request) {
+        return userService.resetUserPassword(resolveToken(token), request);
     }
 
 }
