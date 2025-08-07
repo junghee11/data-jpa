@@ -1,8 +1,11 @@
 package com.develop.datajpa.entity.user;
 
+import com.develop.datajpa.entity.baseball.MatchType;
 import com.develop.datajpa.response.ClientException;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.Builder;
@@ -12,6 +15,7 @@ import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Entity
@@ -37,6 +41,13 @@ public class User {
 
     private Long point;
 
+    @Enumerated(EnumType.STRING)
+    private MatchType.TeamCode team;
+
+    private int[] stadium;
+
+    private int[] player;
+
     private Integer role;
 
     @Column(name = "profile_img_url")
@@ -61,6 +72,18 @@ public class User {
 
     public void setPw(String pw) {
         this.pw = pw;
+    }
+
+    public void setTeam(MatchType.TeamCode team) {
+        this.team = team;
+    }
+
+    public void setStadium(int[] stadium) {
+        this.stadium = stadium;
+    }
+
+    public void setPlayer(int[] player) {
+        this.player = player;
     }
 
     @Builder

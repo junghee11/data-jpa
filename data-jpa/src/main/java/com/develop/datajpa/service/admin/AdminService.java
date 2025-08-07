@@ -270,7 +270,7 @@ public class AdminService {
     public Map<String, Object> blockComment(LoginInfo loginInfo, Long id) {
         userService.checkAdmin(loginInfo.getUserId());
 
-        Comment comment = commentRepository.findByArticleIdxAndState(id, CommentState.ACTIVE.ordinal())
+        Comment comment = commentRepository.findByIdxAndState(id, CommentState.ACTIVE.ordinal())
             .orElseThrow(() -> new ClientException("삭제되었거나 존재하지 않는 댓글입니다."));
 
         comment.setState(CommentState.BLOCKED.ordinal());

@@ -16,4 +16,8 @@ public interface StadiumRepository extends JpaRepository<Stadium, Long> {
 
     Optional<List<Stadium>> findByAddressContaining(String address);
 
+    List<Stadium> findByIdxIn(int[] ids);
+
+    Optional<Stadium> findByIdx(int idx);
+
 }

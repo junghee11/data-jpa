@@ -1,0 +1,80 @@
+package com.develop.datajpa.controller.mypage;
+
+
+import com.develop.datajpa.request.article.AddCommentRequest;
+import com.develop.datajpa.request.article.CreateArticleRequest;
+import com.develop.datajpa.request.article.GetArticleListRequest;
+import com.develop.datajpa.request.article.GetCommentListRequest;
+import com.develop.datajpa.request.article.ModifyArticleRequest;
+import com.develop.datajpa.request.article.ToggleCommentRequest;
+import com.develop.datajpa.request.mypage.SelectMyTeamRequest;
+import com.develop.datajpa.service.article.ArticleService;
+import com.develop.datajpa.service.mypage.MypageService;
+import jakarta.validation.Valid;
+import jdk.jfr.Frequency;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
+
+import static com.develop.datajpa.service.security.JwtProvider.resolveToken;
+
+@RequiredArgsConstructor
+@RestController
+@RequestMapping("/mypage")
+public class MypageController {
+
+    private final MypageService mypageService;
+
+    @GetMapping("/baseball/team")
+    public Map<String, Object> getMyTeamInfo(@RequestHeader(value = "Authorization") String token) {
+        return mypageService.getMyTeamInfo(resolveToken(token));
+    }
+
+    @PatchMapping("/baseball/team")
+    public Map<String, Object> selectMyTeam(@RequestHeader(value = "Authorization") String token,
+                                            @Valid @RequestBody SelectMyTeamRequest request) {
+        return mypageService.selectMyTeam(resolveToken(token), request);
+    }
+
+    @GetMapping("/baseball/stadium")
+    public Map<String, Object> getMyStadiumList(@RequestHeader(value = "Authorization") String token) {
+        return mypageService.getMyStadiumList(resolveToken(token));
+    }
+
+    @PatchMapping("/baseball/stadium/{id}")
+    public Map<String, Object> toggleStadium(@RequestHeader(value = "Authorization") String token,
+                                             @PathVariable(value = "id") int id) {
+        return mypageService.toggleStadium(resolveToken(token), id);
+    }
+
+    @GetMapping("/baseball/player")
+    public Map<String, Object> getMyPlayerList(@RequestHeader(value = "Authorization") String token) {
+        return mypageService.getMyPlayerList(resolveToken(token));
+    }
+
+    @PatchMapping("/baseball/player/{id}")
+    public Map<String, Object> togglePlayer(@RequestHeader(value = "Authorization") String token,
+                                             @PathVariable(value = "id") int id) {
+        return mypageService.togglePlayer(resolveToken(token), id);
+    }
+
+    @GetMapping("/article")
+    public Map<String, Object> getMyArticleList(@RequestHeader(value = "Authorization") String token) {
+        return mypageService.getMyArticleList(resolveToken(token));
+    }
+
+    @GetMapping("/comment")
+    public Map<String, Object> getMyCommentList(@RequestHeader(value = "Authorization") String token) {
+        return mypageService.getMyCommentList(resolveToken(token));
+    }
+
+}

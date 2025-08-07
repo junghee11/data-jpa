@@ -28,6 +28,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -108,7 +109,7 @@ public class ArticleService {
 
         Article article = articleRepository.findByIdxAndState(request.getId(), ArticleState.ACTIVE.ordinal())
             .orElseThrow(() -> new ClientException("삭제되었거나 존재하지 않는 게시글입니다."));
-        if (article.getUserId() != user.getUserId()) {
+        if (!article.getUserId().equals(user.getUserId())) {
             throw new ClientException("해당 게시글 작성자가 아닙니다");
         }
 
@@ -124,13 +125,14 @@ public class ArticleService {
 
         Article article = articleRepository.findByIdxAndState(articleId, ArticleState.ACTIVE.ordinal())
             .orElseThrow(() -> new ClientException("삭제되었거나 존재하지 않는 게시글입니다."));
-        if (article.getUserId() != user.getUserId()) {
+        if (!article.getUserId().equals(user.getUserId())) {
             throw new ClientException("해당 게시글 작성자가 아닙니다");
         }
 
-        articleRepository.delete(article);
+        article.setState(ArticleState.REMOVED.ordinal());
+        articleRepository.save(article);
 
-        return Map.of("result", "게시글이 삭제되었습니다.");
+        return Map.of("message", "게시글이 삭제되었습니다.");
     }
 
     @Transactional
@@ -169,10 +171,12 @@ public class ArticleService {
         Page<Comment> comments;
         if (isNull(request.getCommentId())) {
             comments = commentRepository.findByArticleIdxAndStateAndDepth
-                (request.getId(), ArticleState.ACTIVE.ordinal(), 0, PageRequest.of(request.getPage() - 1, 10));
+                (request.getId(), ArticleState.ACTIVE.ordinal(), 0,
+                    PageRequest.of(request.getPage() - 1, 10, Sort.by("createdAt").ascending()));
         } else {
             comments = commentRepository.findByArticleIdxAndStateAndCommentGroupAndDepth
-                (request.getId(), ArticleState.ACTIVE.ordinal(), request.getCommentId(), 1, PageRequest.of(request.getPage() - 1, 10));
+                (request.getId(), ArticleState.ACTIVE.ordinal(), request.getCommentId(), 1,
+                    PageRequest.of(request.getPage() - 1, 10, Sort.by("createdAt").ascending()));
         }
         return comments;
     }
@@ -221,9 +225,9 @@ public class ArticleService {
     public Map<String, Object> deleteComment(LoginInfo loginInfo, long commentId) {
         User user = userService.checkUser(loginInfo.getUserId());
 
-        Comment comment = commentRepository.findByArticleIdxAndState(commentId, CommentState.ACTIVE.ordinal())
+        Comment comment = commentRepository.findByIdxAndState(commentId, CommentState.ACTIVE.ordinal())
             .orElseThrow(() -> new ClientException("삭제되었거나 존재하지 않는 댓글입니다."));
-        if (comment.getUserId() != user.getUserId()) {
+        if (!comment.getUserId().equals(user.getUserId())) {
             throw new ClientException("해당 댓글 작성자가 아닙니다");
         }
 
@@ -237,20 +241,28 @@ public class ArticleService {
             commentRecommendRepository.deleteAll(recommends);
         }
 
-        return Map.of("result", "댓글이 삭제되었습니다.");
+        return Map.of("message", "댓글이 삭제되었습니다.");
     }
 
     @Transactional
     public Map<String, Object> toggleComment(LoginInfo loginInfo, ToggleCommentRequest request) {
         User user = userService.checkUser(loginInfo.getUserId());
 
-        Comment comment = commentRepository.findByArticleIdxAndState(request.getCommentId(), CommentState.ACTIVE.ordinal())
+        Comment comment = commentRepository.findByIdxAndState(request.getCommentId(), CommentState.ACTIVE.ordinal())
             .orElseThrow(() -> new ClientException("삭제되었거나 존재하지 않는 댓글입니다."));
 
         Boolean isUp = request.getRecommend() == Recommend.UP;
 
         CommentRecommend recommend = commentRecommendRepository.findByCommentIdAndUserId(comment.getIdx(), user.getUserId());
         if (isNull(recommend)) {
+            if (isUp) {
+                comment.updateUp(1);
+            } else {
+                comment.updateDown(1);
+            }
+
+            commentRepository.save(comment);
+
             CommentRecommend newRecommend = CommentRecommend.builder()
                 .commentId(comment.getIdx())
                 .userId(user.getUserId())

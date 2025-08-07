@@ -18,4 +18,8 @@ public interface PlayerRepository extends JpaRepository<Player, Long> {
 
     List<Player> findByTeamContaining(String team);
 
+    List<Player> findByIdxIn(int[] ids);
+
+    Optional<Player> findByIdx(int id);
+
 }
