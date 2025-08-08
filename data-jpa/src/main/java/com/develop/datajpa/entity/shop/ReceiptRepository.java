@@ -11,6 +11,6 @@ public interface ReceiptRepository extends JpaRepository<Receipt, Long> {
 
     Optional<Receipt> findByReceiptCode(String code);
 
-    List<Receipt> findByUserId(String userId);
+    List<Receipt> findByUserIdAndStatus(String userId, boolean status);
 
 }

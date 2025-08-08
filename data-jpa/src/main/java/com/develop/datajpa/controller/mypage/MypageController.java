@@ -77,4 +77,25 @@ public class MypageController {
         return mypageService.getMyCommentList(resolveToken(token));
     }
 
+    @GetMapping("/shop/cart")
+    public Map<String, Object> getMyCart(@RequestHeader(value = "Authorization") String token) {
+        return mypageService.getMyCart(resolveToken(token));
+    }
+
+    @GetMapping("/shop/wish")
+    public Map<String, Object> getMyWishList(@RequestHeader(value = "Authorization") String token) {
+        return mypageService.getMyWishList(resolveToken(token));
+    }
+
+    @GetMapping("/shop/purchase")
+    public Map<String, Object> getMyPurchaseList(@RequestHeader(value = "Authorization") String token) {
+        return mypageService.getMyPurchaseList(resolveToken(token));
+    }
+
+    @GetMapping("/shop/purchase/{id}")
+    public Map<String, Object> getMyPurchaseDetail(@RequestHeader(value = "Authorization") String token,
+                                                   @PathVariable(value = "id") String receiptCode) {
+        return mypageService.getMyPurchaseDetail(resolveToken(token), receiptCode);
+    }
+
 }

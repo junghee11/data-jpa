@@ -24,6 +24,6 @@ public interface GoodsRepository extends JpaRepository<Goods, Long> {
 
     Optional<Goods> findByGoodsCodeAndOnSaleAndGoodsState(String code, boolean sale, State state);
 
-    List<Goods> findByGoodsCodeInAndGoodsState(String[] code,State state);
+    List<Goods> findByGoodsCodeInAndGoodsState(List<String> code,State state);
 
 }

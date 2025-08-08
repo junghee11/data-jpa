@@ -2,6 +2,8 @@ package com.develop.datajpa.service.mypage;
 
 import com.develop.datajpa.dto.article.ArticleDto;
 import com.develop.datajpa.dto.article.CommentDto;
+import com.develop.datajpa.dto.shop.MyCartDto;
+import com.develop.datajpa.dto.shop.MyPurchaseDto;
 import com.develop.datajpa.dto.user.LoginInfo;
 import com.develop.datajpa.entity.article.Article;
 import com.develop.datajpa.entity.article.ArticleType.ArticleState;
@@ -14,7 +16,12 @@ import com.develop.datajpa.entity.baseball.Stadium;
 import com.develop.datajpa.entity.baseball.Team;
 import com.develop.datajpa.entity.shop.Cart;
 import com.develop.datajpa.entity.shop.Goods;
+import com.develop.datajpa.entity.shop.GoodsType;
+import com.develop.datajpa.entity.shop.OrderMenu;
 import com.develop.datajpa.entity.shop.OrderMenuRepository;
+import com.develop.datajpa.entity.shop.Receipt;
+import com.develop.datajpa.entity.shop.ReceiptRepository;
+import com.develop.datajpa.entity.shop.Wish;
 import com.develop.datajpa.entity.user.User;
 import com.develop.datajpa.entity.user.UserType.Role;
 import com.develop.datajpa.repository.article.ArticleRepository;
@@ -45,7 +52,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -73,6 +82,7 @@ public class MypageService {
     private final CartRepository cartRepository;
     private final WishRepository wishRepository;
     private final OrderMenuRepository orderMenuRepository;
+    private final ReceiptRepository receiptRepository;
 
     @Autowired
     EntityManager em;
@@ -202,4 +212,70 @@ public class MypageService {
         );
     }
 
+    public Map<String, Object> getMyCart(LoginInfo loginInfo) {
+        userService.checkUser(loginInfo.getUserId());
+
+        List<String> cartGoodsCodeList = new ArrayList<>();
+        HashMap<String, Integer> cartMap = new HashMap<>();
+        cartRepository.findByUserId(loginInfo.getUserId()).stream().forEach(cart -> {
+            cartGoodsCodeList.add(cart.getGoodsCode());
+            cartMap.put(cart.getGoodsCode(), cart.getCount());
+        });
+
+        List<MyCartDto> myCartList = goodsRepository.findByGoodsCodeInAndGoodsState
+            (cartGoodsCodeList, GoodsType.State.NORMAL).stream().map(goods -> {
+                return new MyCartDto(goods, cartMap.get(goods.getGoodsCode()));
+            }).toList();
+
+        return Map.of(
+            "result", myCartList
+        );
+    }
+
+    public Map<String, Object> getMyWishList(LoginInfo loginInfo) {
+        userService.checkUser(loginInfo.getUserId());
+
+        List<String> wishGoodsCodeList = wishRepository.findByUserId
+            (loginInfo.getUserId()).stream().map(Wish::getGoodsCode).toList();
+
+        List<Goods> myWishList = goodsRepository.findByGoodsCodeInAndGoodsState
+            (wishGoodsCodeList, GoodsType.State.NORMAL);
+
+        return Map.of(
+            "result", myWishList
+        );
+    }
+
+    public Map<String, Object> getMyPurchaseList(LoginInfo loginInfo) {
+       userService.checkUser(loginInfo.getUserId());
+
+        List<Receipt> receipts = receiptRepository.findByUserIdAndStatus(loginInfo.getUserId(), true);
+
+        return Map.of(
+            "result", receipts
+        );
+    }
+
+    public Map<String, Object> getMyPurchaseDetail(LoginInfo loginInfo, String receiptCode) {
+        userService.checkUser(loginInfo.getUserId());
+
+        receiptRepository.findByReceiptCode(receiptCode)
+            .orElseThrow(() -> new ClientException("구매정보가 확인되지 않습니다."));
+
+        List<String> purchaseGoodsCodeList = new ArrayList<>();
+        HashMap<String, OrderMenu> orderMenuMap = new HashMap<>();
+        orderMenuRepository.findByReceiptCode(receiptCode).stream().forEach(menu -> {
+            purchaseGoodsCodeList.add(menu.getGoodsCode());
+            orderMenuMap.put(menu.getGoodsCode(), menu);
+        });
+
+        List<MyPurchaseDto> result = goodsRepository.findByGoodsCodeInAndGoodsState
+            (purchaseGoodsCodeList, GoodsType.State.NORMAL).stream().map(goods -> {
+            return new MyPurchaseDto(goods, orderMenuMap.get(goods.getGoodsCode()));
+        }).toList();
+
+        return Map.of(
+            "result", result
+        );
+    }
 }
