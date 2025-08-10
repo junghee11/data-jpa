@@ -83,4 +83,9 @@ public class UserController {
         return userService.resetUserPassword(resolveToken(token), request);
     }
 
+    @PostMapping("/leave")
+    public Map<String, Object> userLeave(@RequestHeader(value = "Authorization") String token) {
+        return userService.userLeave(resolveToken(token));
+    }
+
 }

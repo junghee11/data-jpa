@@ -27,11 +27,14 @@ public class OrderMenu {
     @Column(name = "receipt_code")
     private String receiptCode;
 
-    @Column(name = "good_code")
+    @Column(name = "goods_code")
     private String goodsCode;
 
     @Column(name = "user_id")
     private String userId;
+
+    @Column(name = "goods_name")
+    private String goodsName;
 
     private Long price;
 
@@ -44,10 +47,11 @@ public class OrderMenu {
     }
 
     @Builder
-    public OrderMenu(String orderMenuCode, String goodsCode, String userId, Long price, Integer count) {
+    public OrderMenu(String orderMenuCode, String goodsCode, String userId, String goodsName, Long price, Integer count) {
         this.orderMenuCode = orderMenuCode;
         this.goodsCode = goodsCode;
         this.userId = userId;
+        this.goodsName = goodsName;
         this.price = price;
         this.count = count;
     }

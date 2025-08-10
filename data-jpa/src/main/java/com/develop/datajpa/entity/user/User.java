@@ -86,6 +86,13 @@ public class User {
         this.player = player;
     }
 
+    public void setRole(Integer role) {
+        if (role == UserType.Role.DEVELOPER.ordinal() || role == UserType.Role.ADMIN.ordinal()) {
+            throw new ClientException("허용되지 않은 요청입니다");
+        }
+        this.role = role;
+    }
+
     @Builder
     public User(String userId, String pw, String name, String nickname, String phone, String country, String ip) {
         this.userId = userId;

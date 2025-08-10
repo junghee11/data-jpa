@@ -1,18 +1,13 @@
 package com.develop.datajpa.dto.shop;
 
-import com.develop.datajpa.entity.shop.Cart;
 import com.develop.datajpa.entity.shop.Goods;
 import com.develop.datajpa.entity.shop.OrderMenu;
-import com.develop.datajpa.entity.shop.Receipt;
-import jakarta.persistence.Column;
 import lombok.Data;
 
 @Data
-public class MyCartDto {
+public class MyReceiptDto {
 
     private String goodsCode;
-
-    private String imgUrl;
 
     private String name;
 
@@ -30,14 +25,13 @@ public class MyCartDto {
 
     private boolean onSale;
 
-    public MyCartDto(Goods goods, int count) {
+    public MyReceiptDto(Goods goods, OrderMenu orderMenu) {
         this.goodsCode = goods.getGoodsCode();
         this.name = goods.getName();
-        this.imgUrl = goods.getImgUrl();
-        this.count = count;
+        this.count = orderMenu.getCount();
         this.team = goods.getTeam();
         this.description = goods.getDescription();
-        this.price = goods.getPrice();
+        this.price = orderMenu.getPrice();
         this.star = goods.getStar();
         this.stock = goods.getStock();
         this.onSale = goods.isOnSale();

@@ -13,28 +13,16 @@ public class MyPurchaseDto {
 
     private Integer count;
 
-    private String team;
-
-    private String description;
+    private String imgUrl;
 
     private Long price;
 
-    private Double star;
-
-    private Integer stock;
-
-    private boolean onSale;
-
     public MyPurchaseDto(Goods goods, OrderMenu orderMenu) {
         this.goodsCode = goods.getGoodsCode();
-        this.name = goods.getName();
+        this.name = orderMenu.getGoodsName();
         this.count = orderMenu.getCount();
-        this.team = goods.getTeam();
-        this.description = goods.getDescription();
+        this.imgUrl = goods.getImgUrl();
         this.price = orderMenu.getPrice();
-        this.star = goods.getStar();
-        this.stock = goods.getStock();
-        this.onSale = goods.isOnSale();
     }
 
 }

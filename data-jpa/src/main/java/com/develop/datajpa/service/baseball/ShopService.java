@@ -215,6 +215,7 @@ public class ShopService {
         OrderMenu orderMenu = OrderMenu.builder()
             .orderMenuCode(createOrderCode(goods.getGoodsCode()))
             .goodsCode(goods.getGoodsCode())
+            .goodsName(goods.getName())
             .userId(loginInfo.getUserId())
             .price(price)
             .count(request.getCount())
@@ -252,15 +253,6 @@ public class ShopService {
 
         User user = userService.checkUser(orderList.get(0).getUserId());
 
-        Receipt receipt = Receipt.builder()
-            .receiptCode(response.getTid())
-            .userId(user.getUserId())
-            .payment(Payment.KAKAO_PAY.name())
-            .payId(response.getAid())
-            .totalPrice((long) response.getAmount().getTotal())
-            .build();
-        receiptRepository.save(receipt);
-
         orderList.stream().forEach(orderMenu -> {
             Goods goods = goodsRepository.findByGoodsCode(orderMenu.getGoodsCode())
                 .orElseThrow(() -> new ClientException("제품 정보가 확인되지 않습니다."));
@@ -272,6 +264,21 @@ public class ShopService {
             goods.updateStock(-orderMenu.getCount());
             goodsRepository.save(goods);
         });
+
+        String receiptDesc = orderList.get(0).getGoodsName();
+        if (orderList.size() > 1) {
+            receiptDesc += "외 " + (orderList.size() - 1) + "건";
+        }
+
+        Receipt receipt = Receipt.builder()
+            .receiptCode(response.getTid())
+            .userId(user.getUserId())
+            .payment(Payment.KAKAO_PAY.name())
+            .payId(response.getAid())
+            .desc(receiptDesc)
+            .totalPrice((long) response.getAmount().getTotal())
+            .build();
+        receiptRepository.save(receipt);
 
         userRepository.save(user);
 
@@ -356,6 +363,7 @@ public class ShopService {
                 .orderMenuCode(createOrderCode(goods.getGoodsCode()))
                 .goodsCode(goods.getGoodsCode())
                 .userId(loginInfo.getUserId())
+                .goodsName(goods.getName())
                 .price(price)
                 .count(cart.getCount())
                 .build();

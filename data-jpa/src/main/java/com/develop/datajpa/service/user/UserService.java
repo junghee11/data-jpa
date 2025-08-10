@@ -316,4 +316,15 @@ public class UserService {
             "message", "비밀번호가 재설정되었습니다."
         );
     }
+
+    public Map<String, Object> userLeave(LoginInfo loginInfo) {
+        User user = checkUser(loginInfo.getUserId());
+
+        user.setRole(Role.WITHDRAWAL.ordinal());
+        userRepository.save(user);
+
+        return Map.of(
+            "message", "탈퇴처리 되었습니다."
+        );
+    }
 }

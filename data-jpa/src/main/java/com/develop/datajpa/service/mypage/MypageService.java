@@ -217,7 +217,7 @@ public class MypageService {
 
         List<String> cartGoodsCodeList = new ArrayList<>();
         HashMap<String, Integer> cartMap = new HashMap<>();
-        cartRepository.findByUserId(loginInfo.getUserId()).stream().forEach(cart -> {
+        cartRepository.findByUserId(loginInfo.getUserId()).forEach(cart -> {
             cartGoodsCodeList.add(cart.getGoodsCode());
             cartMap.put(cart.getGoodsCode(), cart.getCount());
         });
@@ -264,7 +264,7 @@ public class MypageService {
 
         List<String> purchaseGoodsCodeList = new ArrayList<>();
         HashMap<String, OrderMenu> orderMenuMap = new HashMap<>();
-        orderMenuRepository.findByReceiptCode(receiptCode).stream().forEach(menu -> {
+        orderMenuRepository.findByReceiptCode(receiptCode).forEach(menu -> {
             purchaseGoodsCodeList.add(menu.getGoodsCode());
             orderMenuMap.put(menu.getGoodsCode(), menu);
         });
