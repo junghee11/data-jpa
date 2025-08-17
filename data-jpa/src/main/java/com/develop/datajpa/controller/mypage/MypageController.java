@@ -9,6 +9,7 @@ import com.develop.datajpa.request.article.ModifyArticleRequest;
 import com.develop.datajpa.request.article.ToggleCommentRequest;
 import com.develop.datajpa.request.mypage.SelectMyTeamRequest;
 import com.develop.datajpa.service.article.ArticleService;
+import com.develop.datajpa.service.image.ImageService;
 import com.develop.datajpa.service.mypage.MypageService;
 import jakarta.validation.Valid;
 import jdk.jfr.Frequency;
@@ -21,7 +22,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
@@ -96,6 +99,12 @@ public class MypageController {
     public Map<String, Object> getMyPurchaseDetail(@RequestHeader(value = "Authorization") String token,
                                                    @PathVariable(value = "id") String receiptCode) {
         return mypageService.getMyPurchaseDetail(resolveToken(token), receiptCode);
+    }
+
+    @PostMapping("/profile/image")
+    public Map<String, Object> changeProfileImage(@RequestHeader(value = "Authorization") String token,
+                                                  @RequestPart(value = "file") MultipartFile file) {
+        return mypageService.changeProfileImage(resolveToken(token), file);
     }
 
 }

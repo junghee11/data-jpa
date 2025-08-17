@@ -4,9 +4,12 @@ import com.develop.datajpa.entity.baseball.MatchSchedule;
 import com.develop.datajpa.entity.baseball.MatchType.MatchResult;
 import com.develop.datajpa.entity.baseball.MatchType.TeamCode;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,6 +20,12 @@ public interface MatchScheduleRepository extends JpaRepository<MatchSchedule, Lo
 
     Optional<MatchSchedule> findByIdxAndMatchResult(Long id, MatchResult result);
 
-    List<MatchSchedule> findByHomeTeamOrAwayTeamOrderByMatchDate(TeamCode home, TeamCode away);
+    @Query("SELECT m FROM MatchSchedule m " +
+        "WHERE m.matchDate BETWEEN :startDate AND :endDate " +
+        "AND (m.homeTeam = :team OR m.awayTeam = :team)")
+    List<MatchSchedule> findByDateRangeAndTeam(
+        @Param("startDate") LocalDate startDate,
+        @Param("endDate") LocalDate endDate,
+        @Param("team") TeamCode team);
 
 }

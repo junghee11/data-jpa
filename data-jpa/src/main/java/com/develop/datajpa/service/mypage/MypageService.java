@@ -42,6 +42,7 @@ import com.develop.datajpa.request.article.ModifyArticleRequest;
 import com.develop.datajpa.request.article.ToggleCommentRequest;
 import com.develop.datajpa.request.mypage.SelectMyTeamRequest;
 import com.develop.datajpa.response.ClientException;
+import com.develop.datajpa.service.image.ImageService;
 import com.develop.datajpa.service.user.UserService;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -51,6 +52,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -83,6 +85,7 @@ public class MypageService {
     private final WishRepository wishRepository;
     private final OrderMenuRepository orderMenuRepository;
     private final ReceiptRepository receiptRepository;
+    private final ImageService imageService;
 
     @Autowired
     EntityManager em;
@@ -276,6 +279,21 @@ public class MypageService {
 
         return Map.of(
             "result", result
+        );
+    }
+
+    public Map<String, Object> changeProfileImage(LoginInfo loginInfo, MultipartFile file) {
+        User user = userService.checkUser(loginInfo.getUserId());
+
+        String userImgCategory = "user/profile/";
+        String imgUrl = imageService.upload(userImgCategory, file);
+
+        user.setProfileImgUrl(imgUrl);
+        userRepository.save(user);
+
+        return Map.of(
+            "message", "프로필 이미지가 변경되었습니다",
+            "imageUrl", imgUrl
         );
     }
 }

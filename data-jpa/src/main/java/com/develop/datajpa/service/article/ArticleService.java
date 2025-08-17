@@ -22,6 +22,7 @@ import com.develop.datajpa.request.article.GetCommentListRequest;
 import com.develop.datajpa.request.article.ModifyArticleRequest;
 import com.develop.datajpa.request.article.ToggleCommentRequest;
 import com.develop.datajpa.response.ClientException;
+import com.develop.datajpa.service.image.ImageService;
 import com.develop.datajpa.service.user.UserService;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -51,6 +54,7 @@ public class ArticleService {
     private final UserRepository userRepository;
     private final CommentRepository commentRepository;
     private final CommentRecommendRepository commentRecommendRepository;
+    private final ImageService imageService;
 
     @Autowired
     EntityManager em;
@@ -59,9 +63,18 @@ public class ArticleService {
         Page<Article> articles = articleRepository.findByCategoryAndStateOrderByCreatedAtDesc
             (request.getCategory().name(), ArticleState.ACTIVE.ordinal(), PageRequest.of(request.getPage() - 1, 10));
 
+        Set<String> userIds = articles.getContent().stream().map(Article::getUserId).collect(Collectors.toSet());
+
+        Map<String, User> users = userRepository.findByUserIdIn(userIds).stream()
+            .collect(Collectors.toMap(User::getUserId, u -> u));
+
+        List<ArticleDto> result = articles.getContent().stream().map(article -> {
+            return new ArticleDto(article, users.get(article.getUserId()));
+        }).toList();
+
         return Map.of(
             "pageCount", articles.getTotalPages(),
-            "result", articles.getContent()
+            "result", result
         );
     }
 

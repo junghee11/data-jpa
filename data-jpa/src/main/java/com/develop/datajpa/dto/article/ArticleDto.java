@@ -33,6 +33,8 @@ public class ArticleDto {
 
     private Integer grade;
 
+    private String profileImgUrl;
+
     public ArticleDto(Article article, User user) {
         this.idx = article.getIdx();
         this.category = article.getCategory();
@@ -46,6 +48,7 @@ public class ArticleDto {
         this.name = user.getName();
         this.nickname = user.getNickname();
         this.grade = user.getGrade();
+        this.profileImgUrl = user.getProfileImgUrl();
     }
 
 }

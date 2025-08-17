@@ -7,6 +7,7 @@ import com.develop.datajpa.entity.baseball.Food;
 import com.develop.datajpa.entity.baseball.MatchSchedule;
 import com.develop.datajpa.entity.baseball.MatchType.TeamCode;
 import com.develop.datajpa.entity.baseball.Player;
+import com.develop.datajpa.entity.baseball.QMatchSchedule;
 import com.develop.datajpa.entity.baseball.QReview;
 import com.develop.datajpa.entity.baseball.Restaurants;
 import com.develop.datajpa.entity.baseball.Review;
@@ -58,10 +59,13 @@ public class BaseballService {
 
     public Map<String, Object> getMatchList(TeamCode team) {
         List<MatchSchedule> matchSchedules;
+
         if (TeamCode.ALL.equals(team)) {
             matchSchedules = matchScheduleRepository.findByMatchDate(LocalDate.now());
         } else {
-            matchSchedules = matchScheduleRepository.findByHomeTeamOrAwayTeamOrderByMatchDate(team, team);
+            LocalDate today = LocalDate.now();
+            matchSchedules = matchScheduleRepository.findByDateRangeAndTeam
+                (today.minusDays(7), today.plusDays(7), team);
         }
 
         Map<String, String> imgList = new HashMap<String, String>();
