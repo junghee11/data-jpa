@@ -18,7 +18,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
@@ -32,8 +34,7 @@ public class ArticleController {
     private final ArticleService articleService;
 
     @GetMapping("")
-    public Map<String, Object> getArticleList(@RequestHeader(value = "Authorization", required = false) String token,
-                                              @Valid GetArticleListRequest request) {
+    public Map<String, Object> getArticleList(@Valid GetArticleListRequest request) {
         return articleService.getArticleList(request);
     }
 
@@ -83,6 +84,11 @@ public class ArticleController {
     public Map<String, Object> toggleComment(@RequestHeader(value = "Authorization") String token,
                                              @Valid @RequestBody ToggleCommentRequest request) {
         return articleService.toggleComment(resolveToken(token), request);
+    }
+
+    @PostMapping("/image")
+    public Map<String, Object> uploadArticleImage(@RequestPart(value = "file") MultipartFile file) {
+        return articleService.uploadArticleImage(file);
     }
 
 }

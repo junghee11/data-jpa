@@ -3,6 +3,7 @@ package com.develop.datajpa.entity.article;
 public class ArticleType {
 
     public enum Category {
+        ALL,
         NOTICE,
         FOOD,
         GOODS;

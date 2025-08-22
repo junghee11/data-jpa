@@ -140,10 +140,10 @@ public class ShopService {
         userService.checkUser(loginInfo.getUserId());
 
         Optional<Goods> goods = goodsRepository.findByGoodsCode(request.getId());
-        if (goods.isEmpty() || goods.get().isOnSale()) {
+        if (goods.isEmpty() || !goods.get().isOnSale()) {
             throw new ClientException("판매중인 상품이 아닙니다.");
-        } else if (goods.get().getStock() <= 0) {
-            throw new ClientException("상품의 재고가 부족합니다입니다.");
+        } else if (goods.get().getStock() <= request.getCount()) {
+            throw new ClientException("상품의 재고가 부족합니다.");
         }
 
         Optional<Cart> cart = cartRepository.findByGoodsCode(request.getId());
@@ -234,7 +234,7 @@ public class ShopService {
     private Goods getGoods(String goodsCode, int count) {
         Goods goods = goodsRepository.findByGoodsCode(goodsCode)
             .orElseThrow(() -> new ClientException("제품 정보가 확인되지 않습니다."));
-        if (goods.isOnSale()) {
+        if (!goods.isOnSale()) {
             throw new ClientException(goods.getName() + "은/는 현재 판매중인 상품이 아닙니다");
         } else if (goods.getStock() < count) {
             throw new ClientException("상품 재고가 부족합니다");
@@ -266,6 +266,7 @@ public class ShopService {
         });
 
         String receiptDesc = orderList.get(0).getGoodsName();
+
         if (orderList.size() > 1) {
             receiptDesc += "외 " + (orderList.size() - 1) + "건";
         }
@@ -275,7 +276,7 @@ public class ShopService {
             .userId(user.getUserId())
             .payment(Payment.KAKAO_PAY.name())
             .payId(response.getAid())
-            .desc(receiptDesc)
+            .receiptDesc(receiptDesc)
             .totalPrice((long) response.getAmount().getTotal())
             .build();
         receiptRepository.save(receipt);

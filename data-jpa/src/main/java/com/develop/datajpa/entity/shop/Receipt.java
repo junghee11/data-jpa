@@ -39,7 +39,8 @@ public class Receipt {
 
     private Boolean status;
 
-    private String desc;
+    @Column(name = "receipt_desc")
+    private String receiptDesc;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -56,12 +57,12 @@ public class Receipt {
     }
 
     @Builder
-    public Receipt(String receiptCode, String userId, String payment, String payId, String desc, Long totalPrice) {
+    public Receipt(String receiptCode, String userId, String payment, String payId, String receiptDesc, Long totalPrice) {
         this.receiptCode = receiptCode;
         this.userId = userId;
         this.payment = payment;
         this.payId = payId;
-        this.desc = desc;
+        this.receiptDesc = receiptDesc;
         this.totalPrice = totalPrice;
     }
 }

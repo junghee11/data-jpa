@@ -14,6 +14,8 @@ public interface ArticleRepository extends JpaRepository<Article, Long> {
 
     Page<Article> findByCategoryAndStateOrderByCreatedAtDesc(String category, int state, Pageable pageable);
 
+    Page<Article> findByStateOrderByCreatedAtDesc(int state, Pageable pageable);
+
     Optional<Article> findByIdxAndState(long idx, int state);
 
     List<Article> findByUserIdAndStateOrderByCreatedAtDesc(String userId, int state);

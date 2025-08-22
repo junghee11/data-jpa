@@ -84,9 +84,13 @@ public class UserService {
     }
 
     public Map<String, Object> getUserInfo(LoginInfo loginInfo) {
-        UserDto user = userRepository.findByUserId(loginInfo.getUserId());
+        User user = checkUser(loginInfo.getUserId());
         if (isNull(user)) {
             throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "회원정보가 확인되지 않습니다.");
+        } else if (user.getRole() == Role.DORMANT.ordinal()) {
+            throw new ClientException("휴면회원 입니다. 휴면해제 후 로그인 해주세요.");
+        } else if (user.getRole() == Role.WITHDRAWAL.ordinal()) {
+            throw new ClientException("탈퇴처리된 회원입니다.");
         }
 
         return Map.of(

@@ -2,6 +2,7 @@ package com.develop.datajpa.controller.baseball;
 
 
 import com.develop.datajpa.entity.baseball.MatchType.TeamCode;
+import com.develop.datajpa.request.baseball.GetMatchListRequest;
 import com.develop.datajpa.request.baseball.GetPlayerInfoRequest;
 import com.develop.datajpa.request.baseball.GetStadiumInfoRequest;
 import com.develop.datajpa.request.baseball.LeaveReviewRequest;
@@ -30,8 +31,9 @@ public class BaseballController {
     private final BaseballService baseballService;
 
     @GetMapping("/schedule/{team}")
-    public Map<String, Object> getMatchList(@PathVariable("team") TeamCode team) {
-        return baseballService.getMatchList(team);
+    public Map<String, Object> getMatchList(@PathVariable("team") TeamCode team,
+                                            GetMatchListRequest request) {
+        return baseballService.getMatchList(team, request.getDate());
     }
 
     @GetMapping("/team/{team}")

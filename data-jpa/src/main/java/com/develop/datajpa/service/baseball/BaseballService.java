@@ -57,19 +57,18 @@ public class BaseballService {
     @Autowired
     EntityManager em;
 
-    public Map<String, Object> getMatchList(TeamCode team) {
+    public Map<String, Object> getMatchList(TeamCode team, LocalDate date) {
         List<MatchSchedule> matchSchedules;
 
         if (TeamCode.ALL.equals(team)) {
-            matchSchedules = matchScheduleRepository.findByMatchDate(LocalDate.now());
+            matchSchedules = matchScheduleRepository.findByMatchDate(date);
         } else {
-            LocalDate today = LocalDate.now();
             matchSchedules = matchScheduleRepository.findByDateRangeAndTeam
-                (today.minusDays(7), today.plusDays(7), team);
+                (date.withDayOfMonth(1), date.withDayOfMonth(date.lengthOfMonth()), team);
         }
 
         Map<String, String> imgList = new HashMap<String, String>();
-        teamRepository.findAll().stream().forEach(teamInfo -> {
+        teamRepository.findAll().forEach(teamInfo -> {
             imgList.put(teamInfo.getTeamCode().name(), teamInfo.getImgUrl());
         });
 

@@ -22,7 +22,7 @@ public interface MatchScheduleRepository extends JpaRepository<MatchSchedule, Lo
 
     @Query("SELECT m FROM MatchSchedule m " +
         "WHERE m.matchDate BETWEEN :startDate AND :endDate " +
-        "AND (m.homeTeam = :team OR m.awayTeam = :team)")
+        "AND (m.homeTeam = :team OR m.awayTeam = :team) ORDER BY m.matchDate asc")
     List<MatchSchedule> findByDateRangeAndTeam(
         @Param("startDate") LocalDate startDate,
         @Param("endDate") LocalDate endDate,

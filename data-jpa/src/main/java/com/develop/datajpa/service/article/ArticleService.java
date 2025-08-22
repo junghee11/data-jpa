@@ -4,6 +4,7 @@ import com.develop.datajpa.dto.article.ArticleDto;
 import com.develop.datajpa.dto.article.CommentDto;
 import com.develop.datajpa.dto.user.LoginInfo;
 import com.develop.datajpa.entity.article.Article;
+import com.develop.datajpa.entity.article.ArticleType.Category;
 import com.develop.datajpa.entity.article.ArticleType.ArticleState;
 import com.develop.datajpa.entity.article.ArticleType.CommentState;
 import com.develop.datajpa.entity.article.ArticleType.Recommend;
@@ -29,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,8 +62,14 @@ public class ArticleService {
     EntityManager em;
 
     public Map<String, Object> getArticleList(GetArticleListRequest request) {
-        Page<Article> articles = articleRepository.findByCategoryAndStateOrderByCreatedAtDesc
-            (request.getCategory().name(), ArticleState.ACTIVE.ordinal(), PageRequest.of(request.getPage() - 1, 10));
+        Pageable pageable = PageRequest.of(request.getPage() - 1, 10);
+        Page<Article> articles;
+        if (Category.ALL.equals(request.getCategory())) {
+            articles = articleRepository.findByStateOrderByCreatedAtDesc(ArticleState.ACTIVE.ordinal(), pageable);
+        } else {
+            articles = articleRepository.findByCategoryAndStateOrderByCreatedAtDesc
+                (request.getCategory().name(), ArticleState.ACTIVE.ordinal(), pageable);
+        }
 
         Set<String> userIds = articles.getContent().stream().map(Article::getUserId).collect(Collectors.toSet());
 
@@ -305,6 +313,15 @@ public class ArticleService {
         return Map.of(
             "comment", comment,
             "recommend", recommend
+        );
+    }
+    
+    public Map<String, Object> uploadArticleImage(MultipartFile file) {
+        String userImgCategory = "article/";
+        String imgUrl = imageService.upload(userImgCategory, file);
+
+        return Map.of(
+            "imageUrl", imgUrl
         );
     }
 

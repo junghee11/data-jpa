@@ -28,6 +28,7 @@ public class MatchType {
 
     public enum MatchResult {
         INITIAL("경기 시작전"),
+        ONGOING("경기 진행중"),
         HOME_WIN("홈팀 승"),
         AWAY_WIN("원정팀 승"),
         DRAW("무승부"),
