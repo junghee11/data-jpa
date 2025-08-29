@@ -25,6 +25,7 @@ import com.develop.datajpa.request.admin.UpdateFoodInfoRequest;
 import com.develop.datajpa.request.admin.UpdateRestaurantInfoRequest;
 import com.develop.datajpa.request.admin.UpdateTeamGoodsInfoRequest;
 import com.develop.datajpa.response.ClientException;
+import com.develop.datajpa.service.article.ArticleService;
 import com.develop.datajpa.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,7 @@ import java.util.Random;
 public class AdminService {
 
     private final UserService userService;
+    private final ArticleService articleService;
     private final MatchScheduleRepository matchScheduleRepository;
     private final RestaurantsRepository restaurantsRepository;
     private final FoodRepository foodRepository;
@@ -256,8 +258,7 @@ public class AdminService {
     public Map<String, Object> blockArticle(LoginInfo loginInfo, Long id) {
         userService.checkAdmin(loginInfo.getUserId());
 
-        Article article = articleRepository.findByIdxAndState(id, ArticleState.ACTIVE.ordinal())
-            .orElseThrow(() -> new ClientException("삭제되었거나 존재하지 않는 게시글입니다."));
+        Article article = articleService.getArticle(id);
 
         article.setState(ArticleState.BLOCKED.ordinal());
         articleRepository.save(article);
@@ -270,8 +271,7 @@ public class AdminService {
     public Map<String, Object> blockComment(LoginInfo loginInfo, Long id) {
         userService.checkAdmin(loginInfo.getUserId());
 
-        Comment comment = commentRepository.findByIdxAndState(id, CommentState.ACTIVE.ordinal())
-            .orElseThrow(() -> new ClientException("삭제되었거나 존재하지 않는 댓글입니다."));
+        Comment comment = articleService.getComment(id);
 
         comment.setState(CommentState.BLOCKED.ordinal());
         commentRepository.save(comment);

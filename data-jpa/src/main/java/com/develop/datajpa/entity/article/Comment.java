@@ -77,12 +77,15 @@ public class Comment {
         this.commentCount = commentCount;
     }
 
+    public void setCommentGroup(Long commentGroup) {
+        this.commentGroup = commentGroup;
+    }
+
     @Builder
-    public Comment(long articleIdx, String content, String userId, Long commentGroup, Integer depth) {
+    public Comment(long articleIdx, String content, String userId, Integer depth) {
         this.articleIdx = articleIdx;
         this.content = content;
         this.userId = userId;
-        this.commentGroup = commentGroup;
         this.depth = depth;
     }
 }

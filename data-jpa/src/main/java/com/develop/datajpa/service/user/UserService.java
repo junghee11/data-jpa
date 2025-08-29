@@ -84,7 +84,7 @@ public class UserService {
     }
 
     public Map<String, Object> getUserInfo(LoginInfo loginInfo) {
-        User user = checkUser(loginInfo.getUserId());
+        UserDto user = userRepository.findByUserId(loginInfo.getUserId());
         if (isNull(user)) {
             throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "회원정보가 확인되지 않습니다.");
         } else if (user.getRole() == Role.DORMANT.ordinal()) {

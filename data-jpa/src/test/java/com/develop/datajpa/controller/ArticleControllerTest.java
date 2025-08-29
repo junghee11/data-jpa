@@ -82,7 +82,7 @@ public class ArticleControllerTest {
         public void getArticleSuccess() throws Exception {
             Article mockArticle = new Article("FOOD", title, content, userId);
 
-            given(articleService.getArticle(1)).willReturn(
+            given(articleService.getArticleList(1)).willReturn(
                 Map.of(
                     "result", mockArticle
                 ));
@@ -98,7 +98,7 @@ public class ArticleControllerTest {
         @Test
         @DisplayName("특정 게시글 가져오기 - fail")
         public void getArticleFail() throws Exception {
-            given(articleService.getArticle(1)).willReturn(
+            given(articleService.getArticleList(1)).willReturn(
                 Map.of(
                     "result", new Article("FOOD", null, content, userId)
                 ));

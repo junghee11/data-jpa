@@ -136,6 +136,8 @@ public class MypageService {
 
         stadiumRepository.findByIdx(id).orElseThrow(() -> new ClientException("경기장 정보가 확인되지 않습니다."));
 
+        boolean toggle = true;
+
         if (isNull(user.getStadium())) {
             user.setStadium(new int[]{id});
         } else {
@@ -144,6 +146,7 @@ public class MypageService {
                 .collect(Collectors.toCollection(HashSet::new));
 
             if (!stadiumSet.add(id)) {
+                toggle = !toggle;
                 stadiumSet.remove(id);
             }
 
@@ -153,7 +156,7 @@ public class MypageService {
         userRepository.save(user);
 
         return Map.of(
-            "result", user.getStadium()
+            "toggle", toggle
         );
     }
 
@@ -172,6 +175,8 @@ public class MypageService {
 
         playerRepository.findByIdx(id).orElseThrow(() -> new ClientException("선수 정보가 확인되지 않습니다."));
 
+        boolean toggle = true;
+
         if (isNull(user.getPlayer())) {
             user.setPlayer(new int[]{id});
         } else {
@@ -180,6 +185,7 @@ public class MypageService {
                 .collect(Collectors.toCollection(HashSet::new));
 
             if (!playerSet.add(id)) {
+                toggle = false;
                 playerSet.remove(id);
             }
 
@@ -189,7 +195,7 @@ public class MypageService {
         userRepository.save(user);
 
         return Map.of(
-            "result", user.getPlayer()
+            "toggle", toggle
         );
     }
 

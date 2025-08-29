@@ -86,10 +86,15 @@ public class ArticleService {
         );
     }
 
-    @Transactional
-    public Map<String, Object> getArticle(long id) {
+    public Article getArticle(Long id) {
         Article article = articleRepository.findByIdxAndState(id, ArticleState.ACTIVE.ordinal())
             .orElseThrow(() -> new ClientException("삭제되었거나 존재하지 않는 게시글입니다."));
+        return article;
+    }
+
+    @Transactional
+    public Map<String, Object> getArticleList(long id) {
+        Article article = getArticle(id);
 
         User user = userRepository.findOptionalByUserId(article.getUserId())
             .orElseThrow(() -> new ClientException("작성자 정보가 확인되지 않습니다."));
@@ -128,8 +133,7 @@ public class ArticleService {
     public Map<String, Object> modifyArticle(LoginInfo loginInfo, ModifyArticleRequest request) {
         User user = userService.checkUser(loginInfo.getUserId());
 
-        Article article = articleRepository.findByIdxAndState(request.getId(), ArticleState.ACTIVE.ordinal())
-            .orElseThrow(() -> new ClientException("삭제되었거나 존재하지 않는 게시글입니다."));
+        Article article = getArticle(request.getId());
         if (!article.getUserId().equals(user.getUserId())) {
             throw new ClientException("해당 게시글 작성자가 아닙니다");
         }
@@ -144,8 +148,7 @@ public class ArticleService {
     public Map<String, Object> deleteArticle(LoginInfo loginInfo, long articleId) {
         User user = userService.checkUser(loginInfo.getUserId());
 
-        Article article = articleRepository.findByIdxAndState(articleId, ArticleState.ACTIVE.ordinal())
-            .orElseThrow(() -> new ClientException("삭제되었거나 존재하지 않는 게시글입니다."));
+        Article article = getArticle(articleId);
         if (!article.getUserId().equals(user.getUserId())) {
             throw new ClientException("해당 게시글 작성자가 아닙니다");
         }
@@ -191,12 +194,12 @@ public class ArticleService {
     private Page<Comment> getComments(GetCommentListRequest request) {
         Page<Comment> comments;
         if (isNull(request.getCommentId())) {
-            comments = commentRepository.findByArticleIdxAndStateAndDepth
-                (request.getId(), ArticleState.ACTIVE.ordinal(), 0,
+            comments = commentRepository.findByArticleIdxAndDepth
+                (request.getId(), 0,
                     PageRequest.of(request.getPage() - 1, 10, Sort.by("createdAt").ascending()));
         } else {
-            comments = commentRepository.findByArticleIdxAndStateAndCommentGroupAndDepth
-                (request.getId(), ArticleState.ACTIVE.ordinal(), request.getCommentId(), 1,
+            comments = commentRepository.findByArticleIdxAndCommentGroupAndDepth
+                (request.getId(), request.getCommentId(), 1,
                     PageRequest.of(request.getPage() - 1, 10, Sort.by("createdAt").ascending()));
         }
         return comments;
@@ -224,17 +227,21 @@ public class ArticleService {
     public Map<String, Object> addComment(LoginInfo loginInfo, AddCommentRequest request) {
         userService.checkUser(loginInfo.getUserId());
 
-        articleRepository.findByIdxAndState(request.getArticleId(), ArticleState.ACTIVE.ordinal())
-            .orElseThrow(() -> new ClientException("삭제되었거나 존재하지 않는 게시글입니다."));
+        Article article = getArticle(request.getArticleId());
 
         Comment newComment = Comment.builder()
             .articleIdx(request.getArticleId())
-            .commentGroup(nonNull(request.getCommentId()) ? request.getCommentId() : 0)
             .userId(loginInfo.getUserId())
             .content(request.getContent())
             .depth(nonNull(request.getCommentId()) ? 1 : 0)
             .build();
         Comment savedComment = commentRepository.save(newComment);
+
+        savedComment.setCommentGroup(nonNull(request.getCommentId()) ? request.getCommentId() : savedComment.getIdx());
+        commentRepository.save(savedComment);
+
+        article.addCommentCount();
+        articleRepository.save(article);
 
         return Map.of(
             "message", "댓글 작성이 완료되었습니다.",
@@ -242,19 +249,22 @@ public class ArticleService {
         );
     }
 
+    public Comment getComment(long commentId) {
+        Comment comment = commentRepository.findByIdxAndState(commentId, CommentState.ACTIVE.ordinal())
+            .orElseThrow(() -> new ClientException("삭제되었거나 존재하지 않는 댓글입니다."));
+        return comment;
+    }
+
     @Transactional
     public Map<String, Object> deleteComment(LoginInfo loginInfo, long commentId) {
         User user = userService.checkUser(loginInfo.getUserId());
 
-        Comment comment = commentRepository.findByIdxAndState(commentId, CommentState.ACTIVE.ordinal())
-            .orElseThrow(() -> new ClientException("삭제되었거나 존재하지 않는 댓글입니다."));
+        Comment comment = getComment(commentId);
         if (!comment.getUserId().equals(user.getUserId())) {
             throw new ClientException("해당 댓글 작성자가 아닙니다");
         }
 
         comment.setState(CommentState.REMOVED.ordinal());
-        comment.updateUp(-comment.getUp());
-        comment.updateDown(-comment.getDown());
         commentRepository.save(comment);
 
         List<CommentRecommend> recommends = commentRecommendRepository.findByCommentId(commentId);
@@ -269,8 +279,7 @@ public class ArticleService {
     public Map<String, Object> toggleComment(LoginInfo loginInfo, ToggleCommentRequest request) {
         User user = userService.checkUser(loginInfo.getUserId());
 
-        Comment comment = commentRepository.findByIdxAndState(request.getCommentId(), CommentState.ACTIVE.ordinal())
-            .orElseThrow(() -> new ClientException("삭제되었거나 존재하지 않는 댓글입니다."));
+        Comment comment = getComment(request.getCommentId());
 
         Boolean isUp = request.getRecommend() == Recommend.UP;
 

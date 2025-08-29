@@ -48,6 +48,10 @@ public class Article {
         this.viewCount++;
     }
 
+    public void addCommentCount() {
+        this.commentCount++;
+    }
+
     @Column(name = "user_id")
     private String userId;
 
