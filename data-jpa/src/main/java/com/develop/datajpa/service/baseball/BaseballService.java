@@ -132,8 +132,8 @@ public class BaseballService {
     }
 
     public Map<String, Object> getPlayerInfo(GetPlayerInfoRequest request) {
-        if ("all".equals(request.getKeyword())) {
-            Page<Player> players = playerRepository.findAll(PageRequest.of(request.getPage() - 1, 10,
+        if ("all".equals(request.getType())) {
+            Page<Player> players = playerRepository.findAll(PageRequest.of(request.getPage() - 1, 9,
                 Sort.by("name").ascending()));
             return Map.of(
                 "result", players.getContent(),

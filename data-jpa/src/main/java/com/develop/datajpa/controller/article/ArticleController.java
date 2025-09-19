@@ -41,7 +41,7 @@ public class ArticleController {
     @GetMapping("/{id}")
     public Map<String, Object> getArticle(@RequestHeader(value = "Authorization", required = false) String token,
                                           @PathVariable(value = "id") long id) {
-        return articleService.getArticleList(id);
+        return articleService.getArticleContent(id);
     }
 
     @PostMapping("")

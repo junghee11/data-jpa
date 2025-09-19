@@ -93,7 +93,7 @@ public class ArticleService {
     }
 
     @Transactional
-    public Map<String, Object> getArticleList(long id) {
+    public Map<String, Object> getArticleContent(long id) {
         Article article = getArticle(id);
 
         User user = userRepository.findOptionalByUserId(article.getUserId())
@@ -200,7 +200,7 @@ public class ArticleService {
         } else {
             comments = commentRepository.findByArticleIdxAndCommentGroupAndDepth
                 (request.getId(), request.getCommentId(), 1,
-                    PageRequest.of(request.getPage() - 1, 10, Sort.by("createdAt").ascending()));
+                    PageRequest.of(0, 10, Sort.by("createdAt").ascending()));
         }
         return comments;
     }
