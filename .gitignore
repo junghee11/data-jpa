@@ -36,8 +36,9 @@ out/
 ### VS Code ###
 .vscode/
 
-data-jpa/src/main/resources/application.yml
-data-jpa/src/main/resources/application.properties
+**/src/main/resources/application.yml
+**/src/main/resources/application.properties
+
 data-jpa/src/main/generated/
 
-spring-batch/src/main/resources/application.yml
+spring-domain/src/main/generated/

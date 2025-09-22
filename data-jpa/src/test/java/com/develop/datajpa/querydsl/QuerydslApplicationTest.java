@@ -1,7 +1,7 @@
 package com.develop.datajpa.querydsl;
 
-import com.develop.datajpa.entity.baseball.Food;
-import com.develop.datajpa.entity.baseball.QFood;
+import com.develop.domain.entity.baseball.Food;
+import com.develop.domain.entity.baseball.QFood;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Assertions;

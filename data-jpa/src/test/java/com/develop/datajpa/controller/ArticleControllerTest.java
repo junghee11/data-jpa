@@ -1,12 +1,12 @@
 package com.develop.datajpa.controller;
 
-import com.develop.datajpa.dto.article.CommentDto;
-import com.develop.datajpa.dto.user.LoginInfo;
-import com.develop.datajpa.entity.article.Article;
-import com.develop.datajpa.entity.article.ArticleType;
-import com.develop.datajpa.entity.article.ArticleType.Category;
-import com.develop.datajpa.entity.article.Comment;
-import com.develop.datajpa.entity.article.CommentRecommend;
+import com.develop.domain.dto.article.CommentDto;
+import com.develop.domain.dto.user.LoginInfo;
+import com.develop.domain.entity.article.Article;
+import com.develop.domain.entity.article.ArticleType;
+import com.develop.domain.entity.article.ArticleType.Category;
+import com.develop.domain.entity.article.Comment;
+import com.develop.domain.entity.article.CommentRecommend;
 import com.develop.datajpa.request.article.AddCommentRequest;
 import com.develop.datajpa.request.article.CreateArticleRequest;
 import com.develop.datajpa.request.article.GetArticleListRequest;

@@ -1,7 +1,7 @@
 package com.develop.datajpa.controller;
 
 
-import com.develop.datajpa.response.ClientException;
+import com.develop.core.exception.ClientException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;

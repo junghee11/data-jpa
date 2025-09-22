@@ -1,6 +1,6 @@
 package com.develop.datajpa.request.article;
 
-import com.develop.datajpa.entity.article.ArticleType.Category;
+import com.develop.domain.entity.article.ArticleType.Category;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;

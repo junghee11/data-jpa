@@ -2,3 +2,6 @@ rootProject.name = 'spring-boot-baseball'
 
 include 'data-jpa'
 include 'spring-batch'
+include 'spring-core'
+include 'spring-domain'
+include 'spring-websocket'

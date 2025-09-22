@@ -1,12 +1,12 @@
 package com.develop.datajpa.service.kakao;
 
-import com.develop.datajpa.dto.kakao.KakaoPayApproveDto;
-import com.develop.datajpa.dto.kakao.KakaoPayCancelDto;
-import com.develop.datajpa.dto.kakao.KakaoPayErrorDto;
-import com.develop.datajpa.dto.kakao.KakaoPayGetInfoDto;
-import com.develop.datajpa.dto.kakao.KakaoPayReadyDto;
-import com.develop.datajpa.entity.shop.Receipt;
-import com.develop.datajpa.response.ClientException;
+import com.develop.datajpa.response.kakao.KakaoPayApproveDto;
+import com.develop.datajpa.response.kakao.KakaoPayCancelDto;
+import com.develop.datajpa.response.kakao.KakaoPayErrorDto;
+import com.develop.datajpa.response.kakao.KakaoPayGetInfoDto;
+import com.develop.datajpa.response.kakao.KakaoPayReadyDto;
+import com.develop.domain.entity.shop.Receipt;
+import com.develop.core.exception.ClientException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;

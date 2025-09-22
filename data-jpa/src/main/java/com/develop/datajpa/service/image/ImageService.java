@@ -1,6 +1,6 @@
 package com.develop.datajpa.service.image;
 
-import com.develop.datajpa.response.ClientException;
+import com.develop.core.exception.ClientException;
 import io.awspring.cloud.s3.S3Exception;
 import io.awspring.cloud.s3.S3Resource;
 import io.awspring.cloud.s3.S3Template;

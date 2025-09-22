@@ -6,7 +6,7 @@ import com.develop.datajpa.request.shop.AddCartRequest;
 import com.develop.datajpa.request.shop.LeaveGoodsReviewRequest;
 import com.develop.datajpa.request.shop.ModifyGoodsReviewRequest;
 import com.develop.datajpa.request.shop.PurchaseGoodsRequest;
-import com.develop.datajpa.response.ClientException;
+import com.develop.core.exception.ClientException;
 import com.develop.datajpa.service.baseball.ShopService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

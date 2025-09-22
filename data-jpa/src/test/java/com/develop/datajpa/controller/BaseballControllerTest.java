@@ -1,7 +1,7 @@
 package com.develop.datajpa.controller;
 
-import com.develop.datajpa.dto.user.LoginInfo;
-import com.develop.datajpa.entity.baseball.Review;
+import com.develop.domain.dto.user.LoginInfo;
+import com.develop.domain.entity.baseball.Review;
 import com.develop.datajpa.request.baseball.LeaveReviewRequest;
 import com.develop.datajpa.service.baseball.BaseballService;
 import com.develop.datajpa.service.security.JwtProvider;

@@ -1,7 +1,7 @@
 package com.develop.datajpa.controller;
 
-import com.develop.datajpa.dto.kakao.KakaoPayReadyDto;
-import com.develop.datajpa.dto.user.LoginInfo;
+import com.develop.datajpa.response.kakao.KakaoPayReadyDto;
+import com.develop.domain.dto.user.LoginInfo;
 import com.develop.datajpa.request.shop.AddCartRequest;
 import com.develop.datajpa.request.shop.PurchaseGoodsRequest;
 import com.develop.datajpa.service.baseball.ShopService;

@@ -1,8 +1,6 @@
 package com.develop.datajpa.request.mypage;
 
-import com.develop.datajpa.entity.baseball.MatchType;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotBlank;
+import com.develop.domain.entity.baseball.MatchType;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;

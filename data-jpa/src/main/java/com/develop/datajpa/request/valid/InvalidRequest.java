@@ -1,6 +1,6 @@
 package com.develop.datajpa.request.valid;
 
-import com.develop.datajpa.response.ClientException;
+import com.develop.core.exception.ClientException;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 

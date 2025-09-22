@@ -1,6 +1,6 @@
 package com.develop.datajpa.request.user;
 
-import com.develop.datajpa.entity.user.SmsType;
+import com.develop.domain.entity.user.SmsType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;

@@ -1,6 +1,6 @@
 package com.develop.datajpa.request.admin;
 
-import com.develop.datajpa.entity.baseball.MatchType.TeamCode;
+import com.develop.domain.entity.baseball.MatchType.TeamCode;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

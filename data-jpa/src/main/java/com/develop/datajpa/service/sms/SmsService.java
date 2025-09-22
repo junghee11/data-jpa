@@ -1,6 +1,6 @@
 package com.develop.datajpa.service.sms;
 
-import com.develop.datajpa.response.ClientException;
+import com.develop.core.exception.ClientException;
 import lombok.RequiredArgsConstructor;
 import net.nurigo.sdk.NurigoApp;
 import net.nurigo.sdk.message.exception.NurigoMessageNotReceivedException;

@@ -1,6 +1,6 @@
 package com.develop.batch.tasklet;
 
-import com.develop.datajpa.repository.baseball.TeamRepository;
+import com.develop.domain.repository.baseball.TeamRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.StepContribution;

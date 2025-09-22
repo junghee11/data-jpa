@@ -1,7 +1,7 @@
 package com.develop.datajpa.controller.baseball;
 
 
-import com.develop.datajpa.entity.baseball.MatchType.TeamCode;
+import com.develop.domain.entity.baseball.MatchType.TeamCode;
 import com.develop.datajpa.request.baseball.GetMatchListRequest;
 import com.develop.datajpa.request.baseball.GetPlayerInfoRequest;
 import com.develop.datajpa.request.baseball.GetStadiumInfoRequest;

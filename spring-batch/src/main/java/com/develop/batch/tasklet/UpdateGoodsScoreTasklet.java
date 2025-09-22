@@ -1,10 +1,10 @@
 package com.develop.batch.tasklet;
 
-import com.develop.datajpa.dto.shop.GoodsReviewStarDto;
-import com.develop.datajpa.entity.shop.Goods;
-import com.develop.datajpa.entity.shop.GoodsType;
-import com.develop.datajpa.repository.shop.GoodsRepository;
-import com.develop.datajpa.repository.shop.GoodsReviewRepository;
+import com.develop.domain.dto.shop.GoodsReviewStarDto;
+import com.develop.domain.entity.shop.Goods;
+import com.develop.domain.entity.shop.GoodsType;
+import com.develop.domain.repository.shop.GoodsRepository;
+import com.develop.domain.repository.shop.GoodsReviewRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.StepContribution;

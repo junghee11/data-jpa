@@ -1,7 +1,7 @@
 package com.develop.datajpa.controller;
 
-import com.develop.datajpa.dto.user.LoginInfo;
-import com.develop.datajpa.entity.baseball.MatchType;
+import com.develop.domain.dto.user.LoginInfo;
+import com.develop.domain.entity.baseball.MatchType;
 import com.develop.datajpa.request.admin.AddFoodMenuOnRestaurantRequest;
 import com.develop.datajpa.request.admin.AddTeamGoodsRequest;
 import com.develop.datajpa.request.admin.RegisterRestaurantRequest;

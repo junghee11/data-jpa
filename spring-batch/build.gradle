@@ -2,7 +2,7 @@ bootJar { enabled = true }
 jar { enabled = false }
 
 dependencies {
-    implementation project(':data-jpa')
+    implementation project(':spring-domain')
 
     implementation 'org.springframework.boot:spring-boot-starter-batch'
 

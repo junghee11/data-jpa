@@ -1,6 +1,6 @@
 package com.develop.datajpa.request.shop;
 
-import com.develop.datajpa.entity.shop.OrderType.Payment;
+import com.develop.domain.entity.shop.OrderType.Payment;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
