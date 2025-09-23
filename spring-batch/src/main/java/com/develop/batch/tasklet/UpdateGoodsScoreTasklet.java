@@ -36,7 +36,7 @@ public class UpdateGoodsScoreTasklet implements Tasklet {
 
         List<Goods> goodsList = goodsRepository.findByOnSaleAndGoodsState(true, GoodsType.State.NORMAL);
         Map<String, Double> reviewSummary = goodsReviewRepository.findAverageStarsByGoods().stream()
-            .collect(Collectors.toMap(GoodsReviewStarDto::getGoodsCode, GoodsReviewStarDto::getStar));
+                .collect(Collectors.toMap(GoodsReviewStarDto::getGoodsCode, GoodsReviewStarDto::getStar));
 
         goodsList.stream().forEach(goods -> {
             if (nonNull(reviewSummary.get(goods.getGoodsCode()))) {

@@ -48,15 +48,15 @@ public class RestaurantsRepositoryTest {
     @Test
     public void createRestaurantSuccess() throws Exception {
         Restaurants restaurant = Restaurants.builder()
-            .name(name)
-            .stadium(stadium)
-            .inside(inside)
-            .address(address)
-            .phone(phone)
-            .openingHours(openingHours)
-            .website(website)
-            .imgUrl(imgUrl)
-            .build();
+                .name(name)
+                .stadium(stadium)
+                .inside(inside)
+                .address(address)
+                .phone(phone)
+                .openingHours(openingHours)
+                .website(website)
+                .imgUrl(imgUrl)
+                .build();
 
         Restaurants newRestaurant = restaurantsRepository.save(restaurant);
 
@@ -74,14 +74,14 @@ public class RestaurantsRepositoryTest {
     public void createRestaurantFail() throws Exception {
         Restaurants restaurant = Restaurants.builder()
 //            .name(name)
-            .stadium(stadium)
-            .inside(inside)
-            .address(address)
-            .phone(phone)
-            .openingHours(openingHours)
-            .website(website)
-            .imgUrl(imgUrl)
-            .build();
+                .stadium(stadium)
+                .inside(inside)
+                .address(address)
+                .phone(phone)
+                .openingHours(openingHours)
+                .website(website)
+                .imgUrl(imgUrl)
+                .build();
 
         assertThrows(DataIntegrityViolationException.class, () -> {
             restaurantsRepository.save(restaurant);
@@ -92,15 +92,15 @@ public class RestaurantsRepositoryTest {
     @Test
     public void updateRestaurantInfoSuccess() throws Exception {
         Restaurants restaurant = Restaurants.builder()
-            .name(name)
-            .stadium(stadium)
-            .inside(inside)
-            .address(address)
-            .phone(phone)
-            .openingHours(openingHours)
-            .website(website)
-            .imgUrl(imgUrl)
-            .build();
+                .name(name)
+                .stadium(stadium)
+                .inside(inside)
+                .address(address)
+                .phone(phone)
+                .openingHours(openingHours)
+                .website(website)
+                .imgUrl(imgUrl)
+                .build();
 
         Restaurants newRestaurant = restaurantsRepository.save(restaurant);
 
@@ -122,15 +122,15 @@ public class RestaurantsRepositoryTest {
     @Test
     public void updateRestaurantInfoFail() throws Exception {
         Restaurants restaurant = Restaurants.builder()
-            .name(name)
-            .stadium(stadium)
-            .inside(inside)
-            .address(address)
-            .phone(phone)
-            .openingHours(openingHours)
-            .website(website)
-            .imgUrl(imgUrl)
-            .build();
+                .name(name)
+                .stadium(stadium)
+                .inside(inside)
+                .address(address)
+                .phone(phone)
+                .openingHours(openingHours)
+                .website(website)
+                .imgUrl(imgUrl)
+                .build();
         Restaurants savedRestaurant = restaurantsRepository.save(restaurant);
 
         Restaurants findRestaurant = restaurantsRepository.findById(savedRestaurant.getIdx()).get();

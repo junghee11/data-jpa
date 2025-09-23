@@ -32,12 +32,12 @@ public class JwtProvider {
         log.info("salt = {}", salt);  // 이거 어디씀??
 
         return Jwts.builder()
-            // TODO 확인 후 필요없으면 지우기
+                // TODO 확인 후 필요없으면 지우기
 //            .setIssuedAt(new Date(System.currentTimeMillis()))
-            .claim("userId", user.getUserId())
-            .setExpiration(new Date(System.currentTimeMillis() + exp))
-            .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
-            .compact();
+                .claim("userId", user.getUserId())
+                .setExpiration(new Date(System.currentTimeMillis() + exp))
+                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .compact();
     }
 
     // Authorization Header를 통해 인증을 한다.
@@ -64,8 +64,8 @@ public class JwtProvider {
         }
 
         return LoginInfo.builder()
-            .userId(claims.get("userId", String.class))
-            .build();
+                .userId(claims.get("userId", String.class))
+                .build();
     }
 
     // 토큰 검증
@@ -88,9 +88,9 @@ public class JwtProvider {
     private static Claims parseClaims(String token) {
         try {
             return Jwts.parser()
-                .setSigningKey(SECRET_KEY)
-                .parseClaimsJws(token)
-                .getBody();
+                    .setSigningKey(SECRET_KEY)
+                    .parseClaimsJws(token)
+                    .getBody();
         } catch (Exception e) {
             throw new HttpClientErrorException(HttpStatus.PROXY_AUTHENTICATION_REQUIRED);
         }
@@ -102,9 +102,9 @@ public class JwtProvider {
 
         return Jwts.builder()
 //            .setIssuedAt(new Date(System.currentTimeMillis()))
-            .claim("userId", tempId)
-            .setExpiration(new Date(System.currentTimeMillis() + exp))
-            .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
-            .compact();
+                .claim("userId", tempId)
+                .setExpiration(new Date(System.currentTimeMillis() + exp))
+                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .compact();
     }
 }

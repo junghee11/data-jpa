@@ -1,10 +1,10 @@
 package com.develop.datajpa.controller;
 
-import com.develop.domain.dto.user.LoginInfo;
-import com.develop.domain.entity.baseball.Review;
 import com.develop.datajpa.request.baseball.LeaveReviewRequest;
 import com.develop.datajpa.service.baseball.BaseballService;
 import com.develop.datajpa.service.security.JwtProvider;
+import com.develop.domain.dto.user.LoginInfo;
+import com.develop.domain.entity.baseball.Review;
 import com.google.gson.Gson;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -62,18 +62,18 @@ public class BaseballControllerTest {
         request.setContent(content);
 
         given(baseballService.leaveReview(loginInfo, request)).willReturn(
-            Map.of("review", Review.class)
+                Map.of("review", Review.class)
         );
 
         Gson gson = new Gson();
         String requestBody = gson.toJson(request);
 
         mockMvc.perform(post("/baseball/restaurant/review")
-                .header("Authorization", "Bearer " + jwtToken)
-                .content(requestBody)
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andDo(print());
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print());
     }
 
     @Test
@@ -87,18 +87,18 @@ public class BaseballControllerTest {
         request.setContent(content);
 
         given(baseballService.leaveReview(loginInfo, request)).willReturn(
-            Map.of("message", "평점은 최대 5점을 초과할 수 없습니다")
+                Map.of("message", "평점은 최대 5점을 초과할 수 없습니다")
         );
 
         Gson gson = new Gson();
         String requestBody = gson.toJson(request);
 
         mockMvc.perform(post("/baseball/restaurant/review")
-                .header("Authorization", "Bearer " + jwtToken)
-                .content(requestBody)
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest())
-            .andDo(print());
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andDo(print());
     }
 
 }

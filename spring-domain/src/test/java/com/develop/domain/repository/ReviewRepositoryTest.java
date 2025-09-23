@@ -41,11 +41,11 @@ public class ReviewRepositoryTest {
     @Test
     public void createReviewSuccess() throws Exception {
         Review review = Review.builder()
-            .restaurantsId(restaurantsId)
-            .star(star)
-            .content(content)
-            .userId(userId)
-            .build();
+                .restaurantsId(restaurantsId)
+                .star(star)
+                .content(content)
+                .userId(userId)
+                .build();
 
         Review newReview = reviewRepository.save(review);
 
@@ -62,11 +62,11 @@ public class ReviewRepositoryTest {
     @Test
     public void createReviewFail() throws Exception {
         Review review = Review.builder()
-            .restaurantsId(restaurantsId)
-            .star(star)
-            .content(content)
+                .restaurantsId(restaurantsId)
+                .star(star)
+                .content(content)
 //            .userId(userId)
-            .build();
+                .build();
 
         assertThrows(DataIntegrityViolationException.class, () -> {
             reviewRepository.save(review);
@@ -77,7 +77,7 @@ public class ReviewRepositoryTest {
     @Test
     public void deleteReviewSuccess() throws Exception {
         Review review = reviewRepository.findById(1L)
-            .orElseThrow(() -> new ClientException("리뷰가 확인되지 않습니다."));
+                .orElseThrow(() -> new ClientException("리뷰가 확인되지 않습니다."));
 
         reviewRepository.delete(review);
 
@@ -91,7 +91,7 @@ public class ReviewRepositoryTest {
     @Test
     public void deleteReviewFail() throws Exception {
         Review review = reviewRepository.findById(1L)
-            .orElseThrow(() -> new ClientException("리뷰가 확인되지 않습니다."));
+                .orElseThrow(() -> new ClientException("리뷰가 확인되지 않습니다."));
 
         reviewRepository.delete(review);
 

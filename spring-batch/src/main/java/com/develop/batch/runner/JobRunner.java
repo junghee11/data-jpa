@@ -27,8 +27,8 @@ public class JobRunner {
         String jobName = env.getProperty("job.name");
 
         JobParameters jobParameters = new JobParametersBuilder()
-            .addLocalDateTime("date", LocalDateTime.now())
-            .toJobParameters();
+                .addLocalDateTime("date", LocalDateTime.now())
+                .toJobParameters();
 
 
         Job job = ctx.getBean(jobName, Job.class);

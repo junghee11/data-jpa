@@ -1,5 +1,9 @@
 package com.develop.datajpa.service.mypage;
 
+import com.develop.core.exception.ClientException;
+import com.develop.datajpa.request.mypage.SelectMyTeamRequest;
+import com.develop.datajpa.service.image.ImageService;
+import com.develop.datajpa.service.user.UserService;
 import com.develop.domain.dto.shop.MyCartDto;
 import com.develop.domain.dto.shop.MyPurchaseDto;
 import com.develop.domain.dto.user.LoginInfo;
@@ -10,13 +14,7 @@ import com.develop.domain.entity.article.Comment;
 import com.develop.domain.entity.baseball.Player;
 import com.develop.domain.entity.baseball.Stadium;
 import com.develop.domain.entity.baseball.Team;
-import com.develop.domain.entity.shop.Goods;
-import com.develop.domain.entity.shop.GoodsType;
-import com.develop.domain.entity.shop.OrderMenu;
-import com.develop.domain.entity.shop.OrderMenuRepository;
-import com.develop.domain.entity.shop.Receipt;
-import com.develop.domain.entity.shop.ReceiptRepository;
-import com.develop.domain.entity.shop.Wish;
+import com.develop.domain.entity.shop.*;
 import com.develop.domain.entity.user.User;
 import com.develop.domain.repository.article.ArticleRepository;
 import com.develop.domain.repository.article.CommentRepository;
@@ -27,23 +25,13 @@ import com.develop.domain.repository.shop.CartRepository;
 import com.develop.domain.repository.shop.GoodsRepository;
 import com.develop.domain.repository.shop.WishRepository;
 import com.develop.domain.repository.user.UserRepository;
-import com.develop.datajpa.request.mypage.SelectMyTeamRequest;
-import com.develop.core.exception.ClientException;
-import com.develop.datajpa.service.image.ImageService;
-import com.develop.datajpa.service.user.UserService;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
@@ -77,10 +65,10 @@ public class MypageService {
         }
 
         Team myTeam = teamRepository.findByTeamCode(user.getTeam())
-            .orElseThrow(() -> new ClientException("팀정보가 확인되지 않습니다."));
+                .orElseThrow(() -> new ClientException("팀정보가 확인되지 않습니다."));
 
         return Map.of(
-            "result", myTeam
+                "result", myTeam
         );
     }
 
@@ -91,13 +79,13 @@ public class MypageService {
         }
 
         teamRepository.findByTeamCode(request.getTeam())
-            .orElseThrow(() -> new ClientException("팀정보가 확인되지 않습니다."));
+                .orElseThrow(() -> new ClientException("팀정보가 확인되지 않습니다."));
 
         user.setTeam(request.getTeam());
         userRepository.save(user);
 
         return Map.of(
-            "message", "응원팀 설정이 완료되었습니다"
+                "message", "응원팀 설정이 완료되었습니다"
         );
     }
 
@@ -107,7 +95,7 @@ public class MypageService {
         List<Stadium> myStadiumList = stadiumRepository.findByIdxIn(user.getStadium());
 
         return Map.of(
-            "result", myStadiumList
+                "result", myStadiumList
         );
     }
 
@@ -122,8 +110,8 @@ public class MypageService {
             user.setStadium(new int[]{id});
         } else {
             Set<Integer> stadiumSet = Arrays.stream(user.getStadium())
-                .boxed()
-                .collect(Collectors.toCollection(HashSet::new));
+                    .boxed()
+                    .collect(Collectors.toCollection(HashSet::new));
 
             if (!stadiumSet.add(id)) {
                 toggle = !toggle;
@@ -136,7 +124,7 @@ public class MypageService {
         userRepository.save(user);
 
         return Map.of(
-            "toggle", toggle
+                "toggle", toggle
         );
     }
 
@@ -146,7 +134,7 @@ public class MypageService {
         List<Player> myPlayerList = playerRepository.findByIdxIn(user.getPlayer());
 
         return Map.of(
-            "result", myPlayerList
+                "result", myPlayerList
         );
     }
 
@@ -161,8 +149,8 @@ public class MypageService {
             user.setPlayer(new int[]{id});
         } else {
             Set<Integer> playerSet = Arrays.stream(user.getPlayer())
-                .boxed()
-                .collect(Collectors.toCollection(HashSet::new));
+                    .boxed()
+                    .collect(Collectors.toCollection(HashSet::new));
 
             if (!playerSet.add(id)) {
                 toggle = false;
@@ -175,7 +163,7 @@ public class MypageService {
         userRepository.save(user);
 
         return Map.of(
-            "toggle", toggle
+                "toggle", toggle
         );
     }
 
@@ -183,10 +171,10 @@ public class MypageService {
         User user = userService.checkUser(loginInfo.getUserId());
 
         List<Article> myArticleList = articleRepository.findByUserIdAndStateOrderByCreatedAtDesc
-            (user.getUserId(), ArticleState.ACTIVE.ordinal());
+                (user.getUserId(), ArticleState.ACTIVE.ordinal());
 
         return Map.of(
-            "result", myArticleList
+                "result", myArticleList
         );
     }
 
@@ -194,10 +182,10 @@ public class MypageService {
         User user = userService.checkUser(loginInfo.getUserId());
 
         List<Comment> myCommentList = commentRepository.findByUserIdAndStateOrderByCreatedAtDesc
-            (user.getUserId(), CommentState.ACTIVE.ordinal());
+                (user.getUserId(), CommentState.ACTIVE.ordinal());
 
         return Map.of(
-            "result", myCommentList
+                "result", myCommentList
         );
     }
 
@@ -212,12 +200,12 @@ public class MypageService {
         });
 
         List<MyCartDto> myCartList = goodsRepository.findByGoodsCodeInAndGoodsState
-            (cartGoodsCodeList, GoodsType.State.NORMAL).stream().map(goods -> {
-                return new MyCartDto(goods, cartMap.get(goods.getGoodsCode()));
-            }).toList();
+                (cartGoodsCodeList, GoodsType.State.NORMAL).stream().map(goods -> {
+            return new MyCartDto(goods, cartMap.get(goods.getGoodsCode()));
+        }).toList();
 
         return Map.of(
-            "result", myCartList
+                "result", myCartList
         );
     }
 
@@ -225,23 +213,23 @@ public class MypageService {
         userService.checkUser(loginInfo.getUserId());
 
         List<String> wishGoodsCodeList = wishRepository.findByUserId
-            (loginInfo.getUserId()).stream().map(Wish::getGoodsCode).toList();
+                (loginInfo.getUserId()).stream().map(Wish::getGoodsCode).toList();
 
         List<Goods> myWishList = goodsRepository.findByGoodsCodeInAndGoodsState
-            (wishGoodsCodeList, GoodsType.State.NORMAL);
+                (wishGoodsCodeList, GoodsType.State.NORMAL);
 
         return Map.of(
-            "result", myWishList
+                "result", myWishList
         );
     }
 
     public Map<String, Object> getMyPurchaseList(LoginInfo loginInfo) {
-       userService.checkUser(loginInfo.getUserId());
+        userService.checkUser(loginInfo.getUserId());
 
         List<Receipt> receipts = receiptRepository.findByUserIdAndStatus(loginInfo.getUserId(), true);
 
         return Map.of(
-            "result", receipts
+                "result", receipts
         );
     }
 
@@ -249,7 +237,7 @@ public class MypageService {
         userService.checkUser(loginInfo.getUserId());
 
         receiptRepository.findByReceiptCode(receiptCode)
-            .orElseThrow(() -> new ClientException("구매정보가 확인되지 않습니다."));
+                .orElseThrow(() -> new ClientException("구매정보가 확인되지 않습니다."));
 
         List<String> purchaseGoodsCodeList = new ArrayList<>();
         HashMap<String, OrderMenu> orderMenuMap = new HashMap<>();
@@ -259,12 +247,12 @@ public class MypageService {
         });
 
         List<MyPurchaseDto> result = goodsRepository.findByGoodsCodeInAndGoodsState
-            (purchaseGoodsCodeList, GoodsType.State.NORMAL).stream().map(goods -> {
+                (purchaseGoodsCodeList, GoodsType.State.NORMAL).stream().map(goods -> {
             return new MyPurchaseDto(goods, orderMenuMap.get(goods.getGoodsCode()));
         }).toList();
 
         return Map.of(
-            "result", result
+                "result", result
         );
     }
 
@@ -278,8 +266,8 @@ public class MypageService {
         userRepository.save(user);
 
         return Map.of(
-            "message", "프로필 이미지가 변경되었습니다",
-            "imageUrl", imgUrl
+                "message", "프로필 이미지가 변경되었습니다",
+                "imageUrl", imgUrl
         );
     }
 }

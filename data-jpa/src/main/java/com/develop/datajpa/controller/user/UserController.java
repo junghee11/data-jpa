@@ -1,24 +1,11 @@
 package com.develop.datajpa.controller.user;
 
-import com.develop.datajpa.request.user.CheckNicknameRequest;
-import com.develop.datajpa.request.user.CheckUserIdRequest;
-import com.develop.datajpa.request.user.CheckUserPhoneRequest;
-import com.develop.datajpa.request.user.FindUserIdRequest;
-import com.develop.datajpa.request.user.FindUserPwRequest;
-import com.develop.datajpa.request.user.ResetUserPwRequest;
-import com.develop.datajpa.request.user.SendPhoneSmsRequest;
-import com.develop.datajpa.request.user.UserLoginRequest;
-import com.develop.datajpa.request.user.UserSignUpRequest;
+import com.develop.datajpa.request.user.*;
 import com.develop.datajpa.service.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 

@@ -20,12 +20,12 @@ public class ImageService {
 
     @Value("${spring.cloud.aws.s3.bucket}")
     private String bucketName;
-    
+
     public String upload(String category, MultipartFile file) {
-        if(file.isEmpty()) {
+        if (file.isEmpty()) {
             throw new ClientException("파일이 확인되지 않습니다");
         }
-        
+
         try (InputStream is = file.getInputStream()) {
             String fileName = buildFileName(category, file.getOriginalFilename());
             S3Resource upload = s3Template.upload(bucketName, fileName, is);

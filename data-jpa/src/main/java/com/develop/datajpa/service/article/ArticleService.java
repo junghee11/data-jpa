@@ -1,11 +1,15 @@
 package com.develop.datajpa.service.article;
 
+import com.develop.core.exception.ClientException;
+import com.develop.datajpa.request.article.*;
+import com.develop.datajpa.service.image.ImageService;
+import com.develop.datajpa.service.user.UserService;
 import com.develop.domain.dto.article.ArticleDto;
 import com.develop.domain.dto.article.CommentDto;
 import com.develop.domain.dto.user.LoginInfo;
 import com.develop.domain.entity.article.Article;
-import com.develop.domain.entity.article.ArticleType.Category;
 import com.develop.domain.entity.article.ArticleType.ArticleState;
+import com.develop.domain.entity.article.ArticleType.Category;
 import com.develop.domain.entity.article.ArticleType.CommentState;
 import com.develop.domain.entity.article.ArticleType.Recommend;
 import com.develop.domain.entity.article.Comment;
@@ -16,15 +20,6 @@ import com.develop.domain.repository.article.ArticleRepository;
 import com.develop.domain.repository.article.CommentRecommendRepository;
 import com.develop.domain.repository.article.CommentRepository;
 import com.develop.domain.repository.user.UserRepository;
-import com.develop.datajpa.request.article.AddCommentRequest;
-import com.develop.datajpa.request.article.CreateArticleRequest;
-import com.develop.datajpa.request.article.GetArticleListRequest;
-import com.develop.datajpa.request.article.GetCommentListRequest;
-import com.develop.datajpa.request.article.ModifyArticleRequest;
-import com.develop.datajpa.request.article.ToggleCommentRequest;
-import com.develop.core.exception.ClientException;
-import com.develop.datajpa.service.image.ImageService;
-import com.develop.datajpa.service.user.UserService;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,27 +62,27 @@ public class ArticleService {
             articles = articleRepository.findByStateOrderByCreatedAtDesc(ArticleState.ACTIVE.ordinal(), pageable);
         } else {
             articles = articleRepository.findByCategoryAndStateOrderByCreatedAtDesc
-                (request.getCategory().name(), ArticleState.ACTIVE.ordinal(), pageable);
+                    (request.getCategory().name(), ArticleState.ACTIVE.ordinal(), pageable);
         }
 
         Set<String> userIds = articles.getContent().stream().map(Article::getUserId).collect(Collectors.toSet());
 
         Map<String, User> users = userRepository.findByUserIdIn(userIds).stream()
-            .collect(Collectors.toMap(User::getUserId, u -> u));
+                .collect(Collectors.toMap(User::getUserId, u -> u));
 
         List<ArticleDto> result = articles.getContent().stream().map(article -> {
             return new ArticleDto(article, users.get(article.getUserId()));
         }).toList();
 
         return Map.of(
-            "pageCount", articles.getTotalPages(),
-            "result", result
+                "pageCount", articles.getTotalPages(),
+                "result", result
         );
     }
 
     public Article getArticle(Long id) {
         Article article = articleRepository.findByIdxAndState(id, ArticleState.ACTIVE.ordinal())
-            .orElseThrow(() -> new ClientException("삭제되었거나 존재하지 않는 게시글입니다."));
+                .orElseThrow(() -> new ClientException("삭제되었거나 존재하지 않는 게시글입니다."));
         return article;
     }
 
@@ -96,7 +91,7 @@ public class ArticleService {
         Article article = getArticle(id);
 
         User user = userRepository.findOptionalByUserId(article.getUserId())
-            .orElseThrow(() -> new ClientException("작성자 정보가 확인되지 않습니다."));
+                .orElseThrow(() -> new ClientException("작성자 정보가 확인되지 않습니다."));
 
         if (isNull(user) || Role.WITHDRAWAL.ordinal() == user.getRole()) {
             throw new ClientException("탈퇴처리된 회원의 게시글입니다.");
@@ -108,7 +103,7 @@ public class ArticleService {
         ArticleDto result = new ArticleDto(article, user);
 
         return Map.of(
-            "result", result
+                "result", result
         );
     }
 
@@ -116,16 +111,16 @@ public class ArticleService {
         User user = userService.checkUser(loginInfo.getUserId());
 
         Article newArticle = Article.builder()
-            .title(request.getTitle())
-            .content(request.getContent())
-            .category(request.getCategory().name())
-            .userId(user.getUserId())
-            .build();
+                .title(request.getTitle())
+                .content(request.getContent())
+                .category(request.getCategory().name())
+                .userId(user.getUserId())
+                .build();
         Article savedArticle = articleRepository.save(newArticle);
 
         return Map.of(
-            "message", "게시글 작성이 완료되었습니다.",
-            "result", savedArticle
+                "message", "게시글 작성이 완료되었습니다.",
+                "result", savedArticle
         );
     }
 
@@ -170,8 +165,8 @@ public class ArticleService {
             }).collect(Collectors.toList());
 
             return Map.of(
-                "result", result,
-                "page", comments.getTotalPages()
+                    "result", result,
+                    "page", comments.getTotalPages()
             );
         }
 
@@ -184,8 +179,8 @@ public class ArticleService {
         }).collect(Collectors.toList());
 
         return Map.of(
-            "result", result,
-            "page", comments.getTotalPages()
+                "result", result,
+                "page", comments.getTotalPages()
         );
 
     }
@@ -194,12 +189,12 @@ public class ArticleService {
         Page<Comment> comments;
         if (isNull(request.getCommentId())) {
             comments = commentRepository.findByArticleIdxAndDepth
-                (request.getId(), 0,
-                    PageRequest.of(request.getPage() - 1, 10, Sort.by("createdAt").ascending()));
+                    (request.getId(), 0,
+                            PageRequest.of(request.getPage() - 1, 10, Sort.by("createdAt").ascending()));
         } else {
             comments = commentRepository.findByArticleIdxAndCommentGroupAndDepth
-                (request.getId(), request.getCommentId(), 1,
-                    PageRequest.of(0, 10, Sort.by("createdAt").ascending()));
+                    (request.getId(), request.getCommentId(), 1,
+                            PageRequest.of(0, 10, Sort.by("createdAt").ascending()));
         }
         return comments;
     }
@@ -208,7 +203,7 @@ public class ArticleService {
         Set<String> userIds = comments.stream().map(Comment::getUserId).collect(Collectors.toSet());
 
         Map<String, User> users = userRepository.findByUserIdIn(userIds).stream()
-            .collect(Collectors.toMap(User::getUserId, u -> u));
+                .collect(Collectors.toMap(User::getUserId, u -> u));
 
         return users;
     }
@@ -217,7 +212,7 @@ public class ArticleService {
         Set<Long> commentIds = comments.stream().map(Comment::getIdx).collect(Collectors.toSet());
 
         Map<Long, CommentRecommend> recommends = commentRecommendRepository.findByCommentIdInAndUserId
-            (commentIds, userId).stream().collect(Collectors.toMap(CommentRecommend::getCommentId, c -> c));
+                (commentIds, userId).stream().collect(Collectors.toMap(CommentRecommend::getCommentId, c -> c));
 
         return recommends;
     }
@@ -229,11 +224,11 @@ public class ArticleService {
         Article article = getArticle(request.getArticleId());
 
         Comment newComment = Comment.builder()
-            .articleIdx(request.getArticleId())
-            .userId(loginInfo.getUserId())
-            .content(request.getContent())
-            .depth(nonNull(request.getCommentId()) ? 1 : 0)
-            .build();
+                .articleIdx(request.getArticleId())
+                .userId(loginInfo.getUserId())
+                .content(request.getContent())
+                .depth(nonNull(request.getCommentId()) ? 1 : 0)
+                .build();
         Comment savedComment = commentRepository.save(newComment);
 
         savedComment.setCommentGroup(nonNull(request.getCommentId()) ? request.getCommentId() : savedComment.getIdx());
@@ -243,14 +238,14 @@ public class ArticleService {
         articleRepository.save(article);
 
         return Map.of(
-            "message", "댓글 작성이 완료되었습니다.",
-            "result", savedComment
+                "message", "댓글 작성이 완료되었습니다.",
+                "result", savedComment
         );
     }
 
     public Comment getComment(long commentId) {
         Comment comment = commentRepository.findByIdxAndState(commentId, CommentState.ACTIVE.ordinal())
-            .orElseThrow(() -> new ClientException("삭제되었거나 존재하지 않는 댓글입니다."));
+                .orElseThrow(() -> new ClientException("삭제되었거나 존재하지 않는 댓글입니다."));
         return comment;
     }
 
@@ -293,16 +288,16 @@ public class ArticleService {
             commentRepository.save(comment);
 
             CommentRecommend newRecommend = CommentRecommend.builder()
-                .commentId(comment.getIdx())
-                .userId(user.getUserId())
-                .up(isUp)
-                .down(!isUp)
-                .build();
+                    .commentId(comment.getIdx())
+                    .userId(user.getUserId())
+                    .up(isUp)
+                    .down(!isUp)
+                    .build();
             commentRecommendRepository.save(newRecommend);
 
             return Map.of(
-                "comment", comment,
-                "recommend", newRecommend
+                    "comment", comment,
+                    "recommend", newRecommend
             );
 
         }
@@ -319,17 +314,17 @@ public class ArticleService {
         commentRecommendRepository.save(recommend);
 
         return Map.of(
-            "comment", comment,
-            "recommend", recommend
+                "comment", comment,
+                "recommend", recommend
         );
     }
-    
+
     public Map<String, Object> uploadArticleImage(MultipartFile file) {
         String userImgCategory = "article/";
         String imgUrl = imageService.upload(userImgCategory, file);
 
         return Map.of(
-            "imageUrl", imgUrl
+                "imageUrl", imgUrl
         );
     }
 

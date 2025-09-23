@@ -16,12 +16,7 @@ dependencies {
 
     implementation 'net.nurigo:sdk:4.3.0'
 
-    testImplementation 'org.projectlombok:lombok:1.18.26'
-
     annotationProcessor 'org.projectlombok:lombok'
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testImplementation 'org.springframework.security:spring-security-test'
-    testImplementation 'com.google.code.gson:gson:2.9.0'
 
     implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
     annotationProcessor "com.querydsl:querydsl-apt:5.0.0:jakarta"
@@ -31,6 +26,15 @@ dependencies {
 
     implementation platform('io.awspring.cloud:spring-cloud-aws-dependencies:3.1.1')
     implementation 'io.awspring.cloud:spring-cloud-aws-starter-s3'
+
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
+    testImplementation 'com.google.code.gson:gson:2.9.0'
+
+    testImplementation 'org.projectlombok:lombok:1.18.26'
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.3'
+    testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.9.3'
 }
 
 tasks.register("prepareKotlinBuildScriptModel") {}

@@ -22,16 +22,16 @@ public class ExampleJobConfig {
     @Bean(name = "EXAMPLE_JOB")
     public Job ExampleJob() {
         return new JobBuilder("EXAMPLE_JOB", jobRepository)
-            .start(exampleStep())
-            .build();
+                .start(exampleStep())
+                .build();
     }
 
     @Bean(name = "EXAMPLE_STEP")
     public Step exampleStep() {
         return new StepBuilder("EXAMPLE_STEP", jobRepository)
-            .tasklet(exampleTasklet, transactionManager)
-            .allowStartIfComplete(true)
-            .build();
+                .tasklet(exampleTasklet, transactionManager)
+                .allowStartIfComplete(true)
+                .build();
     }
 
 }

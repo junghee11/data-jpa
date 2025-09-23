@@ -43,12 +43,12 @@ public class FoodRepositoryTest {
     @Test
     public void createFoodSuccess() throws Exception {
         Food food = Food.builder()
-            .restaurantsId(restaurantsId)
-            .name(name)
-            .description(description)
-            .price(price)
-            .imgUrl(imgUrl)
-            .build();
+                .restaurantsId(restaurantsId)
+                .name(name)
+                .description(description)
+                .price(price)
+                .imgUrl(imgUrl)
+                .build();
 
         Food newFood = foodRepository.save(food);
 
@@ -66,11 +66,11 @@ public class FoodRepositoryTest {
     public void createFoodFail() throws Exception {
         Food food = Food.builder()
 //            .restaurantsId(restaurantsId)
-            .name(name)
-            .description(description)
-            .price(price)
-            .imgUrl(imgUrl)
-            .build();
+                .name(name)
+                .description(description)
+                .price(price)
+                .imgUrl(imgUrl)
+                .build();
 
         assertThrows(DataIntegrityViolationException.class, () -> {
             foodRepository.save(food);
@@ -81,12 +81,12 @@ public class FoodRepositoryTest {
     @Test
     public void updateFoodSuccess() throws Exception {
         Food food = Food.builder()
-            .restaurantsId(restaurantsId)
-            .name(name)
-            .description(description)
-            .price(price)
-            .imgUrl(imgUrl)
-            .build();
+                .restaurantsId(restaurantsId)
+                .name(name)
+                .description(description)
+                .price(price)
+                .imgUrl(imgUrl)
+                .build();
 
         Food newFood = foodRepository.save(food);
 
@@ -111,12 +111,12 @@ public class FoodRepositoryTest {
     @Test
     public void updateFoodFail() throws Exception {
         Food food = Food.builder()
-            .restaurantsId(restaurantsId)
-            .name(name)
-            .description(description)
-            .price(price)
-            .imgUrl(imgUrl)
-            .build();
+                .restaurantsId(restaurantsId)
+                .name(name)
+                .description(description)
+                .price(price)
+                .imgUrl(imgUrl)
+                .build();
 
         Food savedFood = foodRepository.save(food);
 
@@ -155,12 +155,12 @@ public class FoodRepositoryTest {
     @Test
     public void deleteFoodSuccess() throws Exception {
         Food food = Food.builder()
-            .restaurantsId(restaurantsId)
-            .name(name)
-            .description(description)
-            .price(price)
-            .imgUrl(imgUrl)
-            .build();
+                .restaurantsId(restaurantsId)
+                .name(name)
+                .description(description)
+                .price(price)
+                .imgUrl(imgUrl)
+                .build();
 
         Food newFood = foodRepository.save(food);
 
@@ -178,12 +178,12 @@ public class FoodRepositoryTest {
     @Test
     public void deleteFoodFail() throws Exception {
         Food food = Food.builder()
-            .restaurantsId(restaurantsId)
-            .name(name)
-            .description(description)
-            .price(price)
-            .imgUrl(imgUrl)
-            .build();
+                .restaurantsId(restaurantsId)
+                .name(name)
+                .description(description)
+                .price(price)
+                .imgUrl(imgUrl)
+                .build();
 
         Food newFood = foodRepository.save(food);
 

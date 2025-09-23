@@ -18,14 +18,14 @@ public class ApiResponse<T> {
 
     public static <T> ApiResponse<T> ok(String message) {
         return ApiResponse.<T>builder()
-            .message(message)
-            .build();
+                .message(message)
+                .build();
     }
 
     public static <T> ApiResponse<T> okWithData(T data) {
         return ApiResponse.<T>builder()
-            .data(data)
-            .build();
+                .data(data)
+                .build();
     }
 
 }

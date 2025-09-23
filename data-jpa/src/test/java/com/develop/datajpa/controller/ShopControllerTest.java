@@ -1,11 +1,11 @@
 package com.develop.datajpa.controller;
 
-import com.develop.datajpa.response.kakao.KakaoPayReadyDto;
-import com.develop.domain.dto.user.LoginInfo;
 import com.develop.datajpa.request.shop.AddCartRequest;
 import com.develop.datajpa.request.shop.PurchaseGoodsRequest;
+import com.develop.datajpa.response.kakao.KakaoPayReadyDto;
 import com.develop.datajpa.service.baseball.ShopService;
 import com.develop.datajpa.service.security.JwtProvider;
+import com.develop.domain.dto.user.LoginInfo;
 import com.google.gson.Gson;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -62,18 +62,18 @@ public class ShopControllerTest {
         request.setCount(count);
 
         given(shopService.addCart(loginInfo, request)).willReturn(
-            Map.of("message", "장바구니에 추가했습니다.")
+                Map.of("message", "장바구니에 추가했습니다.")
         );
 
         Gson gson = new Gson();
         String requestBody = gson.toJson(request);
 
         mockMvc.perform(post("/shop/goods/cart")
-                .header("Authorization", "Bearer " + jwtToken)
-                .content(requestBody)
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andDo(print());
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print());
     }
 
     @Test
@@ -86,18 +86,18 @@ public class ShopControllerTest {
         request.setCount(0);
 
         given(shopService.addCart(loginInfo, request)).willReturn(
-            Map.of("message", "갯수가 1 이상이여야 합니다")
+                Map.of("message", "갯수가 1 이상이여야 합니다")
         );
 
         Gson gson = new Gson();
         String requestBody = gson.toJson(request);
 
         mockMvc.perform(post("/shop/goods/cart")
-                .header("Authorization", "Bearer " + jwtToken)
-                .content(requestBody)
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest())
-            .andDo(print());
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andDo(print());
     }
 
     @Test
@@ -106,13 +106,13 @@ public class ShopControllerTest {
         LoginInfo loginInfo = LoginInfo.builder().userId(userId).build();
 
         given(shopService.removeCart(loginInfo, goodsId)).willReturn(
-            Map.of("message", "장바구니에서 삭제되었습니다.")
+                Map.of("message", "장바구니에서 삭제되었습니다.")
         );
 
         mockMvc.perform(delete("/shop/goods/cart/" + goodsId)
-                .header("Authorization", "Bearer " + jwtToken))
-            .andExpect(status().isOk())
-            .andDo(print());
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isOk())
+                .andDo(print());
     }
 
     @Test
@@ -121,13 +121,13 @@ public class ShopControllerTest {
         LoginInfo loginInfo = LoginInfo.builder().userId(userId).build();
 
         given(shopService.removeCart(loginInfo, goodsId)).willReturn(
-            Map.of("message", "로그인 정보가 확인되지 않습니다.")
+                Map.of("message", "로그인 정보가 확인되지 않습니다.")
         );
 
         mockMvc.perform(delete("/shop/goods/cart/" + goodsId)
-                .header("Authorization", "invalid-user-token"))
-            .andExpect(status().isUnauthorized())
-            .andDo(print());
+                        .header("Authorization", "invalid-user-token"))
+                .andExpect(status().isUnauthorized())
+                .andDo(print());
     }
 
     @Test
@@ -136,13 +136,13 @@ public class ShopControllerTest {
         LoginInfo loginInfo = LoginInfo.builder().userId(userId).build();
 
         given(shopService.clearCart(loginInfo)).willReturn(
-            Map.of("message", "장바구니에서 삭제되었습니다.")
+                Map.of("message", "장바구니에서 삭제되었습니다.")
         );
 
         mockMvc.perform(delete("/shop/goods/cart")
-                .header("Authorization", "Bearer " + jwtToken))
-            .andExpect(status().isOk())
-            .andDo(print());
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isOk())
+                .andDo(print());
     }
 
     @Test
@@ -151,13 +151,13 @@ public class ShopControllerTest {
         LoginInfo loginInfo = LoginInfo.builder().userId(userId).build();
 
         given(shopService.clearCart(loginInfo)).willReturn(
-            Map.of("message", "로그인 정보가 확인되지 않습니다.")
+                Map.of("message", "로그인 정보가 확인되지 않습니다.")
         );
 
         mockMvc.perform(delete("/shop/goods/cart")
-                .header("Authorization", "invalid-user-token"))
-            .andExpect(status().isUnauthorized())
-            .andDo(print());
+                        .header("Authorization", "invalid-user-token"))
+                .andExpect(status().isUnauthorized())
+                .andDo(print());
     }
 
     @Test
@@ -170,7 +170,7 @@ public class ShopControllerTest {
         request.setCount(count);
 
         given(shopService.purchaseGoods(loginInfo, request)).willReturn(
-            Map.of("result", new KakaoPayReadyDto())
+                Map.of("result", new KakaoPayReadyDto())
 
         );
 
@@ -178,11 +178,11 @@ public class ShopControllerTest {
         String requestBody = gson.toJson(request);
 
         mockMvc.perform(post("/shop/goods")
-                .header("Authorization", "Bearer " + jwtToken)
-                .content(requestBody)
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andDo(print());
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print());
     }
 
     @Test
@@ -195,18 +195,18 @@ public class ShopControllerTest {
         request.setCount(count);
 
         given(shopService.purchaseGoods(loginInfo, request)).willReturn(
-            Map.of("message", "상품정보가 확인되지 않습니다")
+                Map.of("message", "상품정보가 확인되지 않습니다")
         );
 
         Gson gson = new Gson();
         String requestBody = gson.toJson(request);
 
         mockMvc.perform(post("/shop/goods")
-                .header("Authorization", "Bearer " + jwtToken)
-                .content(requestBody)
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isBadRequest())
-            .andDo(print());
+                        .header("Authorization", "Bearer " + jwtToken)
+                        .content(requestBody)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andDo(print());
     }
 
     @Test
@@ -215,16 +215,16 @@ public class ShopControllerTest {
         LoginInfo loginInfo = LoginInfo.builder().userId(userId).build();
 
         given(shopService.orderShoppingCart(loginInfo)).willReturn(
-            Map.of("result", "결제가 완료되었습니다")
+                Map.of("result", "결제가 완료되었습니다")
 
         );
 
         Gson gson = new Gson();
 
         mockMvc.perform(post("/shop/goods/order-cart")
-                .header("Authorization", "Bearer " + jwtToken))
-            .andExpect(status().isOk())
-            .andDo(print());
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andExpect(status().isOk())
+                .andDo(print());
     }
 
     @Test
@@ -233,13 +233,13 @@ public class ShopControllerTest {
         LoginInfo loginInfo = LoginInfo.builder().userId(userId).build();
 
         given(shopService.orderShoppingCart(loginInfo)).willReturn(
-            Map.of("message", "로그인 정보가 확인되지 않습니다.")
+                Map.of("message", "로그인 정보가 확인되지 않습니다.")
         );
 
         mockMvc.perform(post("/shop/goods/order-cart")
-                .header("Authorization", "invalid-user-token"))
-            .andExpect(status().isUnauthorized())
-            .andDo(print());
+                        .header("Authorization", "invalid-user-token"))
+                .andExpect(status().isUnauthorized())
+                .andDo(print());
     }
 
 }

@@ -1,5 +1,9 @@
 package com.develop.datajpa.service.admin;
 
+import com.develop.core.exception.ClientException;
+import com.develop.datajpa.request.admin.*;
+import com.develop.datajpa.service.article.ArticleService;
+import com.develop.datajpa.service.user.UserService;
 import com.develop.domain.dto.user.LoginInfo;
 import com.develop.domain.entity.article.Article;
 import com.develop.domain.entity.article.ArticleType.ArticleState;
@@ -17,16 +21,6 @@ import com.develop.domain.repository.baseball.FoodRepository;
 import com.develop.domain.repository.baseball.MatchScheduleRepository;
 import com.develop.domain.repository.baseball.RestaurantsRepository;
 import com.develop.domain.repository.shop.GoodsRepository;
-import com.develop.datajpa.request.admin.AddFoodMenuOnRestaurantRequest;
-import com.develop.datajpa.request.admin.AddTeamGoodsRequest;
-import com.develop.datajpa.request.admin.RecordMatchResultRequest;
-import com.develop.datajpa.request.admin.RegisterRestaurantRequest;
-import com.develop.datajpa.request.admin.UpdateFoodInfoRequest;
-import com.develop.datajpa.request.admin.UpdateRestaurantInfoRequest;
-import com.develop.datajpa.request.admin.UpdateTeamGoodsInfoRequest;
-import com.develop.core.exception.ClientException;
-import com.develop.datajpa.service.article.ArticleService;
-import com.develop.datajpa.service.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -51,7 +45,7 @@ public class AdminService {
         userService.checkAdmin(loginInfo.getUserId());
 
         MatchSchedule match = matchScheduleRepository.findById(request.getIdx())
-            .orElseThrow(() -> new ClientException("경기정보가 확인되지 않습니다."));
+                .orElseThrow(() -> new ClientException("경기정보가 확인되지 않습니다."));
 
         LocalDateTime matchTime = LocalDateTime.of(match.getMatchDate(), match.getMatchTime());
         if (LocalDateTime.now().isBefore(matchTime)) {
@@ -65,7 +59,7 @@ public class AdminService {
         matchScheduleRepository.save(match);
 
         return Map.of(
-            "message", "경기결과가 입력되었습니다."
+                "message", "경기결과가 입력되었습니다."
         );
     }
 
@@ -73,13 +67,13 @@ public class AdminService {
         userService.checkAdmin(loginInfo.getUserId());
 
         MatchSchedule match = matchScheduleRepository.findByIdxAndMatchResult(id, MatchResult.INITIAL)
-            .orElseThrow(() -> new ClientException("이미 처리되었거나 존재하지 않은 경기번호 입니다."));
+                .orElseThrow(() -> new ClientException("이미 처리되었거나 존재하지 않은 경기번호 입니다."));
 
         match.setMatchResult(MatchResult.CANCELED);
         matchScheduleRepository.save(match);
 
         return Map.of(
-            "message", "경기결과가 입력되었습니다."
+                "message", "경기결과가 입력되었습니다."
         );
     }
 
@@ -87,19 +81,19 @@ public class AdminService {
         userService.checkAdmin(loginInfo.getUserId());
 
         Restaurants newRestaurant = Restaurants.builder()
-            .name(request.getName())
-            .stadium(request.getStadium())
-            .inside(request.getInside())
-            .address(request.getAddress())
-            .phone(request.getPhone())
-            .openingHours(request.getOpeningHours())
-            .website(request.getWebSite())
-            .imgUrl(request.getImgUrl())
-            .build();
+                .name(request.getName())
+                .stadium(request.getStadium())
+                .inside(request.getInside())
+                .address(request.getAddress())
+                .phone(request.getPhone())
+                .openingHours(request.getOpeningHours())
+                .website(request.getWebSite())
+                .imgUrl(request.getImgUrl())
+                .build();
         restaurantsRepository.save(newRestaurant);
 
         return Map.of(
-            "message", "식당이 등록되었습니다."
+                "message", "식당이 등록되었습니다."
         );
     }
 
@@ -107,7 +101,7 @@ public class AdminService {
         userService.checkAdmin(loginInfo.getUserId());
 
         Restaurants restaurant = restaurantsRepository.findById(request.getId())
-            .orElseThrow(() -> new ClientException("식당 정보가 확인되지 않습니다."));
+                .orElseThrow(() -> new ClientException("식당 정보가 확인되지 않습니다."));
 
         restaurant.setName(request.getName());
         restaurant.setInside(request.getInside());
@@ -121,7 +115,7 @@ public class AdminService {
         restaurantsRepository.save(restaurant);
 
         return Map.of(
-            "message", "식당 정보가 수정되었습니다."
+                "message", "식당 정보가 수정되었습니다."
         );
     }
 
@@ -129,19 +123,19 @@ public class AdminService {
         userService.checkAdmin(loginInfo.getUserId());
 
         restaurantsRepository.findById(request.getId())
-            .orElseThrow(() -> new ClientException("식당 정보가 확인되지 않습니다."));
+                .orElseThrow(() -> new ClientException("식당 정보가 확인되지 않습니다."));
 
         Food food = Food.builder()
-            .restaurantsId(request.getId())
-            .name(request.getName())
-            .price(request.getPrice())
-            .description(request.getDesc())
-            .imgUrl(request.getImgUrl())
-            .build();
+                .restaurantsId(request.getId())
+                .name(request.getName())
+                .price(request.getPrice())
+                .description(request.getDesc())
+                .imgUrl(request.getImgUrl())
+                .build();
         foodRepository.save(food);
 
         return Map.of(
-            "message", "메뉴가 등록되었습니다."
+                "message", "메뉴가 등록되었습니다."
         );
     }
 
@@ -149,7 +143,7 @@ public class AdminService {
         userService.checkAdmin(loginInfo.getUserId());
 
         Food food = foodRepository.findById(request.getId())
-            .orElseThrow(() -> new ClientException("메뉴가 확인되지 않습니다."));
+                .orElseThrow(() -> new ClientException("메뉴가 확인되지 않습니다."));
 
         food.setName(request.getName());
         food.setPrice(request.getPrice());
@@ -159,7 +153,7 @@ public class AdminService {
         foodRepository.save(food);
 
         return Map.of(
-            "message", "메뉴 정보가 수정되었습니다."
+                "message", "메뉴 정보가 수정되었습니다."
         );
     }
 
@@ -167,12 +161,12 @@ public class AdminService {
         userService.checkAdmin(loginInfo.getUserId());
 
         Food food = foodRepository.findById(id)
-            .orElseThrow(() -> new ClientException("메뉴가 확인되지 않습니다."));
+                .orElseThrow(() -> new ClientException("메뉴가 확인되지 않습니다."));
 
         foodRepository.delete(food);
 
         return Map.of(
-            "message", "해당 메뉴가 삭제되었습니다."
+                "message", "해당 메뉴가 삭제되었습니다."
         );
     }
 
@@ -195,21 +189,21 @@ public class AdminService {
         String currentTime = getRandomCode(10);
 
         Goods goods = Goods.builder()
-            .goodsCode(request.getTeam().get().substring(0, 2) + currentTime)
-            .name(request.getName())
-            .team(request.getTeam().get())
-            .description(request.getDescription())
-            .price(request.getPrice())
-            .stock(request.getStock())
-            .onSale(request.getOnSale())
-            .imgUrl(request.getImgUrl())
-            .discountRate(request.getDiscountRate())
-            .pointRate(request.getPointRate())
-            .build();
+                .goodsCode(request.getTeam().get().substring(0, 2) + currentTime)
+                .name(request.getName())
+                .team(request.getTeam().get())
+                .description(request.getDescription())
+                .price(request.getPrice())
+                .stock(request.getStock())
+                .onSale(request.getOnSale())
+                .imgUrl(request.getImgUrl())
+                .discountRate(request.getDiscountRate())
+                .pointRate(request.getPointRate())
+                .build();
         goodsRepository.save(goods);
 
         return Map.of(
-            "message", "상품이 등록되었습니다."
+                "message", "상품이 등록되었습니다."
         );
     }
 
@@ -217,7 +211,7 @@ public class AdminService {
         userService.checkAdmin(loginInfo.getUserId());
 
         Goods goods = goodsRepository.findByGoodsCode(id)
-            .orElseThrow(() -> new ClientException("상품 정보가 확인되지 않습니다."));
+                .orElseThrow(() -> new ClientException("상품 정보가 확인되지 않습니다."));
 
         if (goods.getGoodsState() != State.NORMAL) {
             throw new ClientException("이미 삭제되었거나 판매 승인 거부 상품입니다. 관리자에게 문의해주세요.");
@@ -226,7 +220,7 @@ public class AdminService {
         goodsRepository.save(goods);
 
         return Map.of(
-            "message", "상품이 삭제되었습니다."
+                "message", "상품이 삭제되었습니다."
         );
     }
 
@@ -234,7 +228,7 @@ public class AdminService {
         userService.checkAdmin(loginInfo.getUserId());
 
         Goods goods = goodsRepository.findByGoodsCode(request.getId())
-            .orElseThrow(() -> new ClientException("상품 정보가 확인되지 않습니다."));
+                .orElseThrow(() -> new ClientException("상품 정보가 확인되지 않습니다."));
 
         if (goods.getGoodsState() != State.NORMAL) {
             throw new ClientException("판매 승인 거부 상품입니다. 관리자에게 문의해주세요.");
@@ -251,7 +245,7 @@ public class AdminService {
         goodsRepository.save(goods);
 
         return Map.of(
-            "message", "상품정보가 수정되었습니다."
+                "message", "상품정보가 수정되었습니다."
         );
     }
 
@@ -264,7 +258,7 @@ public class AdminService {
         articleRepository.save(article);
 
         return Map.of(
-            "message", "해당 게시글이 차단 처리되었습니다."
+                "message", "해당 게시글이 차단 처리되었습니다."
         );
     }
 
@@ -277,7 +271,7 @@ public class AdminService {
         commentRepository.save(comment);
 
         return Map.of(
-            "message", "해당 댓글이 차단 처리되었습니다."
+                "message", "해당 댓글이 차단 처리되었습니다."
         );
     }
 

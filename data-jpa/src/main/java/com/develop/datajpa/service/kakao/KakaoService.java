@@ -1,12 +1,8 @@
 package com.develop.datajpa.service.kakao;
 
-import com.develop.datajpa.response.kakao.KakaoPayApproveDto;
-import com.develop.datajpa.response.kakao.KakaoPayCancelDto;
-import com.develop.datajpa.response.kakao.KakaoPayErrorDto;
-import com.develop.datajpa.response.kakao.KakaoPayGetInfoDto;
-import com.develop.datajpa.response.kakao.KakaoPayReadyDto;
-import com.develop.domain.entity.shop.Receipt;
 import com.develop.core.exception.ClientException;
+import com.develop.datajpa.response.kakao.*;
+import com.develop.domain.entity.shop.Receipt;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -57,9 +53,9 @@ public class KakaoService {
         try {
             RestTemplate restTemplate = new RestTemplate();
             kakaoReady = restTemplate.postForObject(
-                KAKAO_PAY_READY_URL,
-                requestEntity,
-                KakaoPayReadyDto.class
+                    KAKAO_PAY_READY_URL,
+                    requestEntity,
+                    KakaoPayReadyDto.class
             );
 
             return kakaoReady;
@@ -81,9 +77,9 @@ public class KakaoService {
         try {
             RestTemplate restTemplate = new RestTemplate();
             KakaoPayApproveDto approveResponse = restTemplate.postForObject(
-                KAKAO_PAY_APPROVE_URL,
-                requestEntity,
-                KakaoPayApproveDto.class
+                    KAKAO_PAY_APPROVE_URL,
+                    requestEntity,
+                    KakaoPayApproveDto.class
             );
 
             return approveResponse;
@@ -106,9 +102,9 @@ public class KakaoService {
         try {
             RestTemplate restTemplate = new RestTemplate();
             KakaoPayGetInfoDto response = restTemplate.postForObject(
-                KAKAO_PAY_GET_INFO_URL,
-                requestEntity,
-                KakaoPayGetInfoDto.class
+                    KAKAO_PAY_GET_INFO_URL,
+                    requestEntity,
+                    KakaoPayGetInfoDto.class
             );
 
             return response;
@@ -133,9 +129,9 @@ public class KakaoService {
         try {
             RestTemplate restTemplate = new RestTemplate();
             KakaoPayCancelDto response = restTemplate.postForObject(
-                KAKAO_PAY_CANCEL_URL,
-                requestEntity,
-                KakaoPayCancelDto.class
+                    KAKAO_PAY_CANCEL_URL,
+                    requestEntity,
+                    KakaoPayCancelDto.class
             );
 
             return response;

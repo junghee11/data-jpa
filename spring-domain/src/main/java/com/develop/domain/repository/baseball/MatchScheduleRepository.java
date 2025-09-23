@@ -19,11 +19,11 @@ public interface MatchScheduleRepository extends JpaRepository<MatchSchedule, Lo
     Optional<MatchSchedule> findByIdxAndMatchResult(Long id, MatchType.MatchResult result);
 
     @Query("SELECT m FROM MatchSchedule m " +
-        "WHERE m.matchDate BETWEEN :startDate AND :endDate " +
-        "AND (m.homeTeam = :team OR m.awayTeam = :team) ORDER BY m.matchDate asc")
+            "WHERE m.matchDate BETWEEN :startDate AND :endDate " +
+            "AND (m.homeTeam = :team OR m.awayTeam = :team) ORDER BY m.matchDate asc")
     List<MatchSchedule> findByDateRangeAndTeam(
-        @Param("startDate") LocalDate startDate,
-        @Param("endDate") LocalDate endDate,
-        @Param("team") MatchType.TeamCode team);
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate,
+            @Param("team") MatchType.TeamCode team);
 
 }

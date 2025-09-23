@@ -38,11 +38,11 @@ public class ArticleRepositoryTest {
     @Test
     public void createArticleSuccess() throws Exception {
         Article article = Article.builder()
-            .category(ArticleType.Category.FOOD.name())
-            .userId(userId)
-            .title(title)
-            .content(content)
-            .build();
+                .category(ArticleType.Category.FOOD.name())
+                .userId(userId)
+                .title(title)
+                .content(content)
+                .build();
 
         Article newArticle = articleRepository.save(article);
 
@@ -59,11 +59,11 @@ public class ArticleRepositoryTest {
     @Test
     public void createArticleFail() throws Exception {
         Article article = Article.builder()
-            .category(ArticleType.Category.FOOD.name())
-            .userId(userId)
+                .category(ArticleType.Category.FOOD.name())
+                .userId(userId)
 //            .title(title)
-            .content(content)
-            .build();
+                .content(content)
+                .build();
 
         assertThrows(DataIntegrityViolationException.class, () -> {
             articleRepository.save(article);

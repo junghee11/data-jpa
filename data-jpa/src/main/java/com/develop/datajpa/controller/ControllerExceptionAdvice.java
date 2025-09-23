@@ -25,8 +25,8 @@ public class ControllerExceptionAdvice {
     @ExceptionHandler(HttpClientErrorException.class)
     public ResponseEntity<Map<String, Object>> HttpClientErrorException(HttpClientErrorException e) {
         return new ResponseEntity<>(
-            Map.of("message", e.getStatusText()),
-            e.getStatusCode()
+                Map.of("message", e.getStatusText()),
+                e.getStatusCode()
         );
     }
 
@@ -34,8 +34,8 @@ public class ControllerExceptionAdvice {
     @ExceptionHandler(ClassNotFoundException.class)
     public ResponseEntity<Map<String, Object>> ClassNotFoundException(ClassNotFoundException e) {
         return new ResponseEntity<>(
-            Map.of("message", e.getMessage()),
-            HttpStatus.BAD_REQUEST
+                Map.of("message", e.getMessage()),
+                HttpStatus.BAD_REQUEST
         );
     }
 
@@ -48,8 +48,8 @@ public class ControllerExceptionAdvice {
         }
 
         return new ResponseEntity<>(
-            Map.of("message", isNull(message) ? "잘못된 요청값입니다" : message),
-            HttpStatus.BAD_REQUEST
+                Map.of("message", isNull(message) ? "잘못된 요청값입니다" : message),
+                HttpStatus.BAD_REQUEST
         );
     }
 
@@ -57,8 +57,8 @@ public class ControllerExceptionAdvice {
     public ResponseEntity<Map<String, Object>> handleDataIntegrityViolationException(DataIntegrityViolationException e) {
         String errorMessage = "필수 입력값이 누락되었습니다.";  // TODO : 배포 후에는 이 메세지로 변경 필요
         return new ResponseEntity<>(
-            Map.of("message", e.getMessage()),
-            HttpStatus.BAD_REQUEST
+                Map.of("message", e.getMessage()),
+                HttpStatus.BAD_REQUEST
         );
     }
 
@@ -66,8 +66,8 @@ public class ControllerExceptionAdvice {
     public ResponseEntity<Map<String, Object>> handleConstraintViolationException(ConstraintViolationException e) {
         String errorMessage = "필수 입력값이 누락되었습니다.";  // TODO : 배포 후에는 이 메세지로 변경 필요
         return new ResponseEntity<>(
-            Map.of("message", e.getMessage()),
-            HttpStatus.BAD_REQUEST
+                Map.of("message", e.getMessage()),
+                HttpStatus.BAD_REQUEST
         );
     }
 
@@ -75,8 +75,8 @@ public class ControllerExceptionAdvice {
     @ExceptionHandler(ClientException.class)
     public ResponseEntity<Map<String, Object>> exception(Exception e) {
         return new ResponseEntity<>(
-            Map.of("message", e.getMessage()),
-            HttpStatus.INTERNAL_SERVER_ERROR
+                Map.of("message", e.getMessage()),
+                HttpStatus.INTERNAL_SERVER_ERROR
         );
     }
 

@@ -19,14 +19,14 @@ public class SecurityConfig extends WebSecurityConfiguration {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .authorizeHttpRequests((authz) -> {
-                authz
-                    .requestMatchers("/register", "/login").permitAll()
-                    .requestMatchers(HttpMethod.POST, "/admin/**").authenticated()
-                    .requestMatchers(HttpMethod.POST, "/user/**").authenticated()
-                    .requestMatchers("/my/**").authenticated()
-                    .anyRequest().denyAll();
-            }).httpBasic(withDefaults());
+                .authorizeHttpRequests((authz) -> {
+                    authz
+                            .requestMatchers("/register", "/login").permitAll()
+                            .requestMatchers(HttpMethod.POST, "/admin/**").authenticated()
+                            .requestMatchers(HttpMethod.POST, "/user/**").authenticated()
+                            .requestMatchers("/my/**").authenticated()
+                            .anyRequest().denyAll();
+                }).httpBasic(withDefaults());
         // TODO : JWT 인증 필터 적용? 뭔지 다시 한번 보기 이제 안써도 되는듯??
 //            .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
 

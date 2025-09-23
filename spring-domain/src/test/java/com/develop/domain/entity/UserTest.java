@@ -1,14 +1,11 @@
 package com.develop.domain.entity;
 
-import com.develop.domain.entity.article.Article;
 import com.develop.domain.entity.user.User;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @SpringBootTest
 @Transactional
@@ -39,7 +36,7 @@ public class UserTest {
         em.persist(user1);
         em.persist(user2);
 
-        System.out.println("user1 = "+ user1);
-        System.out.println("user2 = "+ user2);
+        System.out.println("user1 = " + user1);
+        System.out.println("user2 = " + user2);
     }
 }

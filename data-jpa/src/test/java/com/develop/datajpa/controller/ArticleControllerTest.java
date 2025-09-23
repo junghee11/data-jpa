@@ -1,5 +1,8 @@
 package com.develop.datajpa.controller;
 
+import com.develop.datajpa.request.article.*;
+import com.develop.datajpa.service.article.ArticleService;
+import com.develop.datajpa.service.security.JwtProvider;
 import com.develop.domain.dto.article.CommentDto;
 import com.develop.domain.dto.user.LoginInfo;
 import com.develop.domain.entity.article.Article;
@@ -7,20 +10,8 @@ import com.develop.domain.entity.article.ArticleType;
 import com.develop.domain.entity.article.ArticleType.Category;
 import com.develop.domain.entity.article.Comment;
 import com.develop.domain.entity.article.CommentRecommend;
-import com.develop.datajpa.request.article.AddCommentRequest;
-import com.develop.datajpa.request.article.CreateArticleRequest;
-import com.develop.datajpa.request.article.GetArticleListRequest;
-import com.develop.datajpa.request.article.GetCommentListRequest;
-import com.develop.datajpa.request.article.ModifyArticleRequest;
-import com.develop.datajpa.request.article.ToggleCommentRequest;
-import com.develop.datajpa.service.article.ArticleService;
-import com.develop.datajpa.service.security.JwtProvider;
 import com.google.gson.Gson;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,14 +25,9 @@ import java.util.Map;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -83,31 +69,31 @@ public class ArticleControllerTest {
             Article mockArticle = new Article("FOOD", title, content, userId);
 
             given(articleService.getArticleContent(1)).willReturn(
-                Map.of(
-                    "result", mockArticle
-                ));
+                    Map.of(
+                            "result", mockArticle
+                    ));
 
             Long articleIdx = 1L;
             mockMvc.perform(get("/article/" + articleIdx)
-                    .header("Authorization", "Bearer " + jwtToken))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.result.title").value(title))
-                .andDo(print());
+                            .header("Authorization", "Bearer " + jwtToken))
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.result.title").value(title))
+                    .andDo(print());
         }
 
         @Test
         @DisplayName("특정 게시글 가져오기 - fail")
         public void getArticleFail() throws Exception {
             given(articleService.getArticleContent(1)).willReturn(
-                Map.of(
-                    "result", new Article("FOOD", null, content, userId)
-                ));
+                    Map.of(
+                            "result", new Article("FOOD", null, content, userId)
+                    ));
 
             String articleIdx = "idx";
             mockMvc.perform(get("/article/" + articleIdx)
-                    .header("Authorization", "Bearer " + jwtToken))
-                .andExpect(status().isBadRequest())
-                .andDo(print());
+                            .header("Authorization", "Bearer " + jwtToken))
+                    .andExpect(status().isBadRequest())
+                    .andDo(print());
         }
 
         @Test
@@ -116,43 +102,43 @@ public class ArticleControllerTest {
 
             List<Article> mockArticles = List.of(new Article());
             Map<String, Object> mockResponse = Map.of(
-                "pageCount", 1,
-                "result", mockArticles
+                    "pageCount", 1,
+                    "result", mockArticles
             );
 
             GetArticleListRequest request = new GetArticleListRequest();
             request.setCategory(Category.FOOD);
 
             when(articleService.getArticleList(any(GetArticleListRequest.class)))
-                .thenReturn(mockResponse);
+                    .thenReturn(mockResponse);
 
             mockMvc.perform(get("/article")
-                    .param("category", Category.FOOD.name())
-                    .param("page", "1")
-                    .header("Authorization", "Bearer " + jwtToken))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.result").isArray())
-                .andDo(print());
+                            .param("category", Category.FOOD.name())
+                            .param("page", "1")
+                            .header("Authorization", "Bearer " + jwtToken))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(jsonPath("$.result").isArray())
+                    .andDo(print());
         }
 
         @Test
         @DisplayName("모든 게시글 가져오기 - fail")
         public void getArticleListFail() throws Exception {
             mockMvc.perform(get("/article")
-                    .param("category", Category.FOOD.name())
-                    // request 페이지값 누락
-                    .header("Authorization", "Bearer " + jwtToken))
-                .andExpect(status().isBadRequest())
-                .andDo(print());
+                            .param("category", Category.FOOD.name())
+                            // request 페이지값 누락
+                            .header("Authorization", "Bearer " + jwtToken))
+                    .andExpect(status().isBadRequest())
+                    .andDo(print());
 
             mockMvc.perform(get("/article")
-                    .param("category", Category.FOOD.name())
-                    .param("page", "0")
-                    .header("Authorization", "Bearer " + jwtToken))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("페이지값은 1보다 작을 수 없습니다"))
-                .andDo(print());
+                            .param("category", Category.FOOD.name())
+                            .param("page", "0")
+                            .header("Authorization", "Bearer " + jwtToken))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.message").value("페이지값은 1보다 작을 수 없습니다"))
+                    .andDo(print());
         }
     }
 
@@ -173,15 +159,15 @@ public class ArticleControllerTest {
             String requestBody = gson.toJson(request);
 
             given(articleService.createArticle(loginInfo, request)).willReturn(
-                Map.of("message", "게시글 작성이 완료되었습니다")
+                    Map.of("message", "게시글 작성이 완료되었습니다")
             );
 
             mockMvc.perform(post("/article")
-                    .header("Authorization", "Bearer " + jwtToken)
-                    .content(requestBody)
-                    .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(print());
+                            .header("Authorization", "Bearer " + jwtToken)
+                            .content(requestBody)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andDo(print());
         }
 
         @Test
@@ -198,15 +184,15 @@ public class ArticleControllerTest {
             String requestBody = gson.toJson(request);
 
             given(articleService.createArticle(loginInfo, request)).willReturn(
-                Map.of("message", "게시글 작성이 완료되었습니다")
+                    Map.of("message", "게시글 작성이 완료되었습니다")
             );
 
             mockMvc.perform(post("/article")
-                    .header("Authorization", "Bearer " + null)
-                    .content(requestBody)
-                    .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isUnauthorized())
-                .andDo(print());
+                            .header("Authorization", "Bearer " + null)
+                            .content(requestBody)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isUnauthorized())
+                    .andDo(print());
         }
     }
 
@@ -227,15 +213,15 @@ public class ArticleControllerTest {
             String requestBody = gson.toJson(request);
 
             given(articleService.modifyArticle(loginInfo, request)).willReturn(
-                Map.of("message", "게시글이 수정되었습니다")
+                    Map.of("message", "게시글이 수정되었습니다")
             );
 
             mockMvc.perform(patch("/article")
-                    .header("Authorization", "Bearer " + jwtToken)
-                    .content(requestBody)
-                    .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(print());
+                            .header("Authorization", "Bearer " + jwtToken)
+                            .content(requestBody)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andDo(print());
         }
 
         @Test
@@ -251,15 +237,15 @@ public class ArticleControllerTest {
             String requestBody = gson.toJson(request);
 
             given(articleService.modifyArticle(loginInfo, request)).willReturn(
-                Map.of("message", "게시글이 수정되었습니다")
+                    Map.of("message", "게시글이 수정되었습니다")
             );
 
             mockMvc.perform(patch("/article")
-                    .header("Authorization", "Bearer " + jwtToken)
-                    .content(requestBody)
-                    .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andDo(print());
+                            .header("Authorization", "Bearer " + jwtToken)
+                            .content(requestBody)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest())
+                    .andDo(print());
         }
     }
 
@@ -272,22 +258,22 @@ public class ArticleControllerTest {
             LoginInfo loginInfo = LoginInfo.builder().userId(userId).build();
 
             given(articleService.deleteArticle(loginInfo, 1L)).willReturn(
-                Map.of(
-                    "message", "게시글이 삭제되었습니다.")
+                    Map.of(
+                            "message", "게시글이 삭제되었습니다.")
             );
 
             mockMvc.perform(delete("/article/" + 1)
-                    .header("Authorization", "Bearer " + jwtToken))
-                .andExpect(status().isOk())
-                .andDo(print());
+                            .header("Authorization", "Bearer " + jwtToken))
+                    .andExpect(status().isOk())
+                    .andDo(print());
         }
 
         @Test
         @DisplayName("fail")
         public void deleteArticleFail() throws Exception {
             mockMvc.perform(delete("/article/" + 1))
-                .andExpect(status().isBadRequest())
-                .andDo(print());
+                    .andExpect(status().isBadRequest())
+                    .andDo(print());
         }
     }
 
@@ -300,8 +286,8 @@ public class ArticleControllerTest {
         public void getCommentListSuccess() throws Exception {
             List<CommentDto> mockComments = List.of(new CommentDto());
             Map<String, Object> mockResponse = Map.of(
-                "page", 1,
-                "result", mockComments
+                    "page", 1,
+                    "result", mockComments
             );
 
             GetCommentListRequest request = new GetCommentListRequest();
@@ -311,29 +297,29 @@ public class ArticleControllerTest {
 
 //            when(articleService.getCommentList(jwtToken, request))
             when(articleService.getCommentList(null, request))
-                .thenReturn(mockResponse);
+                    .thenReturn(mockResponse);
 
             mockMvc.perform(get("/article/comments")
-                    .param("id", "3")
-                    .param("page", "1")
+                            .param("id", "3")
+                            .param("page", "1")
 //                    .param("commentId", "3")
 //                    .header("Authorization", "Bearer " + jwtToken))
-                    .header("Authorization", "Bearer " + null))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andDo(print());
+                            .header("Authorization", "Bearer " + null))
+                    .andExpect(status().isOk())
+                    .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                    .andDo(print());
         }
 
         @Test
         @DisplayName("fail")
         public void getCommentListFail() throws Exception {
             mockMvc.perform(get("/article/comments")
-                    .param("id", "3")
-                    .param("page", "0")
-                    .header("Authorization", "Bearer " + jwtToken))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("페이지값은 1보다 작을 수 없습니다"))
-                .andDo(print());
+                            .param("id", "3")
+                            .param("page", "0")
+                            .header("Authorization", "Bearer " + jwtToken))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(jsonPath("$.message").value("페이지값은 1보다 작을 수 없습니다"))
+                    .andDo(print());
         }
     }
 
@@ -354,15 +340,15 @@ public class ArticleControllerTest {
             String requestBody = gson.toJson(request);
 
             given(articleService.addComment(loginInfo, request)).willReturn(
-                Map.of("message", "댓글 작성이 완료되었습니다")
+                    Map.of("message", "댓글 작성이 완료되었습니다")
             );
 
             mockMvc.perform(post("/article/comment")
-                    .header("Authorization", "Bearer " + jwtToken)
-                    .content(requestBody)
-                    .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(print());
+                            .header("Authorization", "Bearer " + jwtToken)
+                            .content(requestBody)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andDo(print());
         }
 
         @Test
@@ -378,15 +364,15 @@ public class ArticleControllerTest {
             String requestBody = gson.toJson(request);
 
             given(articleService.addComment(loginInfo, request)).willReturn(
-                Map.of("message", "댓글은 최소 10자 이상, 최대 300자 이하로 작성해주세요")
+                    Map.of("message", "댓글은 최소 10자 이상, 최대 300자 이하로 작성해주세요")
             );
 
             mockMvc.perform(post("/article/comment")
-                    .header("Authorization", "Bearer " + jwtToken)
-                    .content(requestBody)
-                    .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andDo(print());
+                            .header("Authorization", "Bearer " + jwtToken)
+                            .content(requestBody)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest())
+                    .andDo(print());
         }
     }
 
@@ -399,27 +385,27 @@ public class ArticleControllerTest {
             LoginInfo loginInfo = LoginInfo.builder().userId(userId).build();
 
             given(articleService.deleteComment(loginInfo, 1L)).willReturn(
-                Map.of(
-                    "message", "댓글이 삭제되었습니다.")
+                    Map.of(
+                            "message", "댓글이 삭제되었습니다.")
             );
 
             mockMvc.perform(delete("/article/comment/" + 1)
-                    .header("Authorization", "Bearer " + jwtToken))
-                .andExpect(status().isOk())
-                .andDo(print());
+                            .header("Authorization", "Bearer " + jwtToken))
+                    .andExpect(status().isOk())
+                    .andDo(print());
         }
 
         @Test
         @DisplayName("fail")
         public void deleteCommentFail() throws Exception {
             given(articleService.deleteComment(null, 1L)).willReturn(
-                Map.of(
-                    "message", "Required header 'Authorization' is not present.")
+                    Map.of(
+                            "message", "Required header 'Authorization' is not present.")
             );
 
             mockMvc.perform(delete("/article/comment/" + 1))
-                .andExpect(status().isBadRequest())
-                .andDo(print());
+                    .andExpect(status().isBadRequest())
+                    .andDo(print());
         }
     }
 
@@ -439,16 +425,16 @@ public class ArticleControllerTest {
             String requestBody = gson.toJson(request);
 
             given(articleService.toggleComment(loginInfo, request)).willReturn(
-                Map.of("comment", new Comment(),
-                    "recommend", new CommentRecommend())
+                    Map.of("comment", new Comment(),
+                            "recommend", new CommentRecommend())
             );
 
             mockMvc.perform(patch("/article/comment")
-                    .header("Authorization", "Bearer " + jwtToken)
-                    .content(requestBody)
-                    .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andDo(print());
+                            .header("Authorization", "Bearer " + jwtToken)
+                            .content(requestBody)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isOk())
+                    .andDo(print());
         }
 
         @Test
@@ -464,15 +450,15 @@ public class ArticleControllerTest {
             String requestBody = gson.toJson(request);
 
             given(articleService.toggleComment(loginInfo, request)).willReturn(
-                Map.of("message", "추천 혹은 비추천을 선택해주세요")
+                    Map.of("message", "추천 혹은 비추천을 선택해주세요")
             );
 
             mockMvc.perform(patch("/article/comment")
-                    .header("Authorization", "Bearer " + jwtToken)
-                    .content(requestBody)
-                    .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andDo(print());
+                            .header("Authorization", "Bearer " + jwtToken)
+                            .content(requestBody)
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andExpect(status().isBadRequest())
+                    .andDo(print());
         }
     }
 

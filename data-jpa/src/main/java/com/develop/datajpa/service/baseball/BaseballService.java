@@ -1,29 +1,17 @@
 package com.develop.datajpa.service.baseball;
 
-import com.develop.domain.dto.baseball.MatchDto;
-import com.develop.domain.dto.baseball.ReviewDto;
-import com.develop.domain.dto.user.LoginInfo;
-import com.develop.domain.entity.baseball.Food;
-import com.develop.domain.entity.baseball.MatchSchedule;
-import com.develop.domain.entity.baseball.MatchType.TeamCode;
-import com.develop.domain.entity.baseball.Player;
-import com.develop.domain.entity.baseball.QReview;
-import com.develop.domain.entity.baseball.Restaurants;
-import com.develop.domain.entity.baseball.Review;
-import com.develop.domain.entity.baseball.Stadium;
-import com.develop.domain.entity.user.QUser;
-import com.develop.domain.repository.baseball.FoodRepository;
-import com.develop.domain.repository.baseball.MatchScheduleRepository;
-import com.develop.domain.repository.baseball.PlayerRepository;
-import com.develop.domain.repository.baseball.RestaurantsRepository;
-import com.develop.domain.repository.baseball.ReviewRepository;
-import com.develop.domain.repository.baseball.StadiumRepository;
-import com.develop.domain.repository.baseball.TeamRepository;
+import com.develop.core.exception.ClientException;
 import com.develop.datajpa.request.baseball.GetPlayerInfoRequest;
 import com.develop.datajpa.request.baseball.GetStadiumInfoRequest;
 import com.develop.datajpa.request.baseball.LeaveReviewRequest;
-import com.develop.core.exception.ClientException;
 import com.develop.datajpa.service.user.UserService;
+import com.develop.domain.dto.baseball.MatchDto;
+import com.develop.domain.dto.baseball.ReviewDto;
+import com.develop.domain.dto.user.LoginInfo;
+import com.develop.domain.entity.baseball.*;
+import com.develop.domain.entity.baseball.MatchType.TeamCode;
+import com.develop.domain.entity.user.QUser;
+import com.develop.domain.repository.baseball.*;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
@@ -63,7 +51,7 @@ public class BaseballService {
             matchSchedules = matchScheduleRepository.findByMatchDate(date);
         } else {
             matchSchedules = matchScheduleRepository.findByDateRangeAndTeam
-                (date.withDayOfMonth(1), date.withDayOfMonth(date.lengthOfMonth()), team);
+                    (date.withDayOfMonth(1), date.withDayOfMonth(date.lengthOfMonth()), team);
         }
 
         Map<String, String> imgList = new HashMap<String, String>();
@@ -80,19 +68,19 @@ public class BaseballService {
         }).toList();
 
         return Map.of(
-            "result", result
+                "result", result
         );
     }
 
     public Map<String, Object> getTeamInfo(TeamCode team) {
         if (TeamCode.ALL.equals(team)) {
             return Map.of(
-                "result", teamRepository.findAll(Sort.by("rank").ascending())
+                    "result", teamRepository.findAll(Sort.by("rank").ascending())
             );
         } else {
             return Map.of(
-                "result", teamRepository.findByTeamCode(team)
-                    .orElseThrow(() -> new ClientException("조회되는 팀이 없습니다."))
+                    "result", teamRepository.findByTeamCode(team)
+                            .orElseThrow(() -> new ClientException("조회되는 팀이 없습니다."))
             );
         }
     }
@@ -100,30 +88,30 @@ public class BaseballService {
     public Map<String, Object> getStadiumInfo(GetStadiumInfoRequest request) {
         if ("all".equals(request.getKeyword())) {
             return Map.of(
-                "result", stadiumRepository.findAll()
+                    "result", stadiumRepository.findAll()
             );
         } else if ("id".equals(request.getType())) {
             Stadium stadium = stadiumRepository.findById(Long.parseLong(request.getKeyword()))
-                .orElseThrow(() -> new ClientException("조회되는 경기장이 없습니다."));
+                    .orElseThrow(() -> new ClientException("조회되는 경기장이 없습니다."));
             List<Restaurants> restaurants = restaurantsRepository.findByStadium(stadium.getIdx());
             return Map.of(
-                "result", stadium,
-                "restaurants", restaurantsRepository.findByStadium(stadium.getIdx())
+                    "result", stadium,
+                    "restaurants", restaurantsRepository.findByStadium(stadium.getIdx())
             );
         } else if ("name".equals(request.getType())) {
             return Map.of(
-                "result", stadiumRepository.findByNameContaining(request.getKeyword())
-                    .orElseThrow(() -> new ClientException("조회되는 경기장이 없습니다."))
+                    "result", stadiumRepository.findByNameContaining(request.getKeyword())
+                            .orElseThrow(() -> new ClientException("조회되는 경기장이 없습니다."))
             );
         } else if ("team".equals(request.getType())) {
             return Map.of(
-                "result", stadiumRepository.findByTeamContaining(request.getKeyword())
-                    .orElseThrow(() -> new ClientException("조회되는 경기장이 없습니다."))
+                    "result", stadiumRepository.findByTeamContaining(request.getKeyword())
+                            .orElseThrow(() -> new ClientException("조회되는 경기장이 없습니다."))
             );
         } else if ("address".equals(request.getType())) {
             return Map.of(
-                "result", stadiumRepository.findByAddressContaining(request.getKeyword())
-                    .orElseThrow(() -> new ClientException("조회되는 경기장이 없습니다."))
+                    "result", stadiumRepository.findByAddressContaining(request.getKeyword())
+                            .orElseThrow(() -> new ClientException("조회되는 경기장이 없습니다."))
             );
         } else {
             throw new ClientException("검색 조건을 확인해주세요");
@@ -133,20 +121,20 @@ public class BaseballService {
     public Map<String, Object> getPlayerInfo(GetPlayerInfoRequest request) {
         if ("all".equals(request.getType())) {
             Page<Player> players = playerRepository.findAll(PageRequest.of(request.getPage() - 1, 9,
-                Sort.by("name").ascending()));
+                    Sort.by("name").ascending()));
             return Map.of(
-                "result", players.getContent(),
-                "page", players.getTotalPages()
+                    "result", players.getContent(),
+                    "page", players.getTotalPages()
             );
         } else if ("name".equals(request.getType())) {
             return Map.of(
-                "result", playerRepository.findByNameContaining(request.getKeyword())
-                    .orElseThrow(() -> new ClientException("조회되는 선수가 없습니다."))
+                    "result", playerRepository.findByNameContaining(request.getKeyword())
+                            .orElseThrow(() -> new ClientException("조회되는 선수가 없습니다."))
             );
         } else if ("team".equals(request.getType())) {
             List<Player> players = playerRepository.findByTeamContaining(request.getKeyword());
             return Map.of(
-                "result", players
+                    "result", players
             );
         } else {
             throw new ClientException("검색 조건을 확인해주세요");
@@ -160,27 +148,27 @@ public class BaseballService {
         QUser u = QUser.user;
 
         List<ReviewDto> reviews = queryFactory.select(
-                Projections.constructor(ReviewDto.class,
-                    r, u))
-            .from(r)
-            .join(u).on(r.userId.eq(u.userId))
-            .where(
-                r.restaurantsId.eq(id)
-                    .and(r.state.eq(0))
-                    .and(u.role.eq(0)))
-            .orderBy(r.createdAt.desc())
-            .limit(10)
-            .fetch();
+                        Projections.constructor(ReviewDto.class,
+                                r, u))
+                .from(r)
+                .join(u).on(r.userId.eq(u.userId))
+                .where(
+                        r.restaurantsId.eq(id)
+                                .and(r.state.eq(0))
+                                .and(u.role.eq(0)))
+                .orderBy(r.createdAt.desc())
+                .limit(10)
+                .fetch();
 
         Restaurants restaurants = restaurantsRepository.findById(id)
-            .orElseThrow(() -> new ClientException("조회되는 식당이 없습니다."));
+                .orElseThrow(() -> new ClientException("조회되는 식당이 없습니다."));
 
         List<Food> food = foodRepository.findByRestaurantsId(id);
 
         return Map.of(
-            "result", restaurants,
-            "food", food,
-            "review", reviews
+                "result", restaurants,
+                "food", food,
+                "review", reviews
         );
     }
 
@@ -188,29 +176,29 @@ public class BaseballService {
         userService.checkUser(loginInfo.getUserId());
 
         Restaurants restaurants = restaurantsRepository.findById(request.getId())
-            .orElseThrow(() -> new ClientException("식당 정보가 확인되지 않습니다."));
+                .orElseThrow(() -> new ClientException("식당 정보가 확인되지 않습니다."));
 
         Review review = Review.builder()
-            .restaurantsId(request.getId())
-            .star(request.getStar())
-            .content(request.getContent())
-            .userId(loginInfo.getUserId())
-            .build();
+                .restaurantsId(request.getId())
+                .star(request.getStar())
+                .content(request.getContent())
+                .userId(loginInfo.getUserId())
+                .build();
         reviewRepository.save(review);
 
         JPAQueryFactory queryFactory = new JPAQueryFactory(em);
         QReview r = QReview.review;
 
         double avg = queryFactory.select(r.star.avg())
-            .from(r)
-            .where(r.restaurantsId.eq(request.getId()).and(r.state.eq(0)))
-            .fetchOne();
+                .from(r)
+                .where(r.restaurantsId.eq(request.getId()).and(r.state.eq(0)))
+                .fetchOne();
 
         restaurants.setStar(avg);
         restaurantsRepository.save(restaurants);
 
         return Map.of(
-            "review", review
+                "review", review
         );
     }
 
@@ -218,7 +206,7 @@ public class BaseballService {
         userService.checkUser(loginInfo.getUserId());
 
         Review review = reviewRepository.findById(id)
-            .orElseThrow(() -> new ClientException("리뷰가 확인되지 않습니다."));
+                .orElseThrow(() -> new ClientException("리뷰가 확인되지 않습니다."));
         review.setState(2);
         reviewRepository.save(review);
 
@@ -228,25 +216,25 @@ public class BaseballService {
             QReview r = QReview.review;
 
             double avg = queryFactory.select(r.star.avg().nullif(0D))
-                .from(r)
-                .where(r.restaurantsId.eq(review.getRestaurantsId()).and(r.state.eq(0)))
-                .fetchOne();
+                    .from(r)
+                    .where(r.restaurantsId.eq(review.getRestaurantsId()).and(r.state.eq(0)))
+                    .fetchOne();
 
             restaurants.get().setStar(avg);
             restaurantsRepository.save(restaurants.get());
         }
 
         return Map.of(
-            "message", review
+                "message", review
         );
     }
 
     public Map<String, Object> getFoodInfo(long id) {
         Food food = foodRepository.findById(id)
-            .orElseThrow(() -> new ClientException("조회되는 음식이 없습니다."));
+                .orElseThrow(() -> new ClientException("조회되는 음식이 없습니다."));
 
         return Map.of(
-            "result", food
+                "result", food
         );
     }
 

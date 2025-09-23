@@ -1,5 +1,9 @@
 package com.develop.datajpa.service.user;
 
+import com.develop.core.exception.ClientException;
+import com.develop.datajpa.request.user.*;
+import com.develop.datajpa.service.security.JwtProvider;
+import com.develop.datajpa.service.sms.SmsService;
 import com.develop.domain.dto.user.LoginInfo;
 import com.develop.domain.dto.user.UserDto;
 import com.develop.domain.entity.user.SmsType.VerificationType;
@@ -8,16 +12,6 @@ import com.develop.domain.entity.user.User;
 import com.develop.domain.entity.user.UserType.Role;
 import com.develop.domain.repository.user.SmsVerificationRepository;
 import com.develop.domain.repository.user.UserRepository;
-import com.develop.datajpa.request.user.CheckUserPhoneRequest;
-import com.develop.datajpa.request.user.FindUserIdRequest;
-import com.develop.datajpa.request.user.FindUserPwRequest;
-import com.develop.datajpa.request.user.ResetUserPwRequest;
-import com.develop.datajpa.request.user.SendPhoneSmsRequest;
-import com.develop.datajpa.request.user.UserLoginRequest;
-import com.develop.datajpa.request.user.UserSignUpRequest;
-import com.develop.core.exception.ClientException;
-import com.develop.datajpa.service.security.JwtProvider;
-import com.develop.datajpa.service.sms.SmsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -79,7 +73,7 @@ public class UserService {
         log.info("token = {}", token);
 
         return Map.of(
-            "token", token
+                "token", token
         );
     }
 
@@ -94,12 +88,12 @@ public class UserService {
         }
 
         return Map.of(
-            "result", user
+                "result", user
         );
     }
 
     Set<String> FORBIDDEN_NAME = Set.of(
-        "ADMIN", "UNDEFINED", "NULL", "관리자", "운영자", "LOCALHOST", "DEVELOP"
+            "ADMIN", "UNDEFINED", "NULL", "관리자", "운영자", "LOCALHOST", "DEVELOP"
     );
 
     public Map<String, Object> checkUserId(String memberId) {
@@ -113,7 +107,7 @@ public class UserService {
         }
 
         return Map.of(
-            "message", "사용할 수 있는 아이디입니다."
+                "message", "사용할 수 있는 아이디입니다."
         );
     }
 
@@ -128,7 +122,7 @@ public class UserService {
         }
 
         return Map.of(
-            "message", "사용할 수 있는 닉네임입니다."
+                "message", "사용할 수 있는 닉네임입니다."
         );
     }
 
@@ -146,11 +140,11 @@ public class UserService {
                 throw new ClientException("이미 가입된 정보가 있습니다.");
             } else if (isNull(sms)) {
                 SmsVerification newVerification = SmsVerification.builder()
-                    .phone(request.getPhone())
-                    .name(request.getName())
-                    .verificationType(VerificationType.SIGN_UP)
-                    .code(code)
-                    .build();
+                        .phone(request.getPhone())
+                        .name(request.getName())
+                        .verificationType(VerificationType.SIGN_UP)
+                        .code(code)
+                        .build();
                 smsVerificationRepository.save(newVerification);
             } else if (sms.getState() || !VerificationType.SIGN_UP.equals(sms.getVerificationType())) {
                 throw new ClientException("이미 가입된 정보가 있습니다");
@@ -182,7 +176,7 @@ public class UserService {
 //        smsService.sendSms(request.getPhone(), message);
 
         return Map.of(
-            "message", "문자로 발송된 인증번호를 입력해주세요."
+                "message", "문자로 발송된 인증번호를 입력해주세요."
         );
     }
 
@@ -191,7 +185,7 @@ public class UserService {
         User user = userRepository.findByPhone(request.getPhone());
 
         SmsVerification sms = smsVerificationRepository.findByPhoneAndName(request.getPhone(), request.getName())
-            .orElseThrow(() -> new ClientException("인증 문자를 요청해주세요"));
+                .orElseThrow(() -> new ClientException("인증 문자를 요청해주세요"));
 
         if (sms.getState()) {
             throw new ClientException("인증 문자를 요청해주세요");
@@ -212,7 +206,7 @@ public class UserService {
         }
 
         return Map.of(
-            "message", "본인인증이 완료되었습니다."
+                "message", "본인인증이 완료되었습니다."
         );
     }
 
@@ -229,14 +223,14 @@ public class UserService {
         }
 
         User newMember = User.builder()
-            .userId(request.getUserId())
-            .name(request.getName())
-            .nickname(request.getNickname())
-            .phone(request.getPhone())
-            .pw(request.getPassword())
-            .country(request.getCountry())
-            .ip(request.getIp())
-            .build();
+                .userId(request.getUserId())
+                .name(request.getName())
+                .nickname(request.getNickname())
+                .phone(request.getPhone())
+                .pw(request.getPassword())
+                .country(request.getCountry())
+                .ip(request.getIp())
+                .build();
         userRepository.save(newMember);
 
         sms.setState(true);
@@ -244,16 +238,16 @@ public class UserService {
         smsVerificationRepository.save(sms);
 
         return Map.of(
-            "message", "회원가입이 완료되었습니다."
+                "message", "회원가입이 완료되었습니다."
         );
     }
 
     public Map<String, Object> findUserId(FindUserIdRequest request) {
         User user = userRepository.findByNameAndPhone(request.getName(), request.getPhone())
-            .orElseThrow(() -> new ClientException("가입하신 정보가 확인되지 않습니다."));
+                .orElseThrow(() -> new ClientException("가입하신 정보가 확인되지 않습니다."));
 
         SmsVerification sms = smsVerificationRepository.findByPhoneAndName(request.getPhone(), request.getName())
-            .orElseThrow(() -> new ClientException("인증 정보가 확인되지 않습니다."));
+                .orElseThrow(() -> new ClientException("인증 정보가 확인되지 않습니다."));
         if (sms.getState() || !VerificationType.FIND_ID.equals(sms.getVerificationType())) {
             throw new ClientException("휴대폰 인증에 오류가 있습니다.");
         } else if (sms.getVerificationTime().isBefore(LocalDateTime.now().minusMinutes(10))) {
@@ -265,14 +259,14 @@ public class UserService {
         smsVerificationRepository.save(sms);
 
         return Map.of(
-            "userId", user.getUserId()
+                "userId", user.getUserId()
         );
     }
 
     @Transactional
     public Map<String, Object> findPassword(FindUserPwRequest request) {
         User user = userRepository.findByUserIdAndNameAndPhone(request.getUserId(), request.getName(), request.getPhone())
-            .orElseThrow(() -> new ClientException("가입하신 정보가 확인되지 않습니다."));
+                .orElseThrow(() -> new ClientException("가입하신 정보가 확인되지 않습니다."));
 
         SmsVerification sms = smsVerificationRepository.findByPhone(request.getPhone());
         if (isNull(sms) || sms.getState() || !VerificationType.FIND_PW.equals(sms.getVerificationType())) {
@@ -299,8 +293,8 @@ public class UserService {
         userRepository.save(user);
 
         return Map.of(
-            "tempPw", tempPw,
-            "message", "임시 비밀번호로 로그인 후 비밀번호를 재설정해주세요"
+                "tempPw", tempPw,
+                "message", "임시 비밀번호로 로그인 후 비밀번호를 재설정해주세요"
         );
     }
 
@@ -317,7 +311,7 @@ public class UserService {
         userRepository.save(user);
 
         return Map.of(
-            "message", "비밀번호가 재설정되었습니다."
+                "message", "비밀번호가 재설정되었습니다."
         );
     }
 
@@ -328,7 +322,7 @@ public class UserService {
         userRepository.save(user);
 
         return Map.of(
-            "message", "탈퇴처리 되었습니다."
+                "message", "탈퇴처리 되었습니다."
         );
     }
 }

@@ -23,16 +23,16 @@ public class UpdateGoodsScoreJobConfig {
     @Bean(name = "UPDATE_GOODS_SCORE_JOB")
     public Job UpdateGoodsScoreJob() {
         return new JobBuilder("UPDATE_GOODS_SCORE_JOB", jobRepository)
-            .incrementer(new RunIdIncrementer())
-            .start(updateGoodsScoreStep())
-            .build();
+                .incrementer(new RunIdIncrementer())
+                .start(updateGoodsScoreStep())
+                .build();
     }
 
     @Bean(name = "UPDATE_GOODS_SCORE_STEP")
     public Step updateGoodsScoreStep() {
         return new StepBuilder("UpdateGoodsScoreStep", jobRepository)
-            .tasklet(updateGoodsScoreTasklet, transactionManager)
-            .build();
+                .tasklet(updateGoodsScoreTasklet, transactionManager)
+                .build();
     }
 
 }

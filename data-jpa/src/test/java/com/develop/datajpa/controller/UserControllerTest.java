@@ -41,17 +41,17 @@ public class UserControllerTest {
         request.setIp("123.4567.4567");
 
         given(userService.userSignUp(request)).willReturn(
-            Map.of("message", "회원가입이 완료되었습니다")
+                Map.of("message", "회원가입이 완료되었습니다")
         );
 
         Gson gson = new Gson();
         String content = gson.toJson(request);
 
         mockMvc.perform(post("/user/signup")
-                .content(content)
-                .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(status().isOk())
-            .andDo(print());
+                        .content(content)
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andDo(print());
     }
 
 }

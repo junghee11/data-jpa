@@ -1,24 +1,21 @@
 package com.develop.datajpa.service.baseball;
 
+import com.develop.core.exception.ClientException;
+import com.develop.datajpa.request.baseball.GetGoodsListRequest;
+import com.develop.datajpa.request.shop.AddCartRequest;
+import com.develop.datajpa.request.shop.LeaveGoodsReviewRequest;
+import com.develop.datajpa.request.shop.ModifyGoodsReviewRequest;
+import com.develop.datajpa.request.shop.PurchaseGoodsRequest;
 import com.develop.datajpa.response.kakao.KakaoPayApproveDto;
 import com.develop.datajpa.response.kakao.KakaoPayGetInfoDto;
 import com.develop.datajpa.response.kakao.KakaoPayReadyDto;
+import com.develop.datajpa.service.kakao.KakaoService;
+import com.develop.datajpa.service.user.UserService;
 import com.develop.domain.dto.shop.OrderDto;
 import com.develop.domain.dto.user.LoginInfo;
 import com.develop.domain.entity.baseball.MatchType.TeamCode;
-import com.develop.domain.entity.shop.Cart;
-import com.develop.domain.entity.shop.Goods;
-import com.develop.domain.entity.shop.GoodsReview;
-import com.develop.domain.entity.shop.GoodsReviewType;
-import com.develop.domain.entity.shop.GoodsType;
-import com.develop.domain.entity.shop.OrderMenu;
-import com.develop.domain.entity.shop.OrderMenuRepository;
+import com.develop.domain.entity.shop.*;
 import com.develop.domain.entity.shop.OrderType.Payment;
-import com.develop.domain.entity.shop.QOrderMenu;
-import com.develop.domain.entity.shop.QReceipt;
-import com.develop.domain.entity.shop.Receipt;
-import com.develop.domain.entity.shop.ReceiptRepository;
-import com.develop.domain.entity.shop.Wish;
 import com.develop.domain.entity.user.User;
 import com.develop.domain.entity.user.UserType;
 import com.develop.domain.repository.shop.CartRepository;
@@ -26,14 +23,6 @@ import com.develop.domain.repository.shop.GoodsRepository;
 import com.develop.domain.repository.shop.GoodsReviewRepository;
 import com.develop.domain.repository.shop.WishRepository;
 import com.develop.domain.repository.user.UserRepository;
-import com.develop.datajpa.request.baseball.GetGoodsListRequest;
-import com.develop.datajpa.request.shop.AddCartRequest;
-import com.develop.datajpa.request.shop.LeaveGoodsReviewRequest;
-import com.develop.datajpa.request.shop.ModifyGoodsReviewRequest;
-import com.develop.datajpa.request.shop.PurchaseGoodsRequest;
-import com.develop.core.exception.ClientException;
-import com.develop.datajpa.service.kakao.KakaoService;
-import com.develop.datajpa.service.user.UserService;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
@@ -76,21 +65,21 @@ public class ShopService {
         List<Goods> goodsList;
         if (TeamCode.ALL.name().equals(request.getTeam().toUpperCase())) {
             goodsList = goodsRepository.findByOnSaleAndGoodsState
-                (true, GoodsType.State.NORMAL, PageRequest.of(request.getPage() - 1, 10, Sort.by("goodsCode").descending()));
+                    (true, GoodsType.State.NORMAL, PageRequest.of(request.getPage() - 1, 10, Sort.by("goodsCode").descending()));
         } else {
             goodsList = goodsRepository.findByTeamAndOnSaleAndGoodsState
-                (request.getTeam(), true, GoodsType.State.NORMAL, PageRequest.of(request.getPage() - 1,
-                    10, Sort.by("goodsCode").descending()));
+                    (request.getTeam(), true, GoodsType.State.NORMAL, PageRequest.of(request.getPage() - 1,
+                            10, Sort.by("goodsCode").descending()));
         }
 
         return Map.of(
-            "result", goodsList
+                "result", goodsList
         );
     }
 
     public Map<String, Object> getGoodsInfo(String token, String id) {
         Goods goods = goodsRepository.findByGoodsCodeAndOnSaleAndGoodsStateOrderByCreatedAt(id, true, GoodsType.State.NORMAL)
-            .orElseThrow(() -> new ClientException("판매중이 아니거나 존재하지 않는 상품입니다."));
+                .orElseThrow(() -> new ClientException("판매중이 아니거나 존재하지 않는 상품입니다."));
 
         if (validateToken(token)) {
             User user = userService.checkUser(resolveToken(token).getUserId());
@@ -98,13 +87,13 @@ public class ShopService {
             Optional<Wish> wish = wishRepository.findByGoodsCodeAndUserId(id, user.getUserId());
 
             return Map.of(
-                "wish", wish.isPresent(),
-                "result", goods
+                    "wish", wish.isPresent(),
+                    "result", goods
             );
 
         } else {
             return Map.of(
-                "result", goods
+                    "result", goods
             );
         }
     }
@@ -121,17 +110,17 @@ public class ShopService {
             wishRepository.delete(wish.get());
 
             return Map.of(
-                "message", "찜 목록에서 삭제되었습니다."
+                    "message", "찜 목록에서 삭제되었습니다."
             );
         } else {
             Wish newWish = Wish.builder()
-                .userId(loginInfo.getUserId())
-                .goodsCode(id)
-                .build();
+                    .userId(loginInfo.getUserId())
+                    .goodsCode(id)
+                    .build();
             wishRepository.save(newWish);
 
             return Map.of(
-                "message", "찜 목록에 추가되었습니다."
+                    "message", "찜 목록에 추가되었습니다."
             );
         }
     }
@@ -156,15 +145,15 @@ public class ShopService {
             cartRepository.save(cart.get());
         } else {
             Cart newCart = Cart.builder()
-                .userId(loginInfo.getUserId())
-                .goodsCode(request.getId())
-                .count(request.getCount())
-                .build();
+                    .userId(loginInfo.getUserId())
+                    .goodsCode(request.getId())
+                    .count(request.getCount())
+                    .build();
             cartRepository.save(newCart);
         }
 
         return Map.of(
-            "message", "장바구니에 추가했습니다."
+                "message", "장바구니에 추가했습니다."
         );
     }
 
@@ -185,7 +174,7 @@ public class ShopService {
         cartRepository.delete(cart);
 
         return Map.of(
-            "message", "장바구니에서 삭제되었습니다."
+                "message", "장바구니에서 삭제되었습니다."
         );
     }
 
@@ -200,7 +189,7 @@ public class ShopService {
         cartRepository.deleteAll(cartList);
 
         return Map.of(
-            "message", "장바구니를 비웠습니다."
+                "message", "장바구니를 비웠습니다."
         );
     }
 
@@ -213,13 +202,13 @@ public class ShopService {
         long price = (long) (goods.getPrice() * request.getCount() * ((100 - goods.getDiscountRate()) / 100));
 
         OrderMenu orderMenu = OrderMenu.builder()
-            .orderMenuCode(createOrderCode(goods.getGoodsCode()))
-            .goodsCode(goods.getGoodsCode())
-            .goodsName(goods.getName())
-            .userId(loginInfo.getUserId())
-            .price(price)
-            .count(request.getCount())
-            .build();
+                .orderMenuCode(createOrderCode(goods.getGoodsCode()))
+                .goodsCode(goods.getGoodsCode())
+                .goodsName(goods.getName())
+                .userId(loginInfo.getUserId())
+                .price(price)
+                .count(request.getCount())
+                .build();
 
         KakaoPayReadyDto ready = kakaoService.kakaoPayReady(goods.getGoodsCode(), goods.getName(), price);
 
@@ -227,13 +216,13 @@ public class ShopService {
         orderMenuRepository.save(orderMenu);
 
         return Map.of(
-            "result", ready
+                "result", ready
         );
     }
 
     private Goods getGoods(String goodsCode, int count) {
         Goods goods = goodsRepository.findByGoodsCode(goodsCode)
-            .orElseThrow(() -> new ClientException("제품 정보가 확인되지 않습니다."));
+                .orElseThrow(() -> new ClientException("제품 정보가 확인되지 않습니다."));
         if (!goods.isOnSale()) {
             throw new ClientException(goods.getName() + "은/는 현재 판매중인 상품이 아닙니다");
         } else if (goods.getStock() < count) {
@@ -255,7 +244,7 @@ public class ShopService {
 
         orderList.stream().forEach(orderMenu -> {
             Goods goods = goodsRepository.findByGoodsCode(orderMenu.getGoodsCode())
-                .orElseThrow(() -> new ClientException("제품 정보가 확인되지 않습니다."));
+                    .orElseThrow(() -> new ClientException("제품 정보가 확인되지 않습니다."));
 
             if (goods.getPointRate() > 0) {
                 user.updatePoint((long) (orderMenu.getPrice() * goods.getPointRate()));
@@ -272,19 +261,19 @@ public class ShopService {
         }
 
         Receipt receipt = Receipt.builder()
-            .receiptCode(response.getTid())
-            .userId(user.getUserId())
-            .payment(Payment.KAKAO_PAY.name())
-            .payId(response.getAid())
-            .receiptDesc(receiptDesc)
-            .totalPrice((long) response.getAmount().getTotal())
-            .build();
+                .receiptCode(response.getTid())
+                .userId(user.getUserId())
+                .payment(Payment.KAKAO_PAY.name())
+                .payId(response.getAid())
+                .receiptDesc(receiptDesc)
+                .totalPrice((long) response.getAmount().getTotal())
+                .build();
         receiptRepository.save(receipt);
 
         userRepository.save(user);
 
         return Map.of(
-            "message", "결제가 완료되었습니다"
+                "message", "결제가 완료되었습니다"
         );
     }
 
@@ -293,7 +282,7 @@ public class ShopService {
         User user = userService.checkUser(loginInfo.getUserId());
 
         Receipt receipt = receiptRepository.findByReceiptCode(code)
-            .orElseThrow(() -> new ClientException("결제 정보가 확인되지 않습니다."));
+                .orElseThrow(() -> new ClientException("결제 정보가 확인되지 않습니다."));
 
         if (!loginInfo.getUserId().equals(receipt.getUserId())) {
             throw new ClientException("결제 취소는 본인만 가능합니다.");
@@ -306,7 +295,7 @@ public class ShopService {
 
         orderList.stream().forEach(order -> {
             Goods goods = goodsRepository.findByGoodsCode(order.getGoodsCode())
-                .orElseThrow(() -> new ClientException("제품 정보가 확인되지 않습니다."));
+                    .orElseThrow(() -> new ClientException("제품 정보가 확인되지 않습니다."));
 
             goods.updateStock(order.getCount());
             goodsRepository.save(goods);
@@ -324,7 +313,7 @@ public class ShopService {
         receiptRepository.save(receipt);
 
         return Map.of(
-            "message", "결제가 취소되었습니다"
+                "message", "결제가 취소되었습니다"
         );
     }
 
@@ -333,7 +322,7 @@ public class ShopService {
         User user = userService.checkUser(loginInfo.getUserId());
 
         Receipt receipt = receiptRepository.findByReceiptCode(code)
-            .orElseThrow(() -> new ClientException("결제 정보가 확인되지 않습니다."));
+                .orElseThrow(() -> new ClientException("결제 정보가 확인되지 않습니다."));
 
         if (!user.getRole().equals(UserType.Role.ADMIN.ordinal()) && !loginInfo.getUserId().equals(receipt.getUserId())) {
             throw new ClientException("결제 정보는 본인만 확인 가능합니다.");
@@ -342,7 +331,7 @@ public class ShopService {
         KakaoPayGetInfoDto info = kakaoService.getPayInfo(code);
 
         return Map.of(
-            "message", info
+                "message", info
         );
     }
 
@@ -361,21 +350,21 @@ public class ShopService {
             long price = (long) (goods.getPrice() * cart.getCount() * ((100 - goods.getDiscountRate()) / 100));
 
             OrderMenu orderMenu = OrderMenu.builder()
-                .orderMenuCode(createOrderCode(goods.getGoodsCode()))
-                .goodsCode(goods.getGoodsCode())
-                .userId(loginInfo.getUserId())
-                .goodsName(goods.getName())
-                .price(price)
-                .count(cart.getCount())
-                .build();
+                    .orderMenuCode(createOrderCode(goods.getGoodsCode()))
+                    .goodsCode(goods.getGoodsCode())
+                    .userId(loginInfo.getUserId())
+                    .goodsName(goods.getName())
+                    .price(price)
+                    .count(cart.getCount())
+                    .build();
 
             return orderMenu;
         }).collect(Collectors.toList());
 
         KakaoPayReadyDto ready = kakaoService.kakaoPayReady(
-            cartList.get(0).getGoodsCode(),
-            "장바구니 결제 총" + cartList.size() + "건",
-            orderList.stream().mapToLong(OrderMenu::getPrice).sum()
+                cartList.get(0).getGoodsCode(),
+                "장바구니 결제 총" + cartList.size() + "건",
+                orderList.stream().mapToLong(OrderMenu::getPrice).sum()
         );
 
         orderList.stream().forEach(orderMenu -> {
@@ -384,7 +373,7 @@ public class ShopService {
         });
 
         return Map.of(
-            "message", "결제가 완료되었습니다"
+                "message", "결제가 완료되었습니다"
         );
     }
 
@@ -397,37 +386,37 @@ public class ShopService {
         userService.checkUser(loginInfo.getUserId());
 
         goodsRepository.findByGoodsCode(request.getId())
-            .orElseThrow(() -> new ClientException("제품 정보가 확인되지 않습니다."));
+                .orElseThrow(() -> new ClientException("제품 정보가 확인되지 않습니다."));
 
         JPAQueryFactory queryFactory = new JPAQueryFactory(em);
         QReceipt r = QReceipt.receipt;
         QOrderMenu o = QOrderMenu.orderMenu;
 
         OrderDto order = queryFactory.select(Projections.constructor(OrderDto.class, r, o))
-            .from(r).join(o).on(r.receiptCode.eq(o.receiptCode))
-            .where(r.userId.eq(loginInfo.getUserId())
-                .and(o.goodsCode.eq(request.getId()))
-                .and(o.review.eq(false)))
-            .fetchOne();
+                .from(r).join(o).on(r.receiptCode.eq(o.receiptCode))
+                .where(r.userId.eq(loginInfo.getUserId())
+                        .and(o.goodsCode.eq(request.getId()))
+                        .and(o.review.eq(false)))
+                .fetchOne();
         if (isNull(order)) {
             throw new ClientException("구입 기록이 확인되지 않습니다");
         }
 
         queryFactory.update(o)
-            .set(o.review, true)
-            .where(o.orderMenuCode.eq(order.getOrderMenuCode()))
-            .execute();
+                .set(o.review, true)
+                .where(o.orderMenuCode.eq(order.getOrderMenuCode()))
+                .execute();
 
         GoodsReview review = GoodsReview.builder()
-            .goodsCode(request.getId())
-            .star(request.getStar())
-            .content(request.getContent())
-            .userId(loginInfo.getUserId())
-            .build();
+                .goodsCode(request.getId())
+                .star(request.getStar())
+                .content(request.getContent())
+                .userId(loginInfo.getUserId())
+                .build();
         goodsReviewRepository.save(review);
 
         return Map.of(
-            "message", review
+                "message", review
         );
     }
 
@@ -437,14 +426,14 @@ public class ShopService {
         userService.checkUser(loginInfo.getUserId());
 
         GoodsReview review = goodsReviewRepository.findById(request.getId())
-            .orElseThrow(() -> new ClientException("리뷰가 확인되지 않습니다."));
+                .orElseThrow(() -> new ClientException("리뷰가 확인되지 않습니다."));
 
         review.setStar(request.getStar());
         review.setContent(request.getContent());
         goodsReviewRepository.save(review);
 
         return Map.of(
-            "message", "수정이 완료되었습니다"
+                "message", "수정이 완료되었습니다"
         );
     }
 
@@ -453,13 +442,13 @@ public class ShopService {
         userService.checkUser(loginInfo.getUserId());
 
         GoodsReview review = goodsReviewRepository.findById(id)
-            .orElseThrow(() -> new ClientException("리뷰가 확인되지 않습니다."));
+                .orElseThrow(() -> new ClientException("리뷰가 확인되지 않습니다."));
 
         review.setState(GoodsReviewType.State.REMOVED.ordinal());
         goodsReviewRepository.save(review);
 
         return Map.of(
-            "message", "리뷰가 삭제되었습니다"
+                "message", "리뷰가 삭제되었습니다"
         );
     }
 
