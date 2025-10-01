@@ -2,39 +2,55 @@ package com.develop.datajpa.service.security;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
-@RequiredArgsConstructor
+@Configuration
 @EnableWebSecurity
-public class SecurityConfig extends WebSecurityConfiguration {
+@EnableMethodSecurity
+public class SecurityConfig {
 
-    private final JwtProvider jwtProvider;
+    private final JwtTokenFilter jwtTokenFilter;
+
+    public SecurityConfig(JwtTokenFilter jwtTokenFilter) {
+        this.jwtTokenFilter = jwtTokenFilter;
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests((authz) -> {
                     authz
-                            .requestMatchers("/register", "/login").permitAll()
-                            .requestMatchers(HttpMethod.POST, "/admin/**").authenticated()
-                            .requestMatchers(HttpMethod.POST, "/user/**").authenticated()
+                            .requestMatchers(HttpMethod.POST, "/article/**").authenticated()
+                            .requestMatchers(HttpMethod.DELETE, "/article/**").authenticated()
+                            .requestMatchers(HttpMethod.PATCH, "/article/**").authenticated()
+
+                            .requestMatchers(HttpMethod.POST, "/shop/**").authenticated()
+                            .requestMatchers(HttpMethod.DELETE, "/shop/**").authenticated()
+                            .requestMatchers(HttpMethod.PATCH,"/shop/**").authenticated()
+
                             .requestMatchers("/my/**").authenticated()
-                            .anyRequest().denyAll();
-                }).httpBasic(withDefaults());
-        // TODO : JWT 인증 필터 적용? 뭔지 다시 한번 보기 이제 안써도 되는듯??
-//            .addFilterBefore(new JwtAuthenticationFilter(jwtProvider), UsernamePasswordAuthenticationFilter.class);
+
+                            .requestMatchers("/admin/**").hasRole("ADMIN")
+
+                            .anyRequest().permitAll();
+                    }
+                )
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .csrf(csrf -> csrf.disable())
+                .httpBasic(httpBasic -> httpBasic.disable())
+                .formLogin(formLogin -> formLogin.disable())
+                .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
-
-//    @Bean
-//    public PasswordEncoder passwordEncoder() {
-//        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
-//    }
 }

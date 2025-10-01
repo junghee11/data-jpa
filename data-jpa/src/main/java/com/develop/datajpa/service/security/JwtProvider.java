@@ -28,19 +28,16 @@ public class JwtProvider {
 
     private final Long exp = 1000L * 60 * 60;   // 만료시간 : 1Hour
 
-    public String createToken(User user) {
+    public String createToken(String userId) {
         log.info("salt = {}", salt);  // 이거 어디씀??
 
         return Jwts.builder()
-                // TODO 확인 후 필요없으면 지우기
-//            .setIssuedAt(new Date(System.currentTimeMillis()))
-                .claim("userId", user.getUserId())
+                .claim("userId", userId)
                 .setExpiration(new Date(System.currentTimeMillis() + exp))
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .compact();
     }
 
-    // Authorization Header를 통해 인증을 한다.
     public static LoginInfo resolveToken(String token) {
 
         log.info("token, in doFilterInternal = {}", token);
@@ -68,7 +65,6 @@ public class JwtProvider {
                 .build();
     }
 
-    // 토큰 검증
     public static boolean validateToken(String token) {
         try {
             if (!token.substring(0, "BEARER ".length()).equalsIgnoreCase("BEARER ")) {

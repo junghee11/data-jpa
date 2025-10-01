@@ -5,11 +5,11 @@ import com.develop.datajpa.service.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
-
-import static com.develop.datajpa.service.security.JwtProvider.resolveToken;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -25,8 +25,10 @@ public class UserController {
     }
 
     @GetMapping("/info")
-    public Map<String, Object> getUserInfo(@RequestHeader(value = "Authorization") String token) {
-        return userService.getUserInfo(resolveToken(token));
+    @PreAuthorize("isAuthenticated()")
+    public Map<String, Object> getUserInfo(Authentication authentication) {
+        log.info("name = {}", authentication.getName());
+        return userService.getUserInfo(authentication.getName());
     }
 
     @GetMapping("/check/id")
@@ -65,14 +67,16 @@ public class UserController {
     }
 
     @PostMapping("/user-pw")
-    public Map<String, Object> resetUserPassword(@RequestHeader(value = "Authorization") String token,
+    @PreAuthorize("isAuthenticated()")
+    public Map<String, Object> resetUserPassword(Authentication authentication,
                                                  @Valid @RequestBody ResetUserPwRequest request) {
-        return userService.resetUserPassword(resolveToken(token), request);
+        return userService.resetUserPassword(authentication.getName(), request);
     }
 
     @PostMapping("/leave")
-    public Map<String, Object> userLeave(@RequestHeader(value = "Authorization") String token) {
-        return userService.userLeave(resolveToken(token));
+    @PreAuthorize("isAuthenticated()")
+    public Map<String, Object> userLeave(Authentication authentication) {
+        return userService.userLeave(authentication.getName());
     }
 
 }
