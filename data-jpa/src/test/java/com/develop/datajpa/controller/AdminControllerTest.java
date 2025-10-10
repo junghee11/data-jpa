@@ -1,9 +1,9 @@
 package com.develop.datajpa.controller;
 
+import com.develop.core.security.dto.LoginInfo;
+import com.develop.core.security.jwt.JwtTokenProvider;
 import com.develop.datajpa.request.admin.*;
 import com.develop.datajpa.service.admin.AdminService;
-import com.develop.datajpa.service.security.JwtProvider;
-import com.develop.domain.dto.user.LoginInfo;
 import com.develop.domain.entity.baseball.MatchType;
 import com.google.gson.Gson;
 import org.junit.jupiter.api.BeforeEach;
@@ -58,7 +58,7 @@ public class AdminControllerTest {
 
         userId = "member1";
 
-        JwtProvider jwtProvider = new JwtProvider();
+        JwtTokenProvider jwtProvider = new JwtTokenProvider();
         jwtToken = jwtProvider.generateToken(userId);
     }
 

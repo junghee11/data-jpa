@@ -1,12 +1,13 @@
 package com.develop.datajpa.controller.user;
 
+import com.develop.core.security.jwt.CustomUserDetails;
 import com.develop.datajpa.request.user.*;
 import com.develop.datajpa.service.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -26,9 +27,8 @@ public class UserController {
 
     @GetMapping("/info")
     @PreAuthorize("isAuthenticated()")
-    public Map<String, Object> getUserInfo(Authentication authentication) {
-        log.info("name = {}", authentication.getName());
-        return userService.getUserInfo(authentication.getName());
+    public Map<String, Object> getUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return userService.getUserInfo(userDetails.getLoginInfo());
     }
 
     @GetMapping("/check/id")
@@ -68,15 +68,15 @@ public class UserController {
 
     @PostMapping("/user-pw")
     @PreAuthorize("isAuthenticated()")
-    public Map<String, Object> resetUserPassword(Authentication authentication,
+    public Map<String, Object> resetUserPassword(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                  @Valid @RequestBody ResetUserPwRequest request) {
-        return userService.resetUserPassword(authentication.getName(), request);
+        return userService.resetUserPassword(userDetails.getLoginInfo(), request);
     }
 
     @PostMapping("/leave")
     @PreAuthorize("isAuthenticated()")
-    public Map<String, Object> userLeave(Authentication authentication) {
-        return userService.userLeave(authentication.getName());
+    public Map<String, Object> userLeave(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return userService.userLeave(userDetails.getLoginInfo());
     }
 
 }

@@ -1,10 +1,10 @@
 package com.develop.datajpa.service.user;
 
 import com.develop.core.exception.ClientException;
+import com.develop.core.security.dto.LoginInfo;
+import com.develop.core.security.jwt.JwtTokenProvider;
 import com.develop.datajpa.request.user.*;
-import com.develop.datajpa.service.security.JwtProvider;
 import com.develop.datajpa.service.sms.SmsService;
-import com.develop.domain.dto.user.LoginInfo;
 import com.develop.domain.dto.user.UserDto;
 import com.develop.domain.entity.user.SmsType.VerificationType;
 import com.develop.domain.entity.user.SmsVerification;
@@ -37,7 +37,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final SmsVerificationRepository smsVerificationRepository;
 
-    private final JwtProvider jwtProvider;
+    private final JwtTokenProvider jwtTokenProvider;
     private final SmsService smsService;
 
     public User checkUser(String id) {
@@ -69,7 +69,8 @@ public class UserService {
             throw new HttpClientErrorException(HttpStatus.UNAUTHORIZED, "아이디 혹은 비밀번호가 잘못되었습니다.");
         }
 
-        String token = jwtProvider.createToken(user.getUserId());
+        String token = jwtTokenProvider.createToken(user.getUserId(), user.getNickname(),
+            user.getName(), String.valueOf(user.getRole()));
         log.info("token = {}", token);
 
         return Map.of(
@@ -77,8 +78,8 @@ public class UserService {
         );
     }
 
-    public Map<String, Object> getUserInfo(String userId) {
-        UserDto user = userRepository.findByUserId(userId);
+    public Map<String, Object> getUserInfo(LoginInfo loginInfo) {
+        UserDto user = userRepository.findByUserId(loginInfo.getUserId());
         if (isNull(user)) {
             throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "회원정보가 확인되지 않습니다.");
         } else if (user.getRole() == Role.DORMANT.ordinal()) {
@@ -298,8 +299,8 @@ public class UserService {
         );
     }
 
-    public Map<String, Object> resetUserPassword(String userId, ResetUserPwRequest request) {
-        User user = checkUser(userId);
+    public Map<String, Object> resetUserPassword(LoginInfo loginInfo, ResetUserPwRequest request) {
+        User user = checkUser(loginInfo.getUserId());
 
         if (!user.getPw().equals(request.getOriginalPw())) {
             throw new ClientException("기존 비밀번호 정보가 일치하지 않습니다");
@@ -315,8 +316,8 @@ public class UserService {
         );
     }
 
-    public Map<String, Object> userLeave(String userId) {
-        User user = checkUser(userId);
+    public Map<String, Object> userLeave(LoginInfo loginInfo) {
+        User user = checkUser(loginInfo.getUserId());
 
         user.setRole(Role.WITHDRAWAL.ordinal());
         userRepository.save(user);

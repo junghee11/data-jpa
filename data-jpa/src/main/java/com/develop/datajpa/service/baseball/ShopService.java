@@ -1,6 +1,8 @@
 package com.develop.datajpa.service.baseball;
 
 import com.develop.core.exception.ClientException;
+import com.develop.core.security.dto.LoginInfo;
+import com.develop.core.security.jwt.CustomUserDetails;
 import com.develop.datajpa.request.baseball.GetGoodsListRequest;
 import com.develop.datajpa.request.shop.AddCartRequest;
 import com.develop.datajpa.request.shop.LeaveGoodsReviewRequest;
@@ -12,7 +14,6 @@ import com.develop.datajpa.response.kakao.KakaoPayReadyDto;
 import com.develop.datajpa.service.kakao.KakaoService;
 import com.develop.datajpa.service.user.UserService;
 import com.develop.domain.dto.shop.OrderDto;
-import com.develop.domain.dto.user.LoginInfo;
 import com.develop.domain.entity.baseball.MatchType.TeamCode;
 import com.develop.domain.entity.shop.*;
 import com.develop.domain.entity.shop.OrderType.Payment;
@@ -40,8 +41,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.develop.datajpa.service.security.JwtProvider.resolveToken;
-import static com.develop.datajpa.service.security.JwtProvider.validateToken;
 import static java.util.Objects.isNull;
 
 @Service
@@ -77,12 +76,12 @@ public class ShopService {
         );
     }
 
-    public Map<String, Object> getGoodsInfo(String token, String id) {
+    public Map<String, Object> getGoodsInfo(CustomUserDetails userDetails, String id) {
         Goods goods = goodsRepository.findByGoodsCodeAndOnSaleAndGoodsStateOrderByCreatedAt(id, true, GoodsType.State.NORMAL)
                 .orElseThrow(() -> new ClientException("판매중이 아니거나 존재하지 않는 상품입니다."));
 
-        if (validateToken(token)) {
-            User user = userService.checkUser(resolveToken(token).getUserId());
+        if (userDetails != null) {
+            User user = userService.checkUser(userDetails.getLoginInfo().getUserId());
 
             Optional<Wish> wish = wishRepository.findByGoodsCodeAndUserId(id, user.getUserId());
 

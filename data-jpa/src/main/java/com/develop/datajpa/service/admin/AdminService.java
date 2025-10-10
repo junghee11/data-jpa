@@ -1,10 +1,10 @@
 package com.develop.datajpa.service.admin;
 
 import com.develop.core.exception.ClientException;
+import com.develop.core.security.dto.LoginInfo;
 import com.develop.datajpa.request.admin.*;
 import com.develop.datajpa.service.article.ArticleService;
 import com.develop.datajpa.service.user.UserService;
-import com.develop.domain.dto.user.LoginInfo;
 import com.develop.domain.entity.article.Article;
 import com.develop.domain.entity.article.ArticleType.ArticleState;
 import com.develop.domain.entity.article.ArticleType.CommentState;

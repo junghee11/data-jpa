@@ -1,10 +1,10 @@
 package com.develop.datajpa.controller;
 
+import com.develop.core.security.dto.LoginInfo;
+import com.develop.core.security.jwt.JwtTokenProvider;
 import com.develop.datajpa.request.article.*;
 import com.develop.datajpa.service.article.ArticleService;
-import com.develop.datajpa.service.security.JwtProvider;
 import com.develop.domain.dto.article.CommentDto;
-import com.develop.domain.dto.user.LoginInfo;
 import com.develop.domain.entity.article.Article;
 import com.develop.domain.entity.article.ArticleType;
 import com.develop.domain.entity.article.ArticleType.Category;
@@ -51,7 +51,7 @@ public class ArticleControllerTest {
         content = "오늘은 떡볶이 맛집에 다녀왔어요";
         userId = "member1";
 
-        JwtProvider jwtProvider = new JwtProvider();
+        JwtTokenProvider jwtProvider = new JwtTokenProvider();
         jwtToken = jwtProvider.generateToken(userId);
     }
 

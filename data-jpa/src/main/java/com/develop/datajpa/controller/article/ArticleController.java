@@ -1,16 +1,16 @@
 package com.develop.datajpa.controller.article;
 
 
+import com.develop.core.security.jwt.CustomUserDetails;
 import com.develop.datajpa.request.article.*;
 import com.develop.datajpa.service.article.ArticleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
-
-import static com.develop.datajpa.service.security.JwtProvider.resolveToken;
 
 @RequiredArgsConstructor
 @RestController
@@ -25,51 +25,50 @@ public class ArticleController {
     }
 
     @GetMapping("/{id}")
-    public Map<String, Object> getArticle(@RequestHeader(value = "Authorization", required = false) String token,
-                                          @PathVariable(value = "id") long id) {
+    public Map<String, Object> getArticle(@PathVariable(value = "id") long id) {
         return articleService.getArticleContent(id);
     }
 
     @PostMapping("")
-    public Map<String, Object> createArticle(@RequestHeader(value = "Authorization") String token,
+    public Map<String, Object> createArticle(@AuthenticationPrincipal CustomUserDetails userDetails,
                                              @Valid @RequestBody CreateArticleRequest request) {
-        return articleService.createArticle(resolveToken(token), request);
+        return articleService.createArticle(userDetails.getLoginInfo(), request);
     }
 
     @PatchMapping("")
-    public Map<String, Object> modifyArticle(@RequestHeader(value = "Authorization") String token,
+    public Map<String, Object> modifyArticle(@AuthenticationPrincipal CustomUserDetails userDetails,
                                              @Valid @RequestBody ModifyArticleRequest request) {
-        return articleService.modifyArticle(resolveToken(token), request);
+        return articleService.modifyArticle(userDetails.getLoginInfo(), request);
     }
 
     @DeleteMapping("/{id}")
-    public Map<String, Object> deleteArticle(@RequestHeader(value = "Authorization") String token,
+    public Map<String, Object> deleteArticle(@AuthenticationPrincipal CustomUserDetails userDetails,
                                              @PathVariable(value = "id") long id) {
-        return articleService.deleteArticle(resolveToken(token), id);
+        return articleService.deleteArticle(userDetails.getLoginInfo(), id);
     }
 
     @GetMapping("/comments")
-    public Map<String, Object> getCommentList(@RequestHeader(value = "Authorization", required = false) String token,
+    public Map<String, Object> getCommentList(@AuthenticationPrincipal CustomUserDetails userDetails,
                                               @Valid GetCommentListRequest request) {
-        return articleService.getCommentList(token, request);
+        return articleService.getCommentList(userDetails, request);
     }
 
     @PostMapping("/comment")
-    public Map<String, Object> addComment(@RequestHeader(value = "Authorization") String token,
+    public Map<String, Object> addComment(@AuthenticationPrincipal CustomUserDetails userDetails,
                                           @Valid @RequestBody AddCommentRequest request) {
-        return articleService.addComment(resolveToken(token), request);
+        return articleService.addComment(userDetails.getLoginInfo(), request);
     }
 
     @DeleteMapping("/comment/{id}")
-    public Map<String, Object> deleteComment(@RequestHeader(value = "Authorization") String token,
+    public Map<String, Object> deleteComment(@AuthenticationPrincipal CustomUserDetails userDetails,
                                              @PathVariable(value = "id") long id) {
-        return articleService.deleteComment(resolveToken(token), id);
+        return articleService.deleteComment(userDetails.getLoginInfo(), id);
     }
 
     @PatchMapping("/comment")
-    public Map<String, Object> toggleComment(@RequestHeader(value = "Authorization") String token,
+    public Map<String, Object> toggleComment(@AuthenticationPrincipal CustomUserDetails userDetails,
                                              @Valid @RequestBody ToggleCommentRequest request) {
-        return articleService.toggleComment(resolveToken(token), request);
+        return articleService.toggleComment(userDetails.getLoginInfo(), request);
     }
 
     @PostMapping("/image")

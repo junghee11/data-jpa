@@ -1,8 +1,8 @@
-package com.develop.datajpa.service.security;
+package com.develop.core.security.jwt;
 
-import com.develop.domain.dto.user.LoginInfo;
-import com.develop.domain.entity.user.User;
+import com.develop.core.security.dto.LoginInfo;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
@@ -17,31 +17,26 @@ import java.util.Date;
 import static java.util.Objects.isNull;
 
 @Slf4j
-@RequiredArgsConstructor
 @Component
-public class JwtProvider {
+public class JwtTokenProvider {
 
-    @Value("${jwt.secret.salt}")
-    private String salt;
+    @Value("${jwt.secret}")
+    private String secretKey;
 
-    private final static String SECRET_KEY = "zena.data.jpa.token.test";
+    private final Long exp = 1000L * 60 * 60;
 
-    private final Long exp = 1000L * 60 * 60;   // 만료시간 : 1Hour
-
-    public String createToken(String userId) {
-        log.info("salt = {}", salt);  // 이거 어디씀??
-
+    public String createToken(String userId, String userNickname, String userName, String role) {
         return Jwts.builder()
                 .claim("userId", userId)
+                .claim("userNickname", userNickname)
+                .claim("userName", userName)
+                .claim("role", role)
                 .setExpiration(new Date(System.currentTimeMillis() + exp))
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
 
-    public static LoginInfo resolveToken(String token) {
-
-        log.info("token, in doFilterInternal = {}", token);
-
+    public LoginInfo resolveToken(String token) {
         if (token != null && validateToken(token)) {
             token = token.split(" ")[1].trim();
             return resolveLoginInfoFromJwt(token);
@@ -51,10 +46,8 @@ public class JwtProvider {
 
     }
 
-    public static LoginInfo resolveLoginInfoFromJwt(String jwtToken) {
+    public LoginInfo resolveLoginInfoFromJwt(String jwtToken) {
         Claims claims = parseClaims(jwtToken);
-
-        log.info("claims = {}", claims);
 
         if (isNull(claims)) {
             throw new HttpClientErrorException(HttpStatus.PROXY_AUTHENTICATION_REQUIRED);
@@ -62,10 +55,13 @@ public class JwtProvider {
 
         return LoginInfo.builder()
                 .userId(claims.get("userId", String.class))
+                .userNickname(claims.get("userNickname", String.class))
+                .userName(claims.get("userName", String.class))
+                .role(claims.get("role", String.class))
                 .build();
     }
 
-    public static boolean validateToken(String token) {
+    public boolean validateToken(String token) {
         try {
             if (!token.substring(0, "BEARER ".length()).equalsIgnoreCase("BEARER ")) {
                 return false;
@@ -81,10 +77,10 @@ public class JwtProvider {
         }
     }
 
-    private static Claims parseClaims(String token) {
+    private Claims parseClaims(String token) {
         try {
             return Jwts.parser()
-                    .setSigningKey(SECRET_KEY)
+                    .setSigningKey(secretKey)
                     .parseClaimsJws(token)
                     .getBody();
         } catch (Exception e) {
@@ -92,15 +88,11 @@ public class JwtProvider {
         }
     }
 
-    // test용
     public String generateToken(String tempId) {
-        log.info("salt = {}", salt);  // 이거 어디씀??
-
         return Jwts.builder()
-//            .setIssuedAt(new Date(System.currentTimeMillis()))
                 .claim("userId", tempId)
                 .setExpiration(new Date(System.currentTimeMillis() + exp))
-                .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
+                .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
 }

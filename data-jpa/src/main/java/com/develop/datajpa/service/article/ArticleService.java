@@ -1,12 +1,13 @@
 package com.develop.datajpa.service.article;
 
 import com.develop.core.exception.ClientException;
+import com.develop.core.security.jwt.CustomUserDetails;
 import com.develop.datajpa.request.article.*;
 import com.develop.datajpa.service.image.ImageService;
 import com.develop.datajpa.service.user.UserService;
 import com.develop.domain.dto.article.ArticleDto;
 import com.develop.domain.dto.article.CommentDto;
-import com.develop.domain.dto.user.LoginInfo;
+import com.develop.core.security.dto.LoginInfo;
 import com.develop.domain.entity.article.Article;
 import com.develop.domain.entity.article.ArticleType.ArticleState;
 import com.develop.domain.entity.article.ArticleType.Category;
@@ -36,8 +37,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.develop.datajpa.service.security.JwtProvider.resolveToken;
-import static com.develop.datajpa.service.security.JwtProvider.validateToken;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 
@@ -154,12 +153,12 @@ public class ArticleService {
     }
 
     @Transactional
-    public Map<String, Object> getCommentList(String token, GetCommentListRequest request) {
+    public Map<String, Object> getCommentList(CustomUserDetails userDetails, GetCommentListRequest request) {
         Page<Comment> comments = getComments(request);
 
         Map<String, User> users = getUserInfo(comments.getContent());
 
-        if (!validateToken(token)) {
+        if (userDetails == null) {
             List<CommentDto> result = comments.getContent().stream().map(comment -> {
                 return new CommentDto(comment, users.get(comment.getUserId()), null);
             }).collect(Collectors.toList());
@@ -170,9 +169,8 @@ public class ArticleService {
             );
         }
 
-        LoginInfo loginInfo = resolveToken(token);
-
-        Map<Long, CommentRecommend> recommends = getCommentRecommends(comments.getContent(), loginInfo.getUserId());
+        Map<Long, CommentRecommend> recommends = getCommentRecommends
+            (comments.getContent(), userDetails.getLoginInfo().getUserId());
 
         List<CommentDto> result = comments.getContent().stream().map(comment -> {
             return new CommentDto(comment, users.get(comment.getUserId()), recommends.get(comment.getIdx()));

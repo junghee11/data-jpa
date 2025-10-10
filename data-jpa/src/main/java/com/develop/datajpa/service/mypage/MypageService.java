@@ -1,12 +1,12 @@
 package com.develop.datajpa.service.mypage;
 
 import com.develop.core.exception.ClientException;
+import com.develop.core.security.dto.LoginInfo;
 import com.develop.datajpa.request.mypage.SelectMyTeamRequest;
 import com.develop.datajpa.service.image.ImageService;
 import com.develop.datajpa.service.user.UserService;
 import com.develop.domain.dto.shop.MyCartDto;
 import com.develop.domain.dto.shop.MyPurchaseDto;
-import com.develop.domain.dto.user.LoginInfo;
 import com.develop.domain.entity.article.Article;
 import com.develop.domain.entity.article.ArticleType.ArticleState;
 import com.develop.domain.entity.article.ArticleType.CommentState;

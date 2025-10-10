@@ -1,13 +1,13 @@
 package com.develop.datajpa.service.baseball;
 
 import com.develop.core.exception.ClientException;
+import com.develop.core.security.dto.LoginInfo;
 import com.develop.datajpa.request.baseball.GetPlayerInfoRequest;
 import com.develop.datajpa.request.baseball.GetStadiumInfoRequest;
 import com.develop.datajpa.request.baseball.LeaveReviewRequest;
 import com.develop.datajpa.service.user.UserService;
 import com.develop.domain.dto.baseball.MatchDto;
 import com.develop.domain.dto.baseball.ReviewDto;
-import com.develop.domain.dto.user.LoginInfo;
 import com.develop.domain.entity.baseball.*;
 import com.develop.domain.entity.baseball.MatchType.TeamCode;
 import com.develop.domain.entity.user.QUser;

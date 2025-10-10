@@ -1,11 +1,11 @@
 package com.develop.datajpa.controller;
 
+import com.develop.core.security.dto.LoginInfo;
+import com.develop.core.security.jwt.JwtTokenProvider;
 import com.develop.datajpa.request.shop.AddCartRequest;
 import com.develop.datajpa.request.shop.PurchaseGoodsRequest;
 import com.develop.datajpa.response.kakao.KakaoPayReadyDto;
 import com.develop.datajpa.service.baseball.ShopService;
-import com.develop.datajpa.service.security.JwtProvider;
-import com.develop.domain.dto.user.LoginInfo;
 import com.google.gson.Gson;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -48,7 +48,7 @@ public class ShopControllerTest {
 
         userId = "member1";
 
-        JwtProvider jwtProvider = new JwtProvider();
+        JwtTokenProvider jwtProvider = new JwtTokenProvider();
         jwtToken = jwtProvider.generateToken(userId);
     }
 
