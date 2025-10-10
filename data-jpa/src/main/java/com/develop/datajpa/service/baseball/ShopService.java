@@ -323,7 +323,7 @@ public class ShopService {
         Receipt receipt = receiptRepository.findByReceiptCode(code)
                 .orElseThrow(() -> new ClientException("결제 정보가 확인되지 않습니다."));
 
-        if (!user.getRole().equals(UserType.Role.ADMIN.ordinal()) && !loginInfo.getUserId().equals(receipt.getUserId())) {
+        if (!user.getRole().equals(UserType.Role.ADMIN.name()) && !loginInfo.getUserId().equals(receipt.getUserId())) {
             throw new ClientException("결제 정보는 본인만 확인 가능합니다.");
         }
 

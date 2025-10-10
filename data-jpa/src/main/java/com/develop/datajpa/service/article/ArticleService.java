@@ -92,7 +92,7 @@ public class ArticleService {
         User user = userRepository.findOptionalByUserId(article.getUserId())
                 .orElseThrow(() -> new ClientException("작성자 정보가 확인되지 않습니다."));
 
-        if (isNull(user) || Role.WITHDRAWAL.ordinal() == user.getRole()) {
+        if (isNull(user) || Role.WITHDRAWAL.name().equals(user.getRole())) {
             throw new ClientException("탈퇴처리된 회원의 게시글입니다.");
         }
 

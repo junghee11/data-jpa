@@ -42,7 +42,7 @@ public class User {
 
     private int[] player;
 
-    private Integer role;
+    private String role;
 
     @Column(name = "profile_img_url")
     private String profileImgUrl;
@@ -80,8 +80,8 @@ public class User {
         this.player = player;
     }
 
-    public void setRole(Integer role) {
-        if (role == UserType.Role.DEVELOPER.ordinal() || role == UserType.Role.ADMIN.ordinal()) {
+    public void setRole(String role) {
+        if (UserType.Role.DEVELOPER.name().equals(role) || UserType.Role.ADMIN.name().equals(role)) {
             throw new ClientException("허용되지 않은 요청입니다");
         }
         this.role = role;

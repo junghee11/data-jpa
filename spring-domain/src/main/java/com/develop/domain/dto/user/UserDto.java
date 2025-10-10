@@ -12,7 +12,7 @@ public interface UserDto {
 
     String getPhone();
 
-    Integer getRole();
+    String getRole();
 
     String getGrade();
 

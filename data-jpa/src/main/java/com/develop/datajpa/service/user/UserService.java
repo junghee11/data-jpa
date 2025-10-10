@@ -44,9 +44,9 @@ public class UserService {
         Optional<User> user = userRepository.findOptionalByUserId(id);
         if (user.isEmpty()) {
             throw new ClientException("가입정보가 확인되지 않습니다.");
-        } else if (user.get().getRole() == Role.DORMANT.ordinal()) {
+        } else if (Role.DORMANT.name().equals(user.get().getRole())) {
             throw new ClientException("휴면회원 입니다. 휴면해제 후 로그인 해주세요.");
-        } else if (user.get().getRole() == Role.WITHDRAWAL.ordinal()) {
+        } else if (Role.WITHDRAWAL.name().equals(user.get().getRole())) {
             throw new ClientException("탈퇴처리된 회원입니다.");
         }
 
@@ -55,7 +55,7 @@ public class UserService {
 
     public User checkAdmin(String id) {
         Optional<User> user = userRepository.findOptionalByUserId(id);
-        if (user.isEmpty() || user.get().getRole() != Role.ADMIN.ordinal()) {
+        if (user.isEmpty() || !Role.ADMIN.name().equals(user.get().getRole())) {
             throw new ClientException("관리자가 아닙니다.");
         }
 
@@ -70,8 +70,7 @@ public class UserService {
         }
 
         String token = jwtTokenProvider.createToken(user.getUserId(), user.getNickname(),
-            user.getName(), String.valueOf(user.getRole()));
-        log.info("token = {}", token);
+            user.getName(), user.getRole());
 
         return Map.of(
                 "token", token
@@ -82,9 +81,9 @@ public class UserService {
         UserDto user = userRepository.findByUserId(loginInfo.getUserId());
         if (isNull(user)) {
             throw new HttpClientErrorException(HttpStatus.BAD_REQUEST, "회원정보가 확인되지 않습니다.");
-        } else if (user.getRole() == Role.DORMANT.ordinal()) {
+        } else if (Role.DORMANT.name().equals(user.getRole())) {
             throw new ClientException("휴면회원 입니다. 휴면해제 후 로그인 해주세요.");
-        } else if (user.getRole() == Role.WITHDRAWAL.ordinal()) {
+        } else if (Role.WITHDRAWAL.name().equals(user.getRole())) {
             throw new ClientException("탈퇴처리된 회원입니다.");
         }
 
@@ -319,7 +318,7 @@ public class UserService {
     public Map<String, Object> userLeave(LoginInfo loginInfo) {
         User user = checkUser(loginInfo.getUserId());
 
-        user.setRole(Role.WITHDRAWAL.ordinal());
+        user.setRole(Role.WITHDRAWAL.name());
         userRepository.save(user);
 
         return Map.of(

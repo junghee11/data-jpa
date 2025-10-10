@@ -10,7 +10,7 @@ public class UserType {
         DORMANT,
         WITHDRAWAL;
 
-        public static final int[] GENERAL_ROLE = {GENERAL.ordinal(), SUPPORTERS.ordinal()};
+        public static final String[] GENERAL_ROLE = {GENERAL.name(), SUPPORTERS.name()};
 
     }
 
