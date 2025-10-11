@@ -4,6 +4,7 @@ jar { enabled = false }
 dependencies {
     implementation project(':spring-core')
     implementation project(':spring-domain')
+    implementation project(':spring-websocket')
 
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'

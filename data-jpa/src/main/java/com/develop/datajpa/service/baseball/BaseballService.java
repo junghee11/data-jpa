@@ -11,6 +11,7 @@ import com.develop.domain.dto.baseball.ReviewDto;
 import com.develop.domain.entity.baseball.*;
 import com.develop.domain.entity.baseball.MatchType.TeamCode;
 import com.develop.domain.entity.user.QUser;
+import com.develop.domain.entity.user.UserType;
 import com.develop.domain.repository.baseball.*;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -155,7 +156,7 @@ public class BaseballService {
                 .where(
                         r.restaurantsId.eq(id)
                                 .and(r.state.eq(0))
-                                .and(u.role.eq(0)))
+                                .and(u.role.eq(UserType.Role.GENERAL.name())))
                 .orderBy(r.createdAt.desc())
                 .limit(10)
                 .fetch();
