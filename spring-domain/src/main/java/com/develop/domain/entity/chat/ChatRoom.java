@@ -16,6 +16,7 @@ import com.develop.domain.entity.chat.ChatType.RoomType;
 import javax.crypto.KeyGenerator;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -40,21 +41,40 @@ public class ChatRoom {
 
     @Column(name = "room_type", columnDefinition = "room_type")
     @Enumerated(EnumType.STRING)
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private RoomType roomType;
 
     @Column(name = "created_by")
     private String createdBy;
 
-    @ElementCollection
-    @Column(columnDefinition = "text[]")
-    private List<String> participants;
+    @JdbcTypeCode(SqlTypes.ARRAY)
+    @Column(columnDefinition = "varchar[]")
+    private String[] participants;
 
     @Column(name = "is_active")
     private boolean isActive;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
+
+    public void addParticipant(String userId) {
+        if(Arrays.asList(this.participants).contains(userId)) {
+            throw new ClientException("이미 참여중인 채팅방입니다");
+        }
+
+        List<String> updated = new ArrayList<>(Arrays.asList(this.participants == null ? new String[]{} : this.participants));
+        updated.add(userId);
+        this.participants = updated.toArray(String[]::new);
+    }
+
+    public void removeParticipant(String userId) {
+        if(!Arrays.asList(this.participants).contains(userId)) {
+            throw new ClientException("채팅방에 참여중이 아닙니다");
+        }
+
+        List<String> updated = new ArrayList<>(Arrays.asList(this.participants));
+        updated.remove(userId);
+        this.participants = updated.toArray(String[]::new);
+    }
 
     public static String generateRoodId(RoomType type, String[] participants) {
         switch (type) {
@@ -72,8 +92,8 @@ public class ChatRoom {
     }
 
     @Builder
-    public ChatRoom(String id, String roomName, RoomType roomType, String createdBy, List<String> participants) {
-        this.id = id;   // TODO: DM 채팅방의 경우 생성전에 id 부분 검증 필요!
+    public ChatRoom(String roomName, RoomType roomType, String createdBy, String[] participants) {
+        this.id = generateRoodId(roomType, participants);
         this.roomName = roomName;
         this.roomType = roomType;
         this.createdBy = createdBy;

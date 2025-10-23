@@ -3,14 +3,12 @@ package com.develop.websocket.intercepter;
 import com.develop.core.security.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.server.HandshakeInterceptor;
 
-import java.time.Duration;
 import java.util.Map;
 
 @Slf4j
@@ -53,6 +51,6 @@ public class StompHandshakeInterceptor implements HandshakeInterceptor {
         }
 
         return request.getRemoteAddress() != null ?
-                request.getRemoteAddress().getAddress().getHostAddress() : "unknown";
+            request.getRemoteAddress().getAddress().getHostAddress() : "unknown";
     }
 }

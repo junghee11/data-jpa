@@ -6,7 +6,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.web.socket.config.annotation.*;
+import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
+import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
+import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.server.support.DefaultHandshakeHandler;
 
 @Configuration
@@ -20,9 +22,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setHandshakeHandler(new DefaultHandshakeHandler())
-                .addInterceptors(stompHandshakeInterceptor)
-                .setAllowedOriginPatterns("*");
+            .setHandshakeHandler(new DefaultHandshakeHandler())
+            .addInterceptors(stompHandshakeInterceptor)
+            .setAllowedOriginPatterns("*");
 //                .withSockJS();
     }
 
@@ -43,7 +45,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void configureClientOutboundChannel(ChannelRegistration registration) {
         registration.taskExecutor()
-                .corePoolSize(4)
-                .maxPoolSize(8);
+            .corePoolSize(4)
+            .maxPoolSize(8);
     }
 }
