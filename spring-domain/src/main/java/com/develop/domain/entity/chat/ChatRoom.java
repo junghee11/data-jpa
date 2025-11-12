@@ -56,13 +56,21 @@ public class ChatRoom {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    public void addParticipant(String userId) {
-        if(Arrays.asList(this.participants).contains(userId)) {
+    public void setRoomName(String roomName) {
+        this.roomName = roomName;
+    }
+
+    public void addParticipant(String host, String guest) {
+        if(!Arrays.asList(this.participants).contains(host)) {
+            throw new ClientException("해당 채팅방에 대한 권한이 없습니다");
+        }
+
+        if(Arrays.asList(this.participants).contains(guest)) {
             throw new ClientException("이미 참여중인 채팅방입니다");
         }
 
         List<String> updated = new ArrayList<>(Arrays.asList(this.participants == null ? new String[]{} : this.participants));
-        updated.add(userId);
+        updated.add(guest);
         this.participants = updated.toArray(String[]::new);
     }
 
@@ -92,9 +100,8 @@ public class ChatRoom {
     }
 
     @Builder
-    public ChatRoom(String roomName, RoomType roomType, String createdBy, String[] participants) {
+    public ChatRoom(RoomType roomType, String createdBy, String[] participants) {
         this.id = generateRoodId(roomType, participants);
-        this.roomName = roomName;
         this.roomType = roomType;
         this.createdBy = createdBy;
         this.participants = participants;

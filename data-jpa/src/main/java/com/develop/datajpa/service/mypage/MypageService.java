@@ -2,11 +2,13 @@ package com.develop.datajpa.service.mypage;
 
 import com.develop.core.exception.ClientException;
 import com.develop.core.security.dto.LoginInfo;
+import com.develop.datajpa.request.mypage.GetChatMessageListRequest;
 import com.develop.datajpa.request.mypage.SelectMyTeamRequest;
 import com.develop.datajpa.service.image.ImageService;
 import com.develop.datajpa.service.user.UserService;
 import com.develop.domain.dto.shop.MyCartDto;
 import com.develop.domain.dto.shop.MyPurchaseDto;
+import com.develop.domain.dto.user.UserDto;
 import com.develop.domain.entity.article.Article;
 import com.develop.domain.entity.article.ArticleType.ArticleState;
 import com.develop.domain.entity.article.ArticleType.CommentState;
@@ -14,13 +16,18 @@ import com.develop.domain.entity.article.Comment;
 import com.develop.domain.entity.baseball.Player;
 import com.develop.domain.entity.baseball.Stadium;
 import com.develop.domain.entity.baseball.Team;
+import com.develop.domain.entity.chat.ChatMessage;
+import com.develop.domain.entity.chat.ChatRoom;
 import com.develop.domain.entity.shop.*;
 import com.develop.domain.entity.user.User;
+import com.develop.domain.entity.user.UserType;
 import com.develop.domain.repository.article.ArticleRepository;
 import com.develop.domain.repository.article.CommentRepository;
 import com.develop.domain.repository.baseball.PlayerRepository;
 import com.develop.domain.repository.baseball.StadiumRepository;
 import com.develop.domain.repository.baseball.TeamRepository;
+import com.develop.domain.repository.chat.ChatMessageRepository;
+import com.develop.domain.repository.chat.ChatRoomRepository;
 import com.develop.domain.repository.shop.CartRepository;
 import com.develop.domain.repository.shop.GoodsRepository;
 import com.develop.domain.repository.shop.WishRepository;
@@ -28,6 +35,8 @@ import com.develop.domain.repository.user.UserRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -54,6 +63,8 @@ public class MypageService {
     private final OrderMenuRepository orderMenuRepository;
     private final ReceiptRepository receiptRepository;
     private final ImageService imageService;
+    private final ChatRoomRepository chatRoomRepository;
+    private final ChatMessageRepository chatMessageRepository;
 
     @Autowired
     EntityManager em;
@@ -268,6 +279,54 @@ public class MypageService {
         return Map.of(
                 "message", "프로필 이미지가 변경되었습니다",
                 "imageUrl", imgUrl
+        );
+    }
+
+    public Map<String, Object> getChatRoomList(LoginInfo loginInfo) {
+        User user = userService.checkUser(loginInfo.getUserId());
+
+        List<ChatRoom> roomList = chatRoomRepository.findByParticipant(loginInfo.getUserId());
+
+        Map<String, String> nicknameList = userRepository.findByUserIdNotAndRoleIn
+            (loginInfo.getUserId(), UserType.Role.GENERAL_ROLE).stream().collect(Collectors.toMap(UserDto::getUserId, UserDto::getNickname));
+
+        roomList.forEach(chatRoom -> {
+            String roomName = nonNull(chatRoom.getRoomName()) ?
+                chatRoom.getRoomName() : String.join(", ",
+                                            Arrays.stream(chatRoom.getParticipants())
+                                                .filter(name -> !name.equals(user.getUserId()))
+                                                .sorted()
+                                                .map(nicknameList::get)
+                                                .toArray(String[]::new));
+            chatRoom.setRoomName(roomName);
+        });
+
+        return Map.of(
+            "result", roomList
+        );
+    }
+
+    public Map<String, Object> getFriendList(LoginInfo loginInfo) {
+        userService.checkUser(loginInfo.getUserId());
+
+        // TODO : 친구추가 기능 추가 후 수정하기
+        List<UserDto> userList = userRepository.findByUserIdNotAndRoleIn(loginInfo.getUserId(), UserType.Role.GENERAL_ROLE);
+
+        return Map.of(
+            "result", userList
+        );
+    }
+
+    public Map<String, Object> getChatMessageList(LoginInfo loginInfo, GetChatMessageListRequest request) {
+        userService.checkUser(loginInfo.getUserId());
+
+        List<ChatMessage> messages = chatMessageRepository.findByRoomId(request.getRoomId(),
+            PageRequest.of(request.getPage() - 1, 10, Sort.by("createdAt").descending()));
+
+        Collections.reverse(messages);
+
+        return Map.of(
+            "result", messages
         );
     }
 }

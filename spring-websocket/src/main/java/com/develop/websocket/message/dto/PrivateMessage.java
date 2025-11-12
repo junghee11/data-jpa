@@ -11,6 +11,4 @@ public class PrivateMessage {
 
     private String receiverId;
 
-    private String content;
-
 }

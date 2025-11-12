@@ -2,6 +2,7 @@ package com.develop.datajpa.controller.mypage;
 
 
 import com.develop.core.security.jwt.CustomUserDetails;
+import com.develop.datajpa.request.mypage.GetChatMessageListRequest;
 import com.develop.datajpa.request.mypage.SelectMyTeamRequest;
 import com.develop.datajpa.service.mypage.MypageService;
 import jakarta.validation.Valid;
@@ -87,6 +88,22 @@ public class MypageController {
     public Map<String, Object> changeProfileImage(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                   @RequestPart(value = "file") MultipartFile file) {
         return mypageService.changeProfileImage(userDetails.getLoginInfo(), file);
+    }
+
+    @GetMapping("/chat/room")
+    public Map<String, Object> getChatRoomList(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return mypageService.getChatRoomList(userDetails.getLoginInfo());
+    }
+
+    @GetMapping("/chat/friend")
+    public Map<String, Object> getFriendList(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return mypageService.getFriendList(userDetails.getLoginInfo());
+    }
+
+    @GetMapping("/chat/message")
+    public Map<String, Object> getChatMessage(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                              @Valid GetChatMessageListRequest request) {
+        return mypageService.getChatMessageList(userDetails.getLoginInfo(), request);
     }
 
 }

@@ -19,6 +19,7 @@ import org.springframework.messaging.simp.annotation.SendToUser;
 import org.springframework.stereotype.Controller;
 
 import java.security.Principal;
+import java.util.Map;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -44,9 +45,9 @@ public class ChatController {
     }
 
     @MessageMapping("/chat.privateMessage")
-    public ChatMessage sendPrivateMessage(@Payload PrivateMessage message,
+    public void sendPrivateMessage(@Payload PrivateMessage message,
                                           Principal principal) {
-        return chatService.sendPrivateMessage(principal.getName(), message);
+        chatService.sendPrivateMessage(principal.getName(), message);
     }
 
     @MessageExceptionHandler

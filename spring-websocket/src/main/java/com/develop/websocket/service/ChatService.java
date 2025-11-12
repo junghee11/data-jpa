@@ -59,9 +59,9 @@ public class ChatService {
         User user = checkUser(userId);
 
         ChatRoom room = getChatRoom(roomId);
-        if (RoomType.DIRECT == room.getRoomType()) {
-            throw new WebSocketBusinessException(HttpStatus.BAD_REQUEST.getReasonPhrase(), "잘못된 요청입니다");
-        }
+//        if (RoomType.DIRECT == room.getRoomType()) {
+//            throw new WebSocketBusinessException(HttpStatus.BAD_REQUEST.getReasonPhrase(), "잘못된 요청입니다");
+//        }
 
         return Arrays.asList(room.getParticipants()).contains(user.getUserId());
     }
@@ -85,7 +85,7 @@ public class ChatService {
         return chat;
     }
 
-    public ChatMessage addUser(String userId, String newUserId, String roomId) {
+    public ChatMessage addUser(String hostId, String newUserId, String roomId) {
         if (newUserId == null || newUserId.isEmpty()) {
             throw new IllegalArgumentException("초대하실 회원을 선택해주세요");
         }
@@ -95,14 +95,14 @@ public class ChatService {
         ChatRoom room = chatRoomRepository.findById(roomId).orElseThrow(() ->
             new WebSocketBusinessException(HttpStatus.BAD_REQUEST.getReasonPhrase(), "존재하지 않는 채팅방입니다."));
 
-        room.addParticipant(newUserId);
+        room.addParticipant(hostId, newUserId);
 
         if (RoomType.DIRECT == room.getRoomType()) {
             String[] participants = room.getParticipants();
             ChatRoom newRoom = ChatRoom.builder()
                 .roomType(RoomType.GROUP)
                 .participants(participants)
-                .createdBy(userId)
+                .createdBy(hostId)
                 .build();
 
             ChatRoom savedChatRoom = chatRoomRepository.save(newRoom);
@@ -134,8 +134,10 @@ public class ChatService {
         return user;
     }
 
-    public ChatMessage sendPrivateMessage(String userId, PrivateMessage message) {
-        validatePrivateMessage(message);
+    public void sendPrivateMessage(String userId, PrivateMessage message) {
+        if (message.getReceiverId() == null || message.getReceiverId().isEmpty()) {
+            throw new IllegalArgumentException("수신자 정보가 확인되지 않습니다");
+        }
 
         User sender = checkUser(userId);
         User receiver = checkUser(message.getReceiverId());
@@ -155,34 +157,9 @@ public class ChatService {
                 .build();
             chatRoomRepository.save(newChatRoom);
         }
-
-        ChatMessage chat = ChatMessage.builder()
-            .senderId(userId)
-            .receiverId(message.getReceiverId())
-            .roomId(roomId)
-            .type(MessageType.TALK)
-            .content(message.getContent())
-            .build();
-        chatMessageRepository.save(chat);
-
-        return chat;
     }
 
     public void validateMessage(Message message) {
-        if (message.getContent() == null || message.getContent().isEmpty()) {
-            throw new IllegalArgumentException("메세지 내용을 입력해주세요");
-        }
-
-        if (message.getContent().length() > 1000) {
-            throw new IllegalArgumentException("메세지 내용은 1000자 이하로 작성해주세요");
-        }
-    }
-
-    public void validatePrivateMessage(PrivateMessage message) {
-        if (message.getReceiverId() == null || message.getReceiverId().isEmpty()) {
-            throw new IllegalArgumentException("수신자 정보가 확인되지 않습니다");
-        }
-
         if (message.getContent() == null || message.getContent().isEmpty()) {
             throw new IllegalArgumentException("메세지 내용을 입력해주세요");
         }
