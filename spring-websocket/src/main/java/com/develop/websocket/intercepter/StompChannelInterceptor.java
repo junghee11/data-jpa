@@ -3,11 +3,12 @@ package com.develop.websocket.intercepter;
 import com.develop.core.security.jwt.JwtTokenProvider;
 import com.develop.websocket.exception.WebSocketAuthException;
 import com.develop.websocket.exception.WebSocketBusinessException;
+import com.develop.websocket.redis.subscriber.RedisService;
+import com.develop.websocket.redis.subscriber.UserPresenceService;
 import com.develop.websocket.service.ChatService;
 import com.sun.security.auth.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -26,10 +27,10 @@ import static java.util.Objects.isNull;
 @Slf4j
 public class StompChannelInterceptor implements ChannelInterceptor {
 
-    private final RedisTemplate<String, Object> redisTemplate;
-
     private final JwtTokenProvider jwtTokenProvider;
     private final ChatService chatService;
+    private final RedisService redisService;
+    private final UserPresenceService userPresenceService;
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -74,7 +75,12 @@ public class StompChannelInterceptor implements ChannelInterceptor {
     }
 
     private void handleConnect(StompHeaderAccessor accessor) {
-        log.info("{} 님 로그온.. sessionId {}", accessor.getUser(), accessor.getSessionId());
+        if (!checkConcurrentConnectionLimit(accessor.getUser().getName())) {
+            throw new WebSocketBusinessException(HttpStatus.BAD_GATEWAY.getReasonPhrase(),
+                "이미 접속중인 계정입니다");
+        }
+
+        log.info("{} 님 로그온", accessor.getUser());
     }
 
     private void handleSubscribe(StompHeaderAccessor accessor) {
@@ -102,6 +108,8 @@ public class StompChannelInterceptor implements ChannelInterceptor {
 
         String userId = accessor.getUser().getName();
 
+        updateUserOnlineStatus(userId, true);
+
         if (checkRateLimit(accessor.getDestination().split("/")[2], userId)) {
             throw new WebSocketBusinessException(HttpStatus.BAD_REQUEST.getReasonPhrase(),
                 "채팅방 도배로 당분간 대화가 금지됩니다.");
@@ -119,6 +127,20 @@ public class StompChannelInterceptor implements ChannelInterceptor {
             return false;
         }
         return chatService.exceedMessageLimit(userId);
+    }
+
+    private boolean checkConcurrentConnectionLimit (String userId) {
+        String userSession = userPresenceService.getUserSession(userId);
+
+        return userSession == null;
+    }
+
+    private void updateUserOnlineStatus (String userId, boolean online) {
+        if (online) {
+            userPresenceService.refreshUserPresence(userId);
+        } else {
+            redisService.delete("user:session:" + userId);
+        }
     }
 
 }

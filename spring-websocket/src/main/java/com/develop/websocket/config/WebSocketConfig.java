@@ -25,7 +25,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
             .setHandshakeHandler(new DefaultHandshakeHandler())
             .addInterceptors(stompHandshakeInterceptor)
             .setAllowedOriginPatterns("*")
-                .withSockJS();
+            .withSockJS();
     }
 
     @Override

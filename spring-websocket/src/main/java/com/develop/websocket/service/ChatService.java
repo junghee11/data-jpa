@@ -25,6 +25,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.develop.domain.entity.chat.ChatRoom.generateRoodId;
 
@@ -55,32 +57,38 @@ public class ChatService {
         return room;
     }
 
-    public boolean isUserInRoom(String userId, String roomId) {
-        User user = checkUser(userId);
+    public Set<String> getUserRoom(String userId) {
+        List<ChatRoom> roomList = chatRoomRepository.findByParticipant(userId);
 
-        ChatRoom room = getChatRoom(roomId);
-//        if (RoomType.DIRECT == room.getRoomType()) {
-//            throw new WebSocketBusinessException(HttpStatus.BAD_REQUEST.getReasonPhrase(), "잘못된 요청입니다");
-//        }
-
-        return Arrays.asList(room.getParticipants()).contains(user.getUserId());
+        return roomList.stream().map(ChatRoom::getId).collect(Collectors.toSet());
     }
 
-    public ChatMessage sendMessage(String sender, String roomId, Message message) {
-        validateMessage(message);
+    public ChatMessage processMessage(ChatMessage message) {
+        String filteredContent = filterProfanity(message.getContent());
+        message.setContent(filteredContent);
 
-        boolean isUserInRoom = isUserInRoom(sender, roomId);
-        if (!isUserInRoom) {
-            throw new WebSocketBusinessException(HttpStatus.FORBIDDEN.getReasonPhrase(), "채팅방 참여자가 아닙니다");
+        ChatMessage savedMessage = chatMessageRepository.save(message);
+
+        return savedMessage;
+    }
+
+    private String filterProfanity(String content) {
+        String[] bannedWords = {"비속어", "욕", "나쁜말"};
+
+        for (String word : bannedWords) {
+            content = content.replace("(?i)" + word, "***");
         }
 
+        return content;
+    }
+
+    public ChatMessage createChatMessage(String sender, String roomId, Message message) {
         ChatMessage chat = ChatMessage.builder()
             .senderId(sender)
             .roomId(roomId)
             .type(MessageType.TALK)
             .content(message.getContent())
             .build();
-        chatMessageRepository.save(chat);
 
         return chat;
     }
@@ -156,16 +164,6 @@ public class ChatService {
                 .participants(participants)
                 .build();
             chatRoomRepository.save(newChatRoom);
-        }
-    }
-
-    public void validateMessage(Message message) {
-        if (message.getContent() == null || message.getContent().isEmpty()) {
-            throw new IllegalArgumentException("메세지 내용을 입력해주세요");
-        }
-
-        if (message.getContent().length() > 1000) {
-            throw new IllegalArgumentException("메세지 내용은 1000자 이하로 작성해주세요");
         }
     }
 
