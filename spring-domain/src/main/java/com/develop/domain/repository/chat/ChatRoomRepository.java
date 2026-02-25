@@ -14,7 +14,4 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom, String> {
     @Query(value = "SELECT * FROM chat_room cr WHERE :participant = ANY(cr.participants)", nativeQuery = true)
     List<ChatRoom> findByParticipant(@Param("participant") String participant);
 
-    @Query(value = "SELECT * FROM chat_room cr WHERE :participant = ANY(cr.participants) AND cr.room_type != :roomType", nativeQuery = true)
-    List<ChatRoom> findByParticipantAndRoomTypeNot(@Param("participant") String participant, @Param("roomType") String roomType);
-
 }

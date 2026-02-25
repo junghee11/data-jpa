@@ -46,6 +46,16 @@ public class ChatRoomCacheService {
         return redisService.getSet(key);
     }
 
+    public Set<Object> getUserRooms(String userId) {
+        String key = USER_ROOMS_PREFIX + userId;
+        return redisService.getSet(key);
+    }
+
+    public boolean isUserInRoom(String roomId, String userId) {
+        String key = ROOM_MEMBERS_PREFIX + roomId;
+        return redisService.isMember(key, userId);
+    }
+
     public void cacheMessage(String roomId, ChatMessage message) {
         String key = ROOM_MESSAGES_PREFIX + roomId;
 

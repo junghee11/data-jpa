@@ -16,13 +16,13 @@ import com.develop.websocket.exception.WebSocketAuthException;
 import com.develop.websocket.exception.WebSocketBusinessException;
 import com.develop.websocket.message.dto.Message;
 import com.develop.websocket.message.dto.PrivateMessage;
+import com.develop.websocket.redis.publisher.ChatMessagePublisher;
+import com.develop.websocket.redis.subscriber.ChatRoomCacheService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -38,6 +38,9 @@ public class ChatService {
     private final ChatRoomRepository chatRoomRepository;
     private final ChatMessageRepository chatMessageRepository;
     private final JwtTokenProvider jwtTokenProvider;
+
+    private final ChatMessagePublisher chatMessagePublisher;
+    private final ChatRoomCacheService chatRoomCacheService;
 
     private final long MESSAGE_LIMIT_SECOND = 10;
     private final long MESSAGE_LIMIT_COUNT = 20L;
@@ -63,32 +66,15 @@ public class ChatService {
         return roomList.stream().map(ChatRoom::getId).collect(Collectors.toSet());
     }
 
-    public ChatMessage processMessage(ChatMessage message) {
-        String filteredContent = filterProfanity(message.getContent());
-        message.setContent(filteredContent);
-
-        ChatMessage savedMessage = chatMessageRepository.save(message);
-
-        return savedMessage;
-    }
-
-    private String filterProfanity(String content) {
-        String[] bannedWords = {"비속어", "욕", "나쁜말"};
-
-        for (String word : bannedWords) {
-            content = content.replace("(?i)" + word, "***");
-        }
-
-        return content;
-    }
-
-    public ChatMessage createChatMessage(String sender, String roomId, Message message) {
+    public ChatMessage sendChatMessage(String sender, String roomId, Message message) {
         ChatMessage chat = ChatMessage.builder()
             .senderId(sender)
             .roomId(roomId)
             .type(MessageType.TALK)
             .content(message.getContent())
             .build();
+
+        chatMessagePublisher.publishMessage(chat);
 
         return chat;
     }
@@ -126,6 +112,8 @@ public class ChatService {
             .content(String.format("%s님이 입장하셨습니다", user.getNickname()))
             .build();
         chatMessageRepository.save(chat);
+
+        chatMessagePublisher.publishJoinMessage(chat);
 
         return chat;
     }
@@ -167,30 +155,16 @@ public class ChatService {
         }
     }
 
-    public void leaveChat(String userId) {
+    public void leaveChat(String userId, String roomId) {
         User user = checkUser(userId);
 
-        List<ChatRoom> roomList = chatRoomRepository.findByParticipantAndRoomTypeNot(userId, RoomType.DIRECT.name());
+        Optional<ChatRoom> room = chatRoomRepository.findById(roomId);
 
-        if (!roomList.isEmpty()) {
-            List<ChatMessage> leaveMessageList = new ArrayList<>();
+        chatMessagePublisher.publishLeaveMessage(roomId, user);
 
-            roomList.forEach(room -> {
-                room.removeParticipant(userId);
+        room.get().removeParticipant(userId);
 
-                ChatMessage chatMessage = ChatMessage.builder()
-                    .type(MessageType.LEAVE)
-                    .senderId(user.getUserId())
-                    .roomId(room.getId())
-                    .content(String.format("%s님이 나가셨습니다", user.getNickname()))
-                    .build();
-
-                leaveMessageList.add(chatMessage);
-            });
-
-            chatRoomRepository.saveAll(roomList);
-            chatMessageRepository.saveAll(leaveMessageList);
-        }
+        chatRoomRepository.save(room.get());
     }
 
     public boolean exceedMessageLimit(String userId) {

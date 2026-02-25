@@ -1,6 +1,7 @@
 package com.develop.websocket.redis.publisher;
 
 import com.develop.domain.entity.chat.ChatMessage;
+import com.develop.domain.entity.chat.ChatType;
 import com.develop.websocket.exception.WebSocketAuthException;
 import com.develop.websocket.message.type.UserStatusUpdate;
 import lombok.RequiredArgsConstructor;
@@ -26,8 +27,20 @@ public class RedisMessagePublisher {
     }
 
     public void publishChatMessage(ChatMessage message) {
-        String channel = "chat:room:" + message.getRoomId();
+        String channel = "chat:room:messages" + message.getRoomId();
         publish(channel, message);
+    }
+
+    public void publishRoomEvents(ChatMessage message) {
+        String event = ChatType.MessageType.ENTER.equals(message.getType()) ? "join" : "leave";
+        String channel = "chat:room:" + "event" + message.getRoomId();
+        publish(channel, message);
+    }
+
+    public void publishUserStatus(String userId, String status) {
+        String channel = "user:status";
+        UserStatusUpdate update = new UserStatusUpdate(userId, status);
+        publish(channel, update);
     }
 
 }

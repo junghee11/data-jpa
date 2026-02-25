@@ -6,7 +6,6 @@ import com.develop.websocket.exception.WebSocketAuthException;
 import com.develop.websocket.message.dto.Message;
 import com.develop.websocket.message.dto.PrivateMessage;
 import com.develop.websocket.message.dto.UserJoinMessage;
-import com.develop.websocket.redis.publisher.ChatMessagePublisher;
 import com.develop.websocket.redis.subscriber.ChatRoomCacheService;
 import com.develop.websocket.service.ChatService;
 import lombok.RequiredArgsConstructor;
@@ -31,8 +30,6 @@ public class ChatController {
     private final ChatService chatService;
     private final ChatRoomCacheService chatRoomCacheService;
 
-    private final ChatMessagePublisher chatMessagePublisher;
-
     @MessageMapping("/chat.sendMessage/{roomId}")
     @SendTo("/topic/chat/{roomId}")
     public ChatMessage sendMessage(@DestinationVariable(value = "roomId") String roomId,
@@ -44,9 +41,7 @@ public class ChatController {
             throw new WebSocketAuthException("채팅방 참여자가 아닙니다");
         }
 
-        ChatMessage chatMessage = chatService.createChatMessage(userId, roomId, message);
-
-        chatMessagePublisher.publishMessage(chatMessage);
+        ChatMessage chatMessage = chatService.sendChatMessage(userId, roomId, message);
 
         return chatMessage;
     }
@@ -65,6 +60,13 @@ public class ChatController {
     public void sendPrivateMessage(@Payload PrivateMessage message,
                                    Principal principal) {
         chatService.sendPrivateMessage(principal.getName(), message);
+    }
+
+    @MessageMapping("/chat.leaveRoom/{roomId}")
+    @SendTo("/topic/chat/{roomId}")
+    public void leaveRoom(@DestinationVariable(value = "roomId") String roomId,
+                          Principal principal) {
+        chatService.leaveChat(roomId, principal.getName());
     }
 
     @MessageExceptionHandler

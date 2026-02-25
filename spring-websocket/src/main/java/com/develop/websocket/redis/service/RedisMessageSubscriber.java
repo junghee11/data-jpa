@@ -33,8 +33,16 @@ public class RedisMessageSubscriber implements MessageListener {
 
             log.debug("Received message from channel: {} - {}", channel, messageBody);
 
-            if (channel.startsWith("chat:room:")) {
-                handleChatMessage(messageBody);
+            if (channel.startsWith("chat:room")) {
+                ChatMessage chatMessage = objectMapper.readValue(messageBody, ChatMessage.class);
+
+                if (channel.contains(":messages")) {
+                    handleChatMessage(chatMessage);
+                } else if (channel.contains(":join")) {
+                    handleJoinMessage(chatMessage);
+                } else if (channel.contains(":leave")) {
+                    handleLeaveMessage(chatMessage);
+                }
             } else if (channel.equals("user:status")) {
                 handleUserStatus(messageBody);
             }
@@ -44,32 +52,26 @@ public class RedisMessageSubscriber implements MessageListener {
         }
     }
 
-    private void handleChatMessage(String messageBody) {
-        try {
-            ChatMessage chatMessage = objectMapper.readValue(messageBody, ChatMessage.class);
-            String roomId = chatMessage.getRoomId();
+    private void handleChatMessage(ChatMessage chatMessage) {
+        String roomId = chatMessage.getRoomId();
 
-            Set<Object> members = chatRoomCacheService.getRoomMembers(roomId);
+        Set<Object> members = chatRoomCacheService.getRoomMembers(roomId);
 
-            for (Object memberObj : members) {
-                String memberId = (String) memberObj;
+        for (Object memberObj : members) {
+            String memberId = (String) memberObj;
 
-                if (userPresenceService.isUserOnline(memberId)) {
-                    sendToUser(memberId, chatMessage);
-                } else {
-                    chatRoomCacheService.incrementUnreadCount(roomId, memberId);
-                }
+            if (userPresenceService.isUserOnline(memberId)) {
+                sendToUser(memberId, chatMessage);
+            } else {
+                chatRoomCacheService.incrementUnreadCount(roomId, memberId);
             }
-
-            chatRoomCacheService.updateRoomStats(roomId, "messageCount", 1);
-
-            messagingTemplate.convertAndSend("/topic/room/" + roomId, chatMessage);
-
-            log.debug("Broadcast chat message to room : {}", roomId);
-
-        } catch (Exception e) {
-            log.error("Error handling chat message", e);
         }
+
+        chatRoomCacheService.updateRoomStats(roomId, "messageCount", 1);
+
+        messagingTemplate.convertAndSend("/topic/room/" + roomId, chatMessage);
+
+        log.debug("Broadcast chat message to room : {}", roomId);
     }
 
     private void handleUserStatus(String messageBody) {
@@ -83,6 +85,32 @@ public class RedisMessageSubscriber implements MessageListener {
         } catch (Exception e) {
             log.error("Error handling user status", e);
         }
+    }
+
+    private void handleJoinMessage(ChatMessage message) {
+        String roomId = message.getRoomId();
+        String userId = message.getSenderId();
+
+        chatRoomCacheService.addUserToRoom(roomId, userId);
+
+        messagingTemplate.convertAndSend("/topic/room/" + roomId, message);
+
+        chatRoomCacheService.updateRoomStats(roomId, "memberCount", 1);
+
+        log.info("User {} joined room {}", userId, roomId);
+    }
+
+    private void handleLeaveMessage(ChatMessage message) {
+        String roomId = message.getRoomId();
+        String userId = message.getSenderId();
+
+        chatRoomCacheService.removeUserFromRoom(roomId, userId);
+
+        messagingTemplate.convertAndSend("/topic/room/" + roomId, message);
+
+        chatRoomCacheService.updateRoomStats(roomId, "memberCount", -1);
+
+        log.info("User {} left room {}", userId, roomId);
     }
 
     private void sendToUser(String userId, ChatMessage message) {
