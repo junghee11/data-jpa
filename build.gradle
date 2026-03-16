@@ -17,6 +17,10 @@ allprojects {
     }
 }
 
+ext {
+    set('springCloudAwsVersion', "3.1.0")
+}
+
 // 하위 모든 프로젝트 공통 세팅
 subprojects {
     apply plugin: 'java'

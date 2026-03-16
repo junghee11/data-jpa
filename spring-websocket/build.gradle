@@ -12,7 +12,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+    // TODO: redis, lettuce 효율 비교해보기
     implementation 'redis.clients:jedis'
+//    implementation 'io.lettuce:lettuce-core:6.6.0.RELEASE'
+
+    implementation 'io.awspring.cloud:spring-cloud-aws-starter-sqs'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
@@ -21,3 +26,10 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
 }
+
+dependencyManagement {
+    imports {
+        mavenBom "io.awspring.cloud:spring-cloud-aws-dependencies:${springCloudAwsVersion}"
+    }
+}
+
