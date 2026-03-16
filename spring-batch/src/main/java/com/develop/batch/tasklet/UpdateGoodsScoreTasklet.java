@@ -51,6 +51,4 @@ public class UpdateGoodsScoreTasklet implements Tasklet {
         return RepeatStatus.FINISHED;
     }
 
-    // TODO : gitignore 안먹힘 처리 필요
-
 }
