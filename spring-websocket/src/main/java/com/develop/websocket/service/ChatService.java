@@ -2,6 +2,7 @@ package com.develop.websocket.service;
 
 import com.develop.core.security.dto.LoginInfo;
 import com.develop.core.security.jwt.JwtTokenProvider;
+import com.develop.domain.dto.chat.NotificationEvent;
 import com.develop.domain.dto.user.UserDto;
 import com.develop.domain.entity.chat.ChatMessage;
 import com.develop.domain.entity.chat.ChatRoom;
@@ -17,12 +18,15 @@ import com.develop.websocket.exception.WebSocketBusinessException;
 import com.develop.websocket.message.dto.Message;
 import com.develop.websocket.message.dto.PrivateMessage;
 import com.develop.websocket.redis.publisher.ChatMessagePublisher;
-import com.develop.websocket.redis.subscriber.ChatRoomCacheService;
+import com.develop.websocket.redis.service.ChatRoomCacheService;
+import com.develop.websocket.redis.service.UserPresenceService;
+import com.develop.websocket.sqs.producer.NotificationProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -41,6 +45,8 @@ public class ChatService {
 
     private final ChatMessagePublisher chatMessagePublisher;
     private final ChatRoomCacheService chatRoomCacheService;
+    private final UserPresenceService userPresenceService;
+    private final NotificationProducer notificationProducer;
 
     private final long MESSAGE_LIMIT_SECOND = 10;
     private final long MESSAGE_LIMIT_COUNT = 20L;
@@ -76,7 +82,29 @@ public class ChatService {
 
         chatMessagePublisher.publishMessage(chat);
 
+        Set<String> onlineUsers = getOnlineUsersInRoom(roomId);
+
+        for(String userId : onlineUsers) {
+            NotificationEvent event = NotificationEvent.chatMessage(
+                userId,
+                sender,
+                roomId
+            );
+            notificationProducer.sendNotification(event);
+        }
+
         return chat;
+    }
+
+    private Set<String> getOnlineUsersInRoom(String roomId) {
+        ChatRoom room = chatRoomRepository.findById(roomId).orElseThrow(() -> {
+            throw new IllegalArgumentException("존재하지 않는 채팅방입니다");
+        });
+
+        Set<String> onlineUser = userPresenceService.getOnlineUsersForTest();
+
+        return Arrays.stream(room.getParticipants()).filter(user -> onlineUser.contains(user))
+            .collect(Collectors.toSet());
     }
 
     public ChatMessage addUser(String hostId, String newUserId, String roomId) {

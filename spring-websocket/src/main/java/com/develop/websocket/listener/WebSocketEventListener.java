@@ -1,7 +1,7 @@
 package com.develop.websocket.listener;
 
-import com.develop.websocket.redis.subscriber.ChatRoomCacheService;
-import com.develop.websocket.redis.subscriber.UserPresenceService;
+import com.develop.websocket.redis.service.ChatRoomCacheService;
+import com.develop.websocket.redis.service.UserPresenceService;
 import com.develop.websocket.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

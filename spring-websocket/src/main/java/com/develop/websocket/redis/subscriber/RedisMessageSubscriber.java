@@ -1,9 +1,10 @@
-package com.develop.websocket.redis.service;
+package com.develop.websocket.redis.subscriber;
 
 import com.develop.domain.entity.chat.ChatMessage;
+import com.develop.domain.entity.chat.Notification;
 import com.develop.websocket.message.type.UserStatusUpdate;
-import com.develop.websocket.redis.subscriber.ChatRoomCacheService;
-import com.develop.websocket.redis.subscriber.UserPresenceService;
+import com.develop.websocket.redis.service.ChatRoomCacheService;
+import com.develop.websocket.redis.service.UserPresenceService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +46,8 @@ public class RedisMessageSubscriber implements MessageListener {
                 }
             } else if (channel.equals("user:status")) {
                 handleUserStatus(messageBody);
+            } else if (channel.startsWith("notification:user:")) {
+                handleNotification(channel, messageBody);
             }
 
         } catch (Exception e) {
@@ -68,7 +71,7 @@ public class RedisMessageSubscriber implements MessageListener {
         }
 
         chatRoomCacheService.updateRoomStats(roomId, "messageCount", 1);
-
+        
         messagingTemplate.convertAndSend("/topic/room/" + roomId, chatMessage);
 
         log.debug("Broadcast chat message to room : {}", roomId);
@@ -111,6 +114,28 @@ public class RedisMessageSubscriber implements MessageListener {
         chatRoomCacheService.updateRoomStats(roomId, "memberCount", -1);
 
         log.info("User {} left room {}", userId, roomId);
+    }
+
+    private void handleNotification(String channel, String messageBody) {
+        try {
+            String userId = channel.substring(channel.lastIndexOf(":") + 1);
+
+            Notification notification = objectMapper.readValue(
+                messageBody,
+                Notification.class
+            );
+
+            messagingTemplate.convertAndSendToUser(
+                userId,
+                "/queue/notifications",
+                notification
+            );
+
+            log.debug("Sent notification to user: {}", userId);
+
+        } catch (Exception e) {
+            log.error("Error handling notification", e);
+        }
     }
 
     private void sendToUser(String userId, ChatMessage message) {

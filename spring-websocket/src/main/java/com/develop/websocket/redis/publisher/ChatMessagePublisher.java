@@ -6,7 +6,7 @@ import com.develop.domain.entity.user.User;
 import com.develop.domain.repository.chat.ChatMessageRepository;
 import com.develop.websocket.exception.WebSocketAuthException;
 import com.develop.websocket.exception.WebSocketBusinessException;
-import com.develop.websocket.redis.subscriber.ChatRoomCacheService;
+import com.develop.websocket.redis.service.ChatRoomCacheService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

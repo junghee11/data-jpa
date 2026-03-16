@@ -1,4 +1,4 @@
-package com.develop.websocket.redis.subscriber;
+package com.develop.websocket.redis.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -46,6 +46,10 @@ public class RedisService {
         return redisTemplate.opsForSet().members(key);
     }
 
+    public Set<String> getSetForTest(String key) {
+        return redisTemplate.keys(key);
+    }
+
     public void removeFromSet(String key, Object... values) {
         redisTemplate.opsForSet().remove(key, values);
     }
@@ -59,7 +63,8 @@ public class RedisService {
     }
 
     public void saveToHash(String key, String hashKey, Object value) {
-        redisTemplate.opsForHash().put(key, hashKey, value);
+        redisTemplate.opsForHash().putAll(key, (Map<?, ?>) value);
+//        redisTemplate.opsForHash().put(key, hashKey, value);
     }
 
     public Object getFromHash(String key, String hashKey) {

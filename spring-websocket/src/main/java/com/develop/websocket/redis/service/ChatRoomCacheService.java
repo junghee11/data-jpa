@@ -1,7 +1,6 @@
-package com.develop.websocket.redis.subscriber;
+package com.develop.websocket.redis.service;
 
 import com.develop.domain.entity.chat.ChatMessage;
-import com.develop.domain.entity.chat.ChatRoom;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

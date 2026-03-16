@@ -1,6 +1,6 @@
 package com.develop.websocket.config;
 
-import com.develop.websocket.redis.service.RedisMessageSubscriber;
+import com.develop.websocket.redis.subscriber.RedisMessageSubscriber;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -87,6 +87,9 @@ public class RedisConfig {
 
         container.addMessageListener(subscriber,
             new PatternTopic("user:status"));
+
+        container.addMessageListener(subscriber,
+            new PatternTopic("notification:user:*"));
 
         return container;
     }

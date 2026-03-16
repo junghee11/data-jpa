@@ -52,6 +52,10 @@ public class ChatMessage {
         }
     }
 
+    public void setContent(String content) {
+        this.content = content;
+    }
+
     @Builder
     public ChatMessage(String roomId, String senderId, ChatType.MessageType type, String receiverId, String content) {
         this.roomId = roomId;

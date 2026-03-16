@@ -1,4 +1,4 @@
-package com.develop.websocket.redis.subscriber;
+package com.develop.websocket.redis.service;
 
 import com.develop.websocket.message.type.UserStatus;
 import lombok.RequiredArgsConstructor;
@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -62,6 +63,14 @@ public class UserPresenceService {
 
     public boolean isUserOnline(String userId) {
         return redisService.isMember(ONLINE_USERS_KEY, userId);
+    }
+
+    public Set<String> getOnlineUsersForTest() {
+        return redisService.getSetForTest(ONLINE_USERS_KEY);
+    }
+
+    public Set<Object> getOnlineUsers() {
+        return redisService.getSet(ONLINE_USERS_KEY);
     }
 
     public String getUserSession(String userId) {

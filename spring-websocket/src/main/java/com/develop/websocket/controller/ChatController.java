@@ -6,7 +6,7 @@ import com.develop.websocket.exception.WebSocketAuthException;
 import com.develop.websocket.message.dto.Message;
 import com.develop.websocket.message.dto.PrivateMessage;
 import com.develop.websocket.message.dto.UserJoinMessage;
-import com.develop.websocket.redis.subscriber.ChatRoomCacheService;
+import com.develop.websocket.redis.service.ChatRoomCacheService;
 import com.develop.websocket.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
