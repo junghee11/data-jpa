@@ -1,0 +1,110 @@
+spring:
+  profiles:
+    active: dev
+  config:
+    import:
+      - optional:file:.env[.properties]
+      - optional:file:../.env[.properties]
+
+# 공통 설정
+logging:
+  level:
+    root: INFO
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show_sql: false
+    properties:
+      hibernate:
+        format_sql: false
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+  cloud:
+    aws:
+      credentials:
+        access-key: ${AWS_ACCESS_KEY}
+        secret-key: ${AWS_SECRET_KEY}
+      region:
+        static: ${AWS_REGION}
+      s3:
+        bucket: ${AWS_S3_BUCKET}
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  aws:
+    region: ${AWS_REGION}
+    sqs:
+      queues:
+        notifications: ${AWS_SQS_QUEUE_NOTIFICATIONS}
+        chat-messages: ${AWS_SQS_QUEUE_CHAT_MESSAGES}
+        chat-events: ${AWS_SQS_QUEUE_CHAT_EVENTS}
+
+logging.level:
+  org.hibernate.SQL: OFF
+  org.hibernate.orm.jdbc.bind: OFF
+
+jwt:
+  secret: ${JWT_SECRET}
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+  jpa:
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        format_sql: true
+  datasource:
+    url: ${DB_PROD_URL}
+    username: ${DB_PROD_USERNAME}
+    password: ${DB_PROD_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      password: ${REDIS_PASSWORD}
+  cloud:
+    aws:
+      credentials:
+        access-key: ${AWS_ACCESS_KEY}
+        secret-key: ${AWS_SECRET_KEY}
+      region:
+        static: ${AWS_REGION}
+      s3:
+        bucket: ${AWS_S3_BUCKET}
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+  aws:
+    region: ${AWS_REGION}
+    sqs:
+      queues:
+        notifications: ${AWS_SQS_QUEUE_NOTIFICATIONS}
+        chat-messages: ${AWS_SQS_QUEUE_CHAT_MESSAGES}
+        chat-events: ${AWS_SQS_QUEUE_CHAT_EVENTS}
+
+logging.level:
+  org.hibernate.SQL: debug
+
+jwt:
+  secret: ${JWT_SECRET}
