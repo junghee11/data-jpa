@@ -2,10 +2,12 @@ package com.develop.websocket.message.type;
 
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Data
+@NoArgsConstructor
 public class UserStatus {
 
     String userId;

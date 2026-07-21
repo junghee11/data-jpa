@@ -172,8 +172,7 @@ public class UserService {
             throw new ClientException("잘못된 요청입니다.");
         }
 
-        // TODO : 비용발생방지용 주석처리, 운영 시... 주석제거하기
-//        smsService.sendSms(request.getPhone(), message);
+        smsService.sendSms(request.getPhone(), message);
 
         return Map.of(
                 "message", "문자로 발송된 인증번호를 입력해주세요."

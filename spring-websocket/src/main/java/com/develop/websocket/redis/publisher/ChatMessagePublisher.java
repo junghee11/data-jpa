@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.regex.Pattern;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -84,7 +86,7 @@ public class ChatMessagePublisher {
         String[] bannedWords = {"비속어", "욕", "나쁜말"};
 
         for (String word : bannedWords) {
-            content = content.replace("(?i)" + word, "***");
+            content = content.replaceAll("(?i)" + Pattern.quote(word), "***");
         }
 
         return content;

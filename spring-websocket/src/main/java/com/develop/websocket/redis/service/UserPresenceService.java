@@ -3,9 +3,13 @@ package com.develop.websocket.redis.service;
 import com.develop.websocket.message.type.UserStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -65,18 +69,27 @@ public class UserPresenceService {
         return redisService.isMember(ONLINE_USERS_KEY, userId);
     }
 
-    public Set<String> getOnlineUsersForTest() {
-        return redisService.getSetForTest(ONLINE_USERS_KEY);
-    }
-
-    public Set<Object> getOnlineUsers() {
+    public Set<String> getOnlineUsers() {
         return redisService.getSet(ONLINE_USERS_KEY);
     }
 
     public String getUserSession(String userId) {
         String sessionKey = USER_SESSION_PREFIX + userId;
-        Object session = redisService.get(sessionKey);
-        return session != null ? session.toString() : null;
+        return redisService.get(sessionKey);
+    }
+
+    public UserStatus getUserStatus(String userId) {
+        return redisService.getFromHash(USER_STATUS_PREFIX + userId, "status", UserStatus.class);
+    }
+
+    public Map<String, Boolean> getUsersOnlineStatus(List<String> userIds) {
+        Map<String, Boolean> statusMap = new HashMap<>();
+
+        for (String userId : userIds) {
+            statusMap.put(userId, isUserOnline(userId));
+        }
+
+        return statusMap;
     }
 
     public void refreshUserPresence(String userId) {

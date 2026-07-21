@@ -17,6 +17,7 @@ import com.develop.websocket.exception.WebSocketAuthException;
 import com.develop.websocket.exception.WebSocketBusinessException;
 import com.develop.websocket.message.dto.Message;
 import com.develop.websocket.message.dto.PrivateMessage;
+import com.develop.websocket.redis.dto.ChatRoomCacheDto;
 import com.develop.websocket.redis.publisher.ChatMessagePublisher;
 import com.develop.websocket.redis.service.ChatRoomCacheService;
 import com.develop.websocket.redis.service.UserPresenceService;
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -97,13 +99,14 @@ public class ChatService {
     }
 
     private Set<String> getOnlineUsersInRoom(String roomId) {
-        ChatRoom room = chatRoomRepository.findById(roomId).orElseThrow(() -> {
+        ChatRoomCacheDto room = chatRoomCacheService.getChatRoom(roomId);
+        if (room == null) {
             throw new IllegalArgumentException("존재하지 않는 채팅방입니다");
-        });
+        }
 
-        Set<String> onlineUser = userPresenceService.getOnlineUsersForTest();
+        Set<String> onlineUser = userPresenceService.getOnlineUsers();
 
-        return Arrays.stream(room.getParticipants()).filter(user -> onlineUser.contains(user))
+        return Arrays.stream(room.getParticipants()).filter(onlineUser::contains)
             .collect(Collectors.toSet());
     }
 
@@ -129,8 +132,12 @@ public class ChatService {
 
             ChatRoom savedChatRoom = chatRoomRepository.save(newRoom);
             roomId = savedChatRoom.getId();
+
+            chatRoomCacheService.cacheChatRoom(savedChatRoom);
         } else {
             chatRoomRepository.save(room);
+
+            chatRoomCacheService.invalidateRoomCache(roomId);
         }
 
         ChatMessage chat = ChatMessage.builder()
@@ -169,7 +176,6 @@ public class ChatService {
         String[] participants = {sender.getUserId(), receiver.getUserId()};
 
         String roomId = generateRoodId(RoomType.DIRECT, participants);
-        ;
 
         Optional<ChatRoom> room = chatRoomRepository.findById(roomId);
 
@@ -183,16 +189,19 @@ public class ChatService {
         }
     }
 
-    public void leaveChat(String userId, String roomId) {
+    public void leaveChat(String roomId, String userId) {
         User user = checkUser(userId);
 
-        Optional<ChatRoom> room = chatRoomRepository.findById(roomId);
+        ChatRoom room = chatRoomRepository.findById(roomId).orElseThrow(() ->
+            new WebSocketBusinessException(HttpStatus.BAD_REQUEST.getReasonPhrase(), "존재하지 않는 채팅방입니다."));
 
         chatMessagePublisher.publishLeaveMessage(roomId, user);
 
-        room.get().removeParticipant(userId);
+        room.removeParticipant(userId);
 
-        chatRoomRepository.save(room.get());
+        chatRoomRepository.save(room);
+
+        chatRoomCacheService.invalidateRoomCache(roomId);
     }
 
     public boolean exceedMessageLimit(String userId) {
