@@ -6,6 +6,7 @@ import com.develop.websocket.exception.WebSocketAuthException;
 import com.develop.websocket.message.dto.Message;
 import com.develop.websocket.message.dto.PrivateMessage;
 import com.develop.websocket.message.dto.UserJoinMessage;
+import com.develop.websocket.redis.dto.ChatRoomCacheDto;
 import com.develop.websocket.redis.service.ChatRoomCacheService;
 import com.develop.websocket.service.ChatService;
 import lombok.RequiredArgsConstructor;
@@ -57,16 +58,10 @@ public class ChatController {
     }
 
     @MessageMapping("/chat.privateMessage")
-    public void sendPrivateMessage(@Payload PrivateMessage message,
-                                   Principal principal) {
-        chatService.sendPrivateMessage(principal.getName(), message);
-    }
-
-    @MessageMapping("/chat.leaveRoom/{roomId}")
-    @SendTo("/topic/chat/{roomId}")
-    public void leaveRoom(@DestinationVariable(value = "roomId") String roomId,
-                          Principal principal) {
-        chatService.leaveChat(roomId, principal.getName());
+    @SendToUser("/queue/chat.room")
+    public ChatRoomCacheDto createPrivateRoom(@Payload PrivateMessage message,
+                                              Principal principal) {
+        return chatService.getOrCreateDirectRoom(principal.getName(), message);
     }
 
     @MessageExceptionHandler

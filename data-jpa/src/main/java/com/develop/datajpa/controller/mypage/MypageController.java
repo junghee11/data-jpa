@@ -5,6 +5,7 @@ import com.develop.core.security.jwt.CustomUserDetails;
 import com.develop.datajpa.request.mypage.GetChatMessageListRequest;
 import com.develop.datajpa.request.mypage.SelectMyTeamRequest;
 import com.develop.datajpa.service.mypage.MypageService;
+import com.develop.websocket.service.ChatService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,6 +20,7 @@ import java.util.Map;
 public class MypageController {
 
     private final MypageService mypageService;
+    private final ChatService chatService;
 
     @GetMapping("/baseball/team")
     public Map<String, Object> getMyTeamInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -104,6 +106,14 @@ public class MypageController {
     public Map<String, Object> getChatMessage(@AuthenticationPrincipal CustomUserDetails userDetails,
                                               @Valid GetChatMessageListRequest request) {
         return mypageService.getChatMessageList(userDetails.getLoginInfo(), request);
+    }
+
+    @DeleteMapping("/chat/room/{roomId}")
+    public Map<String, Object> leaveChatRoom(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                             @PathVariable(value = "roomId") String roomId) {
+        chatService.leaveChat(roomId, userDetails.getLoginInfo().getUserId());
+
+        return Map.of("message", "채팅방을 나갔습니다");
     }
 
 }

@@ -1,10 +1,7 @@
 package com.develop.websocket.redis.publisher;
 
 import com.develop.domain.entity.chat.ChatMessage;
-import com.develop.domain.entity.chat.ChatType;
-import com.develop.domain.entity.user.User;
 import com.develop.domain.repository.chat.ChatMessageRepository;
-import com.develop.websocket.exception.WebSocketAuthException;
 import com.develop.websocket.exception.WebSocketBusinessException;
 import com.develop.websocket.redis.service.ChatRoomCacheService;
 import lombok.RequiredArgsConstructor;
@@ -43,24 +40,6 @@ public class ChatMessagePublisher {
         chatRoomCacheService.cacheMessage(message.getRoomId(), message);
 
         redisPublisher.publishRoomEvents(message);
-    }
-
-    public void publishLeaveMessage(String roomId, User user) {
-        if(!chatRoomCacheService.isUserInRoom(roomId, user.getUserId())) {
-            throw new WebSocketAuthException("채팅방 참여자가 아닙니다");
-        }
-
-        ChatMessage leaveMessage = ChatMessage.builder()
-            .type(ChatType.MessageType.LEAVE)
-            .senderId(user.getUserId())
-            .roomId(roomId)
-            .content(String.format("%s님이 나가셨습니다", user.getNickname()))
-            .build();
-        ChatMessage savedMessage = chatMessageRepository.save(leaveMessage);
-
-        chatRoomCacheService.cacheMessage(roomId, savedMessage);
-
-        redisPublisher.publishRoomEvents(leaveMessage);
     }
 
     private void validateMessage(ChatMessage message) {

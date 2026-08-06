@@ -1,5 +1,6 @@
 package com.develop.websocket.service;
 
+import com.develop.core.exception.ClientException;
 import com.develop.core.security.dto.LoginInfo;
 import com.develop.core.security.jwt.JwtTokenProvider;
 import com.develop.domain.dto.chat.NotificationEvent;
@@ -24,13 +25,11 @@ import com.develop.websocket.redis.service.UserPresenceService;
 import com.develop.websocket.sqs.producer.NotificationProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -49,9 +48,7 @@ public class ChatService {
     private final ChatRoomCacheService chatRoomCacheService;
     private final UserPresenceService userPresenceService;
     private final NotificationProducer notificationProducer;
-
-    private final long MESSAGE_LIMIT_SECOND = 10;
-    private final long MESSAGE_LIMIT_COUNT = 20L;
+    private final SimpMessageSendingOperations messagingTemplate;
 
     public UserDto getUserInfo(String token) {
         LoginInfo loginInfo = jwtTokenProvider.resolveToken(token);
@@ -165,7 +162,7 @@ public class ChatService {
         return user;
     }
 
-    public void sendPrivateMessage(String userId, PrivateMessage message) {
+    public ChatRoomCacheDto getOrCreateDirectRoom(String userId, PrivateMessage message) {
         if (message.getReceiverId() == null || message.getReceiverId().isEmpty()) {
             throw new IllegalArgumentException("수신자 정보가 확인되지 않습니다");
         }
@@ -177,37 +174,53 @@ public class ChatService {
 
         String roomId = generateRoodId(RoomType.DIRECT, participants);
 
-        Optional<ChatRoom> room = chatRoomRepository.findById(roomId);
+        ChatRoomCacheDto room = chatRoomCacheService.getChatRoom(roomId);
 
-        if (room.isEmpty()) {
+        if (room == null) {
             ChatRoom newChatRoom = ChatRoom.builder()
                 .roomType(RoomType.DIRECT)
                 .createdBy(userId)
                 .participants(participants)
                 .build();
             chatRoomRepository.save(newChatRoom);
+
+            chatRoomCacheService.cacheChatRoom(newChatRoom);
+
+            room = ChatRoomCacheDto.from(newChatRoom);
         }
+
+        chatRoomCacheService.addUserToRoom(roomId, sender.getUserId());
+        chatRoomCacheService.addUserToRoom(roomId, receiver.getUserId());
+
+        return room;
     }
 
     public void leaveChat(String roomId, String userId) {
-        User user = checkUser(userId);
+        User user;
+        try {
+            user = checkUser(userId);
+        } catch (WebSocketAuthException e) {
+            throw new ClientException(e.getMessage());
+        }
 
         ChatRoom room = chatRoomRepository.findById(roomId).orElseThrow(() ->
-            new WebSocketBusinessException(HttpStatus.BAD_REQUEST.getReasonPhrase(), "존재하지 않는 채팅방입니다."));
-
-        chatMessagePublisher.publishLeaveMessage(roomId, user);
+            new ClientException("존재하지 않는 채팅방입니다."));
 
         room.removeParticipant(userId);
-
         chatRoomRepository.save(room);
 
+        ChatMessage leaveMessage = ChatMessage.builder()
+            .type(MessageType.LEAVE)
+            .senderId(userId)
+            .roomId(roomId)
+            .content(String.format("%s님이 나가셨습니다", user.getNickname()))
+            .build();
+        ChatMessage savedMessage = chatMessageRepository.save(leaveMessage);
+
+        chatRoomCacheService.cacheMessage(roomId, savedMessage);
+        chatRoomCacheService.removeUserFromRoom(roomId, userId);
         chatRoomCacheService.invalidateRoomCache(roomId);
-    }
 
-    public boolean exceedMessageLimit(String userId) {
-        long messageCount = chatMessageRepository.countBySenderIdAndCreatedAtAfter
-            (userId, LocalDateTime.now().minusSeconds(MESSAGE_LIMIT_SECOND));
-
-        return messageCount > MESSAGE_LIMIT_COUNT;
+        messagingTemplate.convertAndSend("/topic/chat/" + roomId, savedMessage);
     }
 }

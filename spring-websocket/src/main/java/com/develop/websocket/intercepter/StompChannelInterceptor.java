@@ -3,9 +3,9 @@ package com.develop.websocket.intercepter;
 import com.develop.core.security.jwt.JwtTokenProvider;
 import com.develop.websocket.intercepter.result.StompCheckResult;
 import com.develop.websocket.intercepter.result.StompErrorSender;
+import com.develop.websocket.redis.service.ChatRateLimiter;
 import com.develop.websocket.redis.service.RedisService;
 import com.develop.websocket.redis.service.UserPresenceService;
-import com.develop.websocket.service.ChatService;
 import com.sun.security.auth.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +27,7 @@ import static java.util.Objects.isNull;
 public class StompChannelInterceptor implements ChannelInterceptor {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final ChatService chatService;
+    private final ChatRateLimiter chatRateLimiter;
     private final RedisService redisService;
     private final UserPresenceService userPresenceService;
     private final StompErrorSender stompErrorSender;
@@ -125,7 +125,7 @@ public class StompChannelInterceptor implements ChannelInterceptor {
         if ("chat.addUser".equals(destination)) {
             return false;
         }
-        return chatService.exceedMessageLimit(userId);
+        return chatRateLimiter.isExceeded(userId);
     }
 
     private boolean checkConcurrentConnectionLimit (String userId) {

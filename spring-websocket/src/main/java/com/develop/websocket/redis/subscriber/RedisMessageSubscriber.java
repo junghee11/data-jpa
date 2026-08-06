@@ -58,11 +58,9 @@ public class RedisMessageSubscriber implements MessageListener {
     private void handleChatMessage(ChatMessage chatMessage) {
         String roomId = chatMessage.getRoomId();
 
-        Set<Object> members = chatRoomCacheService.getRoomMembers(roomId);
+        Set<String> members = chatRoomCacheService.getRoomMembers(roomId);
 
-        for (Object memberObj : members) {
-            String memberId = (String) memberObj;
-
+        for (String memberId : members) {
             if (userPresenceService.isUserOnline(memberId)) {
                 sendToUser(memberId, chatMessage);
             } else {
