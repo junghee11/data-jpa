@@ -74,6 +74,17 @@ public class ChatRoom {
         this.participants = updated.toArray(String[]::new);
     }
 
+    public boolean rejoinParticipant(String userId) {
+        List<String> updated = new ArrayList<>(Arrays.asList(this.participants == null ? new String[]{} : this.participants));
+        if (updated.contains(userId)) {
+            return false;
+        }
+
+        updated.add(userId);
+        this.participants = updated.toArray(String[]::new);
+        return true;
+    }
+
     public void removeParticipant(String userId) {
         if(!Arrays.asList(this.participants).contains(userId)) {
             throw new ClientException("채팅방에 참여중이 아닙니다");

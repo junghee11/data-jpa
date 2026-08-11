@@ -174,9 +174,10 @@ public class ChatService {
 
         String roomId = generateRoodId(RoomType.DIRECT, participants);
 
-        ChatRoomCacheDto room = chatRoomCacheService.getChatRoom(roomId);
+        ChatRoom roomEntity = chatRoomRepository.findById(roomId).orElse(null);
+        ChatRoomCacheDto room;
 
-        if (room == null) {
+        if (roomEntity == null) {
             ChatRoom newChatRoom = ChatRoom.builder()
                 .roomType(RoomType.DIRECT)
                 .createdBy(userId)
@@ -187,6 +188,22 @@ public class ChatService {
             chatRoomCacheService.cacheChatRoom(newChatRoom);
 
             room = ChatRoomCacheDto.from(newChatRoom);
+
+            messagingTemplate.convertAndSendToUser(receiver.getUserId(), "/queue/chat.room", room);
+        } else {
+            boolean senderRejoined = roomEntity.rejoinParticipant(sender.getUserId());
+            boolean receiverRejoined = roomEntity.rejoinParticipant(receiver.getUserId());
+
+            if (senderRejoined || receiverRejoined) {
+                chatRoomRepository.save(roomEntity);
+                chatRoomCacheService.cacheChatRoom(roomEntity); 
+            }
+
+            room = ChatRoomCacheDto.from(roomEntity);
+
+            if (receiverRejoined) {
+                messagingTemplate.convertAndSendToUser(receiver.getUserId(), "/queue/chat.room", room);
+            }
         }
 
         chatRoomCacheService.addUserToRoom(roomId, sender.getUserId());
@@ -207,6 +224,15 @@ public class ChatService {
             new ClientException("존재하지 않는 채팅방입니다."));
 
         room.removeParticipant(userId);
+
+        chatRoomCacheService.removeUserFromRoom(roomId, userId);
+
+        if (room.getParticipants().length == 0) {
+            chatRoomRepository.delete(room);
+            chatRoomCacheService.deleteRoomData(roomId);
+            return;
+        }
+
         chatRoomRepository.save(room);
 
         ChatMessage leaveMessage = ChatMessage.builder()
@@ -218,7 +244,6 @@ public class ChatService {
         ChatMessage savedMessage = chatMessageRepository.save(leaveMessage);
 
         chatRoomCacheService.cacheMessage(roomId, savedMessage);
-        chatRoomCacheService.removeUserFromRoom(roomId, userId);
         chatRoomCacheService.invalidateRoomCache(roomId);
 
         messagingTemplate.convertAndSend("/topic/chat/" + roomId, savedMessage);

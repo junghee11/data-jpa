@@ -134,4 +134,15 @@ public class ChatRoomCacheService {
         log.info("Invalidated cache for room :{}", roomId);
     }
 
+    public void deleteRoomData(String roomId) {
+        redisService.delete(ROOM_INFO_PREFIX + roomId);
+        redisService.delete(ROOM_MEMBERS_PREFIX + roomId);
+        redisService.delete(ROOM_MESSAGES_PREFIX + roomId);
+
+        redisService.deleteKeys("room:" + roomId + ":unread:*");
+        redisService.deleteKeys(ROOM_INFO_PREFIX + roomId + ":stats:*");
+
+        log.info("Deleted all redis data for room: {}", roomId);
+    }
+
 }
