@@ -99,4 +99,18 @@ public class UserPresenceService {
         }
     }
 
+    @Scheduled(fixedRate = 60000)
+    public void cleanupExpiredSessions() {
+        Set<String> onlineUsers = getOnlineUsers();
+
+        for (String userId : onlineUsers) {
+            String sessionKey = USER_SESSION_PREFIX + userId;
+
+            if (!redisService.hasKey(sessionKey)) {
+                log.info("Cleaning up expired session for user {}", userId);
+                setUserOffline(userId);
+            }
+        }
+    }
+
 }

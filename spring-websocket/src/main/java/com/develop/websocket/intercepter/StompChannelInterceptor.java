@@ -35,15 +35,19 @@ public class StompChannelInterceptor implements ChannelInterceptor {
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+        if (accessor == null) {
+            return message;
+        }
 
         StompCheckResult result = StompCheckResult.ok();
 
         StompCommand command = accessor.getCommand();
         if (command == null) {
-            result = StompCheckResult.invalidMessage("잘못된 연결 요청입니다");
-            stompErrorSender.sendError(accessor, result);
-            
-            return null;
+            if (accessor.getUser() != null) {
+                userPresenceService.refreshUserPresence(accessor.getUser().getName());
+            }
+
+            return message;
         }
 
         switch (command) {

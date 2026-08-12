@@ -196,7 +196,7 @@ public class ChatService {
 
             if (senderRejoined || receiverRejoined) {
                 chatRoomRepository.save(roomEntity);
-                chatRoomCacheService.cacheChatRoom(roomEntity); 
+                chatRoomCacheService.cacheChatRoom(roomEntity);
             }
 
             room = ChatRoomCacheDto.from(roomEntity);
