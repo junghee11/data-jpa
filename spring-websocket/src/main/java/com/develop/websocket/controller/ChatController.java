@@ -57,13 +57,6 @@ public class ChatController {
         return chatMessage;
     }
 
-    @MessageMapping("/chat.privateMessage")
-    @SendToUser("/queue/chat.room")
-    public ChatRoomCacheDto createPrivateRoom(@Payload PrivateMessage message,
-                                              Principal principal) {
-        return chatService.getOrCreateDirectRoom(principal.getName(), message);
-    }
-
     @MessageExceptionHandler
     @SendToUser("/queue/errors")
     public ResponseEntity<ErrorMessage> handleException(Exception e) {

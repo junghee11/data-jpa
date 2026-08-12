@@ -2,9 +2,11 @@ package com.develop.datajpa.controller.mypage;
 
 
 import com.develop.core.security.jwt.CustomUserDetails;
+import com.develop.datajpa.request.mypage.CreateChatRoomRequest;
 import com.develop.datajpa.request.mypage.GetChatMessageListRequest;
 import com.develop.datajpa.request.mypage.SelectMyTeamRequest;
 import com.develop.datajpa.service.mypage.MypageService;
+import com.develop.websocket.redis.dto.ChatRoomCacheDto;
 import com.develop.websocket.service.ChatService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -106,6 +108,19 @@ public class MypageController {
     public Map<String, Object> getChatMessage(@AuthenticationPrincipal CustomUserDetails userDetails,
                                               @Valid GetChatMessageListRequest request) {
         return mypageService.getChatMessageList(userDetails.getLoginInfo(), request);
+    }
+
+    @PostMapping("/chat/room")
+    public Map<String, Object> createChatRoom(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                              @Valid @RequestBody CreateChatRoomRequest request) {
+        ChatRoomCacheDto room = chatService.createChatRoom(
+            userDetails.getLoginInfo().getUserId(),
+            request.getRoomType(),
+            request.getRoomName(),
+            request.getParticipants()
+        );
+
+        return Map.of("room", room);
     }
 
     @DeleteMapping("/chat/room/{roomId}")

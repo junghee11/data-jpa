@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.develop.domain.entity.chat.ChatRoom.generateRoodId;
 
@@ -49,6 +50,8 @@ public class ChatService {
     private final UserPresenceService userPresenceService;
     private final NotificationProducer notificationProducer;
     private final SimpMessageSendingOperations messagingTemplate;
+
+    private static final int MIN_GROUP_INVITEE = 2;
 
     public UserDto getUserInfo(String token) {
         LoginInfo loginInfo = jwtTokenProvider.resolveToken(token);
@@ -162,13 +165,77 @@ public class ChatService {
         return user;
     }
 
-    public ChatRoomCacheDto getOrCreateDirectRoom(String userId, PrivateMessage message) {
-        if (message.getReceiverId() == null || message.getReceiverId().isEmpty()) {
+    public ChatRoomCacheDto createChatRoom(String userId, RoomType roomType,
+                                           String roomName, List<String> participantIds) {
+        if (roomType == null) {
+            throw new ClientException("채팅방 유형을 확인해주세요");
+        }
+
+        List<String> targets = participantIds == null ? List.of() : participantIds.stream()
+            .filter(id -> id != null && !id.isBlank())
+            .map(String::trim)
+            .filter(id -> !id.equals(userId)) // 본인은 아래에서 별도로 추가
+            .distinct()
+            .toList();
+
+        return switch (roomType) {
+            case DIRECT -> {
+                if (targets.size() != 1) {
+                    throw new ClientException("1:1 대화는 상대방 1명만 지정할 수 있습니다");
+                }
+                yield getOrCreateDirectRoom(userId, targets.get(0));
+            }
+            case GROUP -> createGroupRoom(userId, roomName, targets);
+            default -> throw new ClientException("지원하지 않는 채팅방 유형입니다");
+        };
+    }
+
+    private ChatRoomCacheDto createGroupRoom(String userId, String roomName, List<String> targets) {
+        if (roomName == null || roomName.isBlank()) {
+            throw new ClientException("채팅방 이름을 입력해주세요");
+        }
+        if (targets.size() < MIN_GROUP_INVITEE) {
+            throw new ClientException("그룹 채팅은 본인 외 " + MIN_GROUP_INVITEE + "명 이상 초대해야 합니다");
+        }
+
+        User host = checkUser(userId);
+        for (String target : targets) {
+            checkUser(target);
+        }
+
+        String[] participants = Stream.concat(Stream.of(host.getUserId()), targets.stream())
+            .toArray(String[]::new);
+
+        ChatRoom newChatRoom = ChatRoom.builder()
+            .roomType(RoomType.GROUP)
+            .roomName(roomName.trim())
+            .createdBy(host.getUserId())
+            .participants(participants)
+            .build();
+        chatRoomRepository.save(newChatRoom);
+
+        chatRoomCacheService.cacheChatRoom(newChatRoom);
+
+        ChatRoomCacheDto room = ChatRoomCacheDto.from(newChatRoom);
+
+        for (String participant : participants) {
+            chatRoomCacheService.addUserToRoom(newChatRoom.getId(), participant);
+
+            if (!participant.equals(host.getUserId())) {
+                messagingTemplate.convertAndSendToUser(participant, "/queue/chat.room", room);
+            }
+        }
+
+        return room;
+    }
+
+    public ChatRoomCacheDto getOrCreateDirectRoom(String userId, String receiverId) {
+        if (receiverId == null || receiverId.isEmpty()) {
             throw new IllegalArgumentException("수신자 정보가 확인되지 않습니다");
         }
 
         User sender = checkUser(userId);
-        User receiver = checkUser(message.getReceiverId());
+        User receiver = checkUser(receiverId);
 
         String[] participants = {sender.getUserId(), receiver.getUserId()};
 

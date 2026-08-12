@@ -111,10 +111,13 @@ public class ChatRoom {
     }
 
     @Builder
-    public ChatRoom(RoomType roomType, String createdBy, String[] participants) {
+    public ChatRoom(RoomType roomType, String roomName, String createdBy, String[] participants) {
         this.id = generateRoodId(roomType, participants);
         this.roomType = roomType;
+        this.roomName = roomName;
         this.createdBy = createdBy;
         this.participants = participants;
+        this.isActive = true;
+        this.createdAt = LocalDateTime.now();
     }
 }
